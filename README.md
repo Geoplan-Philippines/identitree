@@ -1,159 +1,148 @@
-# Turborepo starter
+# Identitree Monorepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+Monorepo powered by Turborepo with:
 
-## Using this example
+- `apps/web`: Next.js 16 frontend (Tailwind CSS v4, shadcn/ui, Better Auth client-side flows)
+- `apps/api`: NestJS 11 backend (Better Auth server-side dependencies)
+- `packages/ui`: shared UI package
+- `packages/eslint-config`: shared ESLint config
+- `packages/typescript-config`: shared TS config
 
-Run the following command:
+## Setup Tutorial
 
-```sh
-npx create-turbo@latest
+Follow these steps in order for a clean first-time setup.
+
+## Step 1: Install required tools
+
+- Node.js 18+ (Node 20+ recommended)
+- npm 11+ (project uses npm workspaces)
+- Git
+- Turbo CLI (global install)
+
+### Install tools
+
+Windows (using winget):
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS -e
+winget install --id Git.Git -e
 ```
 
-## What's inside?
+macOS (using Homebrew):
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+brew install node@20 git
 ```
 
-Without global `turbo`, use your package manager:
+Ubuntu/Debian:
 
-```sh
-cd my-turborepo
-npx turbo build
-npm dlx turbo build
-npm exec turbo build
+```bash
+sudo apt update
+sudo apt install -y nodejs npm git
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Install Turbo CLI globally:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```bash
+npm install -g turbo
 ```
 
-Without global `turbo`:
+Verify installations:
 
-```sh
-npx turbo build --filter=docs
-npm exec turbo build --filter=docs
-npm exec turbo build --filter=docs
+```bash
+node -v
+npm -v
+git --version
+turbo --version
 ```
 
-### Develop
+## Step 2: Clone the repository
 
-To develop all apps and packages, run the following command:
+```bash
+git clone https://github.com/Geoplan-Philippines/identitree.git
+cd identitree
+```
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Step 3: Install dependencies
 
-```sh
-cd my-turborepo
+From repo root:
+
+```bash
+npm install
+```
+
+## Step 4: Configure environment variables
+
+Create API environment file from the example:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+PowerShell alternative:
+
+```powershell
+Copy-Item apps/api/.env.example apps/api/.env
+```
+
+Then update values in `apps/api/.env`:
+
+- `BETTER_AUTH_SECRET`: set a strong secret
+- `BETTER_AUTH_URL`: app base URL (for local web this is usually `http://localhost:3000`)
+
+## Step 5: Run the app
+
+Run everything from root with Turbo:
+
+```bash
 turbo dev
 ```
 
-Without global `turbo`, use your package manager:
+Or use the npm workspace script:
 
-```sh
-cd my-turborepo
-npx turbo dev
-npm exec turbo dev
-npm exec turbo dev
+```bash
+npm run dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Default local URLs:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+- Web: http://localhost:3000
+- API: http://localhost:8000
 
-```sh
-turbo dev --filter=web
+## Step 6: Useful workspace commands
+
+From repo root:
+
+```bash
+# Build all workspaces
+npm run build
+
+# Lint all workspaces
+npm run lint
+
+# Type-check all workspaces
+npm run check-types
 ```
 
-Without global `turbo`:
+Run a single app:
 
-```sh
-npx turbo dev --filter=web
-npm exec turbo dev --filter=web
-npm exec turbo dev --filter=web
+```bash
+# Web only
+npm run -w apps/web dev
+
+# API only
+npm run -w apps/api dev
 ```
 
-### Remote Caching
+## Auth routes in web
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+Basic auth routes are available in the Next.js app:
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+- `/login`
+- `/signup`
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## Tech notes
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-npm exec turbo login
-npm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-npm exec turbo link
-npm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- Tailwind CSS v4 is used in both web and api workspaces.
+- shadcn/ui has been initialized in the web app.
+- Better Auth packages are installed for auth integration.
