@@ -21,17 +21,16 @@ RUN npm install --include=dev --workspaces --include-workspace-root
 # -------------------------
 FROM base AS builder
 
-ENV PATH=/app/node_modules/.bin:$PATH
-
 COPY . .
 
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 
 # 🔥 Prisma generate (IMPORTANT)
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
-# Build API directly with the hoisted Nest CLI binary
-RUN cd apps/api && ../../node_modules/.bin/nest build
+# Build API with workspace-local Nest CLI binary
+RUN cd apps/api && ./node_modules/.bin/nest build
 
 # -------------------------
 # 4. Production image
