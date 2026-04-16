@@ -1,0 +1,20 @@
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { DatabaseService } from './database';
+import { env } from './env';
+
+// Use the centralized database connection
+const db = new DatabaseService();
+
+export const auth = betterAuth({
+  database: prismaAdapter(db, {
+    provider: 'postgresql',
+  }),
+  secret: env.authSecret,
+  baseURL: env.authUrl,
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: false,
+  },
+  socialProviders: {},
+});
