@@ -88,7 +88,14 @@ jobs:
             ENV=${{ steps.vars.outputs.env }}
             TAG=${{ steps.vars.outputs.tag }}
 
-            cd /var/www/identitree-$ENV
+            case "$ENV" in
+              dev) DEPLOY_DIR="$HOME/docker-apps/identitree/dev" ;;
+              staging) DEPLOY_DIR="$HOME/docker-apps/identitree/stg" ;;
+              prod) DEPLOY_DIR="$HOME/docker-apps/identitree/prod" ;;
+              *) echo "Unknown environment: $ENV"; exit 1 ;;
+            esac
+
+            cd "$DEPLOY_DIR"
 
             export TAG=$TAG
 
