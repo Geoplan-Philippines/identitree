@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Identitree Web
 
-## Getting Started
+Next.js frontend for Identitree. This app provides:
 
-First, run the development server:
+- Better Auth client-side sign-in and sign-up flows
+- cookie-backed session hydration
+- public and protected route guards
+- organization setup and dashboard routes
+- a shared API client for backend requests
+
+## Setup
+
+### 1. Install dependencies
+
+From the repo root:
+
+```bash
+npm install
+```
+
+Or from this package:
+
+```bash
+cd apps/web
+npm install
+```
+
+### 2. Create your environment file
+
+Copy the example file:
+
+```bash
+cp apps/web/.env.example apps/web/.env
+```
+
+PowerShell:
+
+```powershell
+Copy-Item apps/web/.env.example apps/web/.env
+```
+
+Then update `apps/web/.env`:
+
+- `NEXT_PUBLIC_API_BASE_URL`: backend base URL, usually `http://localhost:8000`
+
+The frontend reads this value in:
+
+- `apps/web/lib/api/client.ts`
+- `apps/web/lib/auth-client.ts`
+
+### 3. Run the web app
+
+Development mode:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production build:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+Production start:
 
-## Learn More
+```bash
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+Type checking:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run check-types
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Linting:
 
-## Deploy on Vercel
+```bash
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Default local web URL:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+http://localhost:3000
+```
+
+## Routes
+
+The app includes these routes:
+
+- `/` public homepage
+- `/login` sign-in page
+- `/signup` sign-up page
+- `/organization/setup` organization setup flow
+- `/dashboard` dashboard entry point
+- `/dashboard/[slug]` organization dashboard route
+
+## Auth flow
+
+The frontend uses Better Auth through `apps/web/lib/auth-client.ts` and the shared API client in `apps/web/lib/api/client.ts`.
+
+The login and signup forms call the backend auth endpoints and also support Google sign-in.
+
+The auth provider hydrates the current session from cookies and keeps auth state in memory instead of localStorage.
+
+## Notes
+
+- The app uses the Next.js App Router.
+- Shared UI components live under `apps/web/components`.
+- The backend must be running on `NEXT_PUBLIC_API_BASE_URL` for auth and org lookups to work.
