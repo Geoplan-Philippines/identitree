@@ -30,8 +30,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # 🔥 Prisma generate (IMPORTANT)
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
-# Build API package directly
-RUN npm --prefix apps/api run build
+# Build API directly with the hoisted Nest CLI binary
+RUN cd apps/api && ../../node_modules/.bin/nest build
 
 # -------------------------
 # 4. Production image
