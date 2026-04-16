@@ -16,13 +16,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { authService } from "@/lib/services/auth.service";
 import { signupSchema, type SignupFormValues } from "@/lib/zod/auth";
-import { useAuth } from "@/providers/auth-provider";
 
 export function SignupForm() {
   const router = useRouter();
-  const { setAuth } = useAuth();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<SignupFormValues>({
@@ -36,30 +33,32 @@ export function SignupForm() {
 
   async function onSubmit(data: SignupFormValues) {
     try {
-      const result = await authService.register({
-        name: data.fullName,
+      const response = await authClient.signUp.email({
         email: data.email,
         password: data.password,
+        name: data.fullName,
       });
-      const organization = await authService.getUserOrganization(result.user.id);
 
-      setAuth({
-        ...result,
-        organizationSlug: organization.organizationSlug,
-      });
-      toast.success("Account created");
-
-      if (organization.organizationSlug) {
-        router.push(`/dashboard/${organization.organizationSlug}`);
-        return;
+      if (response.error) {
+        throw new Error(response.error.message || "Signup failed");
       }
 
-      router.push(`/organization/setup?userId=${result.user.id}`);
+      toast.success("Account created");
+
+      // Email/password users must verify their email first
+      router.push(`/verify-email?sent=1&email=${encodeURIComponent(data.email)}`);
     } catch (error) {
-      const message =
+      const rawMessage =
         error instanceof Error
           ? error.message
           : "Signup failed. Please check your data and try again.";
+
+      const resendTestingRestriction =
+        "You can only send testing emails to your own email address";
+
+      const message = rawMessage.includes(resendTestingRestriction)
+        ? "Resend is in testing mode. You can only send verification emails to your verified recipient email. Verify a domain in Resend to send to any address."
+        : rawMessage;
 
       toast.error("Signup failed", {
         description: message,
@@ -72,7 +71,7 @@ export function SignupForm() {
       setIsGoogleLoading(true);
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: window.location.origin,
+        callbackURL: `${window.location.origin}/organization/setup`,
       });
     } catch (error) {
       const message =

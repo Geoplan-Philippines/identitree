@@ -64,7 +64,7 @@ export function LoginForm() {
       setIsGoogleLoading(true);
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: window.location.origin,
+        callbackURL: `${window.location.origin}/dashboard`,
       });
     } catch (error) {
       const message =

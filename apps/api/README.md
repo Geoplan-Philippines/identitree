@@ -46,7 +46,16 @@ Then update `apps/api/.env`:
 - `FRONTEND_URL`: frontend base URL, usually `http://localhost:3000`
 - `GOOGLE_CLIENT_ID`: Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+- `RESEND_API_KEY`: Resend API key
+- `RESEND_FROM_EMAIL`: sender value, for example `Identitree <noreply@your-domain.com>`
+- `RESEND_VERIFY_TEMPLATE_ID`: published Resend template id or alias used for verification emails
 - `DATABASE_URL`: PostgreSQL connection string
+
+Resend notes:
+
+- The sender domain in `RESEND_FROM_EMAIL` must be verified in the same Resend project as the API key.
+- If `RESEND_VERIFY_TEMPLATE_ID` is set, verification emails are sent using the published template and template variables.
+- If `RESEND_VERIFY_TEMPLATE_ID` is empty, the API falls back to the built-in HTML/text verification email.
 
 For local Google OAuth, the redirect URI should be:
 

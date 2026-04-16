@@ -4,6 +4,7 @@ import {
   Post,
   Get,
   Param,
+  Query,
   All,
   Req,
   Res,
@@ -41,6 +42,15 @@ export class AuthController {
   @Post('organization')
   async createOrganization(@Body() dto: CreateOrganizationDto) {
     return this.authService.createOrganization(dto);
+  }
+
+  @Get('verification-token-status')
+  async getVerificationTokenStatus(@Query('token') token?: string) {
+    if (!token) {
+      return { status: 'invalid' } as const;
+    }
+
+    return this.authService.getVerificationTokenStatus(token);
   }
 
   // Let Better Auth handle all auth routes

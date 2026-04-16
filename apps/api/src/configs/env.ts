@@ -10,4 +10,7 @@ export const env = {
   authUrl: process.env.BETTER_AUTH_URL || 'http://localhost:8000',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+  resendVerifyTemplateId: process.env.RESEND_VERIFY_TEMPLATE_ID || '',
 };
