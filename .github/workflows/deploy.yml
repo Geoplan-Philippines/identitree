@@ -42,11 +42,11 @@ jobs:
         id: apiurl
         run: |
           if [ "${{ steps.vars.outputs.env }}" = "dev" ]; then
-            echo "url=http://identitree-dev.geoplanph.com/api" >> $GITHUB_OUTPUT
+            echo "url=https://identitree-dev.geoplanph.com/api" >> $GITHUB_OUTPUT
           fi
 
           if [ "${{ steps.vars.outputs.env }}" = "staging" ]; then
-            echo "url=http://identitree-stg.geoplanph.com/api" >> $GITHUB_OUTPUT
+            echo "url=https://identitree-stg.geoplanph.com/api" >> $GITHUB_OUTPUT
           fi
 
           if [ "${{ steps.vars.outputs.env }}" = "prod" ]; then
