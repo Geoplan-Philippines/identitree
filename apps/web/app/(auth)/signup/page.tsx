@@ -1,7 +1,16 @@
-export default function Signup() {
+import { AuthCard } from "@/components/auth/auth-card";
+import { SignupForm } from "@/components/auth/signup-form";
+
+export default function SignupPage() {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <h1 className="text-2xl font-bold">Signup Page</h1>
-    </div>
+    <AuthCard
+      title="Create your account"
+      description="Register with your email and password to get started."
+      footerLabel="Already have an account?"
+      footerHref="/login"
+      footerActionText="Sign in"
+    >
+      <SignupForm />
+    </AuthCard>
   );
 }
