@@ -11,11 +11,6 @@ export const signupSchema = z.object({
 	fullName: z.string().min(2, "Full name must be at least 2 characters."),
 	email: z.email("Please enter a valid email address."),
 	password: z.string().min(8, "Password must be at least 8 characters."),
-	organizationName: z.string().min(2, "Organization name is required."),
-	organizationSlug: z
-		.string()
-		.min(2, "Organization slug is required.")
-		.regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and dashes only."),
 });
 
 export type SignupFormValues = z.infer<typeof signupSchema>;

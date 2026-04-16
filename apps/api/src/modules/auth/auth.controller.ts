@@ -1,4 +1,4 @@
-import { Body, Controller, Post, All, Req, Res } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, All, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { AuthService } from './auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { auth } from '../../configs/auth';
 import { LoginDto } from './dto/login.dto';
+import { CreateOrganizationDto } from './dto/create-organization.dto';
 
 const nodeAuthHandler = toNodeHandler(auth);
 
@@ -21,6 +22,16 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @Get('organization/:userId')
+  async getUserOrganization(@Param('userId') userId: string) {
+    return this.authService.getUserOrganization(userId);
+  }
+
+  @Post('organization')
+  async createOrganization(@Body() dto: CreateOrganizationDto) {
+    return this.authService.createOrganization(dto);
   }
 
   // Let Better Auth handle all auth routes
