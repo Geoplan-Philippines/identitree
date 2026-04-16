@@ -8,6 +8,8 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('api');
+
   app.enableCors({
     origin: [env.authUrl, env.frontendUrl, 'http://localhost:3000'],
     credentials: true,
