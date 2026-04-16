@@ -95,6 +95,9 @@ Then update values in `apps/api/.env`:
 - `FRONTEND_URL`: frontend base URL (for local dev this is usually `http://localhost:3000`)
 - `GOOGLE_CLIENT_ID`: Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+- `RESEND_API_KEY`: Resend API key used to send auth emails
+- `RESEND_FROM_EMAIL`: sender value, for example `Identitree <noreply@your-domain.com>`
+- `RESEND_VERIFY_TEMPLATE_ID`: published Resend template id or alias used for email verification (for example `verification-template`)
 - `DATABASE_URL`: URL of your PostgreSQL database
 
 Then update values in `apps/web/.env`:
