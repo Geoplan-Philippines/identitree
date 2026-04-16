@@ -16,9 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
+import { useAuth } from "@/providers/auth-provider";
 
 export function LoginForm() {
   const router = useRouter();
+  const { setAuth } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,10 +33,16 @@ export function LoginForm() {
   async function onSubmit(data: LoginFormValues) {
     try {
       const result = await authService.login(data);
+      const organization = await authService.getUserOrganization(result.user.id);
+
+      setAuth({
+        ...result,
+        organizationSlug: organization.organizationSlug,
+      });
       toast.success("Login successful");
 
-      if (result.organizationSlug) {
-        router.push(`/dashboard/${result.organizationSlug}`);
+      if (organization.organizationSlug) {
+        router.push(`/dashboard/${organization.organizationSlug}`);
         return;
       }
 

@@ -16,6 +16,16 @@ export type AuthResponse = {
   organizationSlug: string | null;
 };
 
+export type BetterAuthSessionResponse = {
+  session: {
+    id: string;
+    userId: string;
+    expiresAt: string;
+    token: string;
+  };
+  user: AuthUser;
+} | null;
+
 export type RegisterPayload = {
   name: string;
   email: string;
@@ -45,11 +55,21 @@ export type CreateOrganizationResponse = {
 
 class AuthService {
   register(payload: RegisterPayload) {
-    return apiClient.post<AuthResponse>("/auth/register", payload);
+    return apiClient.post<{ token: string | null; user: AuthUser }>(
+      "/auth/sign-up/email",
+      payload,
+    );
   }
 
   login(payload: LoginPayload) {
-    return apiClient.post<AuthResponse>("/auth/login", payload);
+    return apiClient.post<{ token: string | null; user: AuthUser }>(
+      "/auth/sign-in/email",
+      payload,
+    );
+  }
+
+  getSession() {
+    return apiClient.request<BetterAuthSessionResponse>("/auth/get-session");
   }
 
   getUserOrganization(userId: string) {

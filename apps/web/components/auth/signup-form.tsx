@@ -16,9 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
 import { signupSchema, type SignupFormValues } from "@/lib/zod/auth";
+import { useAuth } from "@/providers/auth-provider";
 
 export function SignupForm() {
   const router = useRouter();
+  const { setAuth } = useAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -36,10 +38,16 @@ export function SignupForm() {
         email: data.email,
         password: data.password,
       });
+      const organization = await authService.getUserOrganization(result.user.id);
+
+      setAuth({
+        ...result,
+        organizationSlug: organization.organizationSlug,
+      });
       toast.success("Account created");
 
-      if (result.organizationSlug) {
-        router.push(`/dashboard/${result.organizationSlug}`);
+      if (organization.organizationSlug) {
+        router.push(`/dashboard/${organization.organizationSlug}`);
         return;
       }
 

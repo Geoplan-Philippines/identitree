@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
+import { useAuth } from "@/providers/auth-provider";
 
 const organizationSchema = z.object({
   name: z.string().min(2, "Organization name is required."),
@@ -29,7 +30,8 @@ type OrganizationSetupValues = z.infer<typeof organizationSchema>;
 export function OrganizationSetupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId") ?? "";
+  const { user, setOrganizationSlug } = useAuth();
+  const userId = searchParams.get("userId") ?? user?.id ?? "";
 
   const form = useForm<OrganizationSetupValues>({
     resolver: zodResolver(organizationSchema),
@@ -55,6 +57,7 @@ export function OrganizationSetupForm() {
       });
 
       toast.success(result.alreadyMember ? "Organization already linked" : "Organization created");
+      setOrganizationSlug(result.organizationSlug);
       router.push(`/dashboard/${result.organizationSlug}`);
     } catch (error) {
       const message =
