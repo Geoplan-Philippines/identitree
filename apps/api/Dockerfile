@@ -14,12 +14,14 @@ COPY package*.json ./
 COPY apps/api/package*.json apps/api/
 COPY apps/web/package*.json apps/web/
 
-RUN npm install
+RUN npm install --include=dev --workspaces --include-workspace-root
 
 # -------------------------
 # 3. Build stage
 # -------------------------
 FROM base AS builder
+
+ENV PATH=/app/node_modules/.bin:$PATH
 
 COPY . .
 
