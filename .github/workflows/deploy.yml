@@ -108,7 +108,7 @@ jobs:
             docker run --rm \
               --env-file .env \
               geoplanoperation/identitree-api:$TAG \
-              npx prisma migrate deploy
+              npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
 
             # 🚀 Restart containers
             docker compose up -d
