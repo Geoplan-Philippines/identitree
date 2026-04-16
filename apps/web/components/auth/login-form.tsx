@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -14,6 +15,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { authService } from "@/lib/services/auth.service";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
 import { useAuth } from "@/providers/auth-provider";
@@ -21,6 +23,7 @@ import { useAuth } from "@/providers/auth-provider";
 export function LoginForm() {
   const router = useRouter();
   const { setAuth } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -53,6 +56,23 @@ export function LoginForm() {
       toast.error("Login failed", {
         description: message,
       });
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    try {
+      setIsGoogleLoading(true);
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: window.location.origin,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Google sign-in failed.";
+      toast.error("Google sign-in failed", {
+        description: message,
+      });
+      setIsGoogleLoading(false);
     }
   }
 
@@ -103,8 +123,14 @@ export function LoginForm() {
 
         <FieldSeparator>OR</FieldSeparator>
 
-        <Button type="button" variant="outline" className="w-full" disabled>
-          Continue with Google (soon)
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => void handleGoogleSignIn()}
+          disabled={isGoogleLoading}
+        >
+          {isGoogleLoading ? "Redirecting..." : "Continue with Google"}
         </Button>
       </FieldGroup>
     </form>
