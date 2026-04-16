@@ -35,11 +35,26 @@ export const auth = betterAuth({
         ? `${env.frontendUrl}/verify-email?token=${encodeURIComponent(token)}`
         : url;
 
+      const templateId = env.resendVerifyTemplateId.trim();
+
       await sendAuthEmail({
         to: user.email,
         subject: 'Verify your email address',
         text: `Verify your email using this link: ${verificationLink}`,
         html: `<p>Verify your email using this link:</p><p><a href="${verificationLink}">${verificationLink}</a></p>`,
+        template: templateId
+          ? {
+              id: templateId,
+              variables: {
+                app_name: 'Identitree',
+                user_name_prefix: user.name ? ` ${user.name}` : '',
+                verify_url: verificationLink,
+                expires_in: '1 hour',
+                support_email: 'support@kukaass.app',
+                year: String(new Date().getFullYear()),
+              },
+            }
+          : undefined,
       });
     },
   },

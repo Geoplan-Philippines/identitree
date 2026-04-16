@@ -48,10 +48,17 @@ export function SignupForm() {
       // Email/password users must verify their email first
       router.push(`/verify-email?sent=1&email=${encodeURIComponent(data.email)}`);
     } catch (error) {
-      const message =
+      const rawMessage =
         error instanceof Error
           ? error.message
           : "Signup failed. Please check your data and try again.";
+
+      const resendTestingRestriction =
+        "You can only send testing emails to your own email address";
+
+      const message = rawMessage.includes(resendTestingRestriction)
+        ? "Resend is in testing mode. You can only send verification emails to your verified recipient email. Verify a domain in Resend to send to any address."
+        : rawMessage;
 
       toast.error("Signup failed", {
         description: message,

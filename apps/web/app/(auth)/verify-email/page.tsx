@@ -10,6 +10,9 @@ import { authService } from "@/lib/services/auth.service";
 type VerificationStatus =
   | "loading"
   | "verified"
+  | "already-verified"
+  | "expired"
+  | "invalid-link"
   | "not-verified"
   | "no-session"
   | "error";
@@ -23,6 +26,7 @@ export default function VerifyEmailPage() {
   const token = searchParams.get("token");
   const sent = searchParams.get("sent") === "1";
   const verified = searchParams.get("verified") === "1";
+  const errorCode = searchParams.get("error");
   const emailFromQuery = searchParams.get("email");
   const apiBaseURL =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -55,10 +59,47 @@ export default function VerifyEmailPage() {
   }, []);
 
   useEffect(() => {
+    if (errorCode === "TOKEN_EXPIRED") {
+      setStatus("expired");
+      return;
+    }
+
+    if (errorCode) {
+      setStatus("invalid-link");
+      return;
+    }
+
     if (token) {
-      const callbackURL = `${window.location.origin}/verify-email?verified=1`;
-      const verifyURL = `${apiBaseURL}/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
-      window.location.assign(verifyURL);
+      void (async () => {
+        const tokenStatus = await authService.getVerificationTokenStatus(token);
+
+        if (tokenStatus.status === "already-verified") {
+          setStatus("already-verified");
+          setEmail(tokenStatus.email ?? emailFromQuery);
+          return;
+        }
+
+        if (tokenStatus.status === "expired") {
+          setStatus("expired");
+          return;
+        }
+
+        if (tokenStatus.status === "invalid") {
+          setStatus("invalid-link");
+          return;
+        }
+
+        const callbackURL = `${window.location.origin}/verify-email?verified=1&email=${encodeURIComponent(tokenStatus.email ?? "")}`;
+        const verifyURL = `${apiBaseURL}/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
+        window.location.assign(verifyURL);
+      })().catch((error: unknown) => {
+        setStatus("error");
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Could not verify your email link.",
+        );
+      });
       return;
     }
 
@@ -79,6 +120,7 @@ export default function VerifyEmailPage() {
     apiBaseURL,
     checkVerificationStatus,
     emailFromQuery,
+    errorCode,
     sent,
     token,
     verified,
@@ -87,6 +129,18 @@ export default function VerifyEmailPage() {
   const description = useMemo(() => {
     if (status === "verified") {
       return "Your email is verified. You can continue to sign in.";
+    }
+
+    if (status === "already-verified") {
+      return "This verification link was already used. Your email is already verified.";
+    }
+
+    if (status === "expired") {
+      return "This verification link has expired. Please request a new verification email.";
+    }
+
+    if (status === "invalid-link") {
+      return "This verification link is invalid.";
     }
 
     if (status === "not-verified") {
@@ -142,6 +196,41 @@ export default function VerifyEmailPage() {
               {sent
                 ? "Please check your inbox and spam folder for the verification link."
                 : "Check your inbox and spam folder, then click Refresh Status."}
+            </p>
+          </div>
+        )}
+
+        {status === "already-verified" && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
+              This link was already used.
+            </p>
+            {email && (
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-400">
+                Account email: {email}
+              </p>
+            )}
+          </div>
+        )}
+
+        {status === "expired" && (
+          <div className="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
+            <p className="text-sm font-medium text-red-900 dark:text-red-300">
+              Verification link expired.
+            </p>
+            <p className="mt-1 text-sm text-red-800 dark:text-red-400">
+              Please sign in and request another verification email.
+            </p>
+          </div>
+        )}
+
+        {status === "invalid-link" && (
+          <div className="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
+            <p className="text-sm font-medium text-red-900 dark:text-red-300">
+              Invalid verification link.
+            </p>
+            <p className="mt-1 text-sm text-red-800 dark:text-red-400">
+              Please use the latest email link.
             </p>
           </div>
         )}

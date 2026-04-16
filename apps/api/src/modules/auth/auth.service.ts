@@ -1,8 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { jwtVerify } from 'jose';
+import { JWTExpired } from 'jose/errors';
 import { DatabaseService } from '../../configs/database';
 
 import { RegisterDto } from './dto/register.dto';
 import { auth } from '../../configs/auth';
+import { env } from '../../configs/env';
 import { LoginDto } from './dto/login.dto';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 
@@ -136,5 +139,43 @@ export class AuthService {
       organizationSlug: organization.slug,
       alreadyMember: false,
     };
+  }
+
+  async getVerificationTokenStatus(token: string) {
+    try {
+      const jwt = await jwtVerify(
+        token,
+        new TextEncoder().encode(env.authSecret),
+        {
+          algorithms: ['HS256'],
+        },
+      );
+      const payload = jwt.payload as { email?: string };
+      const email = payload.email?.toLowerCase();
+
+      if (!email) {
+        return { status: 'invalid' } as const;
+      }
+
+      const user = await this.db.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        return { status: 'invalid' } as const;
+      }
+
+      if (user.emailVerified) {
+        return { status: 'already-verified', email: user.email } as const;
+      }
+
+      return { status: 'ready', email: user.email } as const;
+    } catch (error) {
+      if (error instanceof JWTExpired) {
+        return { status: 'expired' } as const;
+      }
+
+      return { status: 'invalid' } as const;
+    }
   }
 }

@@ -53,6 +53,11 @@ export type CreateOrganizationResponse = {
   alreadyMember: boolean;
 };
 
+export type VerificationTokenStatusResponse = {
+  status: "ready" | "already-verified" | "expired" | "invalid";
+  email?: string;
+};
+
 class AuthService {
   register(payload: RegisterPayload) {
     return apiClient.post<{ token: string | null; user: AuthUser }>(
@@ -70,6 +75,12 @@ class AuthService {
 
   getSession() {
     return apiClient.request<BetterAuthSessionResponse>("/auth/get-session");
+  }
+
+  getVerificationTokenStatus(token: string) {
+    return apiClient.request<VerificationTokenStatusResponse>(
+      `/auth/verification-token-status?token=${encodeURIComponent(token)}`,
+    );
   }
 
   getUserOrganization(userId: string) {
