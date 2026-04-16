@@ -98,6 +98,8 @@ jobs:
             cd "$DEPLOY_DIR"
 
             export TAG=$TAG
+            export API_TAG=$TAG
+            export FRONTEND_TAG=$TAG
 
             echo "Deploying $ENV with tag $TAG"
 
