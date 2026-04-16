@@ -89,6 +89,8 @@ Then update values in `apps/api/.env`:
 
 - `BETTER_AUTH_SECRET`: set a strong secret
 - `BETTER_AUTH_URL`: app base URL (for local web this is usually `http://localhost:3000`)
+- `PORT`: set a port e.g 8000
+- `DATAASE_URL`: url of your postgres database
 
 ## Step 5: Run the app
 
