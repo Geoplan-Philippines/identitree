@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
+import { getApiBasePath } from "@/lib/base-url";
 import { authService } from "@/lib/services/auth.service";
 
 type VerificationStatus =
@@ -28,10 +29,7 @@ export default function VerifyEmailPage() {
   const verified = searchParams.get("verified") === "1";
   const errorCode = searchParams.get("error");
   const emailFromQuery = searchParams.get("email");
-  const apiBaseURL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8000";
+  const apiBaseURL = getApiBasePath();
 
   const checkVerificationStatus = useCallback(async () => {
     setStatus("loading");

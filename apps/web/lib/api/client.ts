@@ -1,4 +1,6 @@
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+import { getApiBaseURL } from "@/lib/base-url";
+
+const DEFAULT_API_BASE_URL = getApiBaseURL();
 
 export class ApiError extends Error {
   constructor(
@@ -21,11 +23,7 @@ class ApiClient {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl =
-      baseUrl ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      DEFAULT_API_BASE_URL;
+    this.baseUrl = baseUrl || DEFAULT_API_BASE_URL;
   }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
