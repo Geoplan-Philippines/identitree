@@ -11,7 +11,12 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: [env.frontendUrl, 'http://localhost:3000'],
+    origin: [
+      env.frontendUrl,
+      'https://identitree-dev.geoplanph.com',
+      'https://identitree-stg.geoplanph.com',
+      'https://identitree.geoplanph.com',
+    ],
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
