@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { env } from './configs/env';
-import cors from 'cors';
+// No need to import cors directly; use app.enableCors()
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -11,7 +11,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  app.use(cors({
+  app.enableCors({
     origin: [
       env.frontendUrl,
       'https://identitree-dev.geoplanph.com',
@@ -19,7 +19,9 @@ async function bootstrap() {
       'https://identitree.geoplanph.com',
     ],
     credentials: true,
-  }));
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   await app.listen(process.env.PORT || 8000);
 }
