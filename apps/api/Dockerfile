@@ -30,8 +30,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # 🔥 Prisma generate (IMPORTANT)
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
-# Build only API workspace
-RUN npm run build --workspace=api
+# Build API package directly
+RUN npm --prefix apps/api run build
 
 # -------------------------
 # 4. Production image
