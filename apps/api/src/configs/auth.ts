@@ -14,7 +14,12 @@ export const auth = betterAuth({
   }),
   secret: env.authSecret,
   baseURL: getAuthBaseURL(env.authUrl),
-  trustedOrigins: [env.frontendUrl],
+  trustedOrigins: [
+    env.frontendUrl,
+    'https://identitree-dev.geoplanph.com',
+    'https://identitree-stg.geoplanph.com',
+    'https://identitree.geoplanph.com',
+  ],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
