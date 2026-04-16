@@ -41,11 +41,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+
 # Copy only necessary files
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api ./apps/api
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/package*.json ./apps/api/
 COPY --from=builder /app/package*.json ./
-
 # Prisma schema (needed at runtime for migrations)
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 
