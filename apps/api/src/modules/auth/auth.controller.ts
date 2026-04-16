@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Get, Param, All, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Param,
+  All,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { AuthService } from './auth.service';
