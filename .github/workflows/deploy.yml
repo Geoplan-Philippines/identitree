@@ -105,9 +105,8 @@ jobs:
             docker compose pull
 
             # 🧠 Prisma migration FIRST (important)
-            docker run --rm \
-              --env-file .env \
-              geoplanoperation/identitree-api:$TAG \
+            docker compose up -d db
+            docker compose run --rm api \
               npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
 
             # 🚀 Restart containers
