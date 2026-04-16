@@ -70,6 +70,36 @@ If you need to regenerate the Prisma client:
 npx prisma generate
 ```
 
+If you changed `prisma/schema.prisma` and want to create a new migration in development:
+
+```bash
+npx prisma migrate dev --name your_migration_name
+```
+
+Example:
+
+```bash
+npx prisma migrate dev --name add_auth_indexes
+```
+
+This command creates a migration file, applies it to your local database, and updates Prisma Client.
+
+If you need to re-migrate your local database (drop data, reapply all migrations, and reseed schema state):
+
+```bash
+npx prisma migrate reset --force
+npx prisma migrate deploy
+npx prisma generate
+```
+
+Use this only in local/dev environments because `migrate reset` destroys existing data.
+
+To apply existing migrations in non-dev environments (without creating a new one), use:
+
+```bash
+npx prisma migrate deploy
+```
+
 If you want to clear local data during development, use the provided script:
 
 ```bash
