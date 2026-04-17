@@ -16,8 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🧠 Set environment + tag
-      - name: Set env + tag
+      # 🧠 Set environment
+      - name: Set env
         id: vars
         run: |
           BRANCH=${GITHUB_REF##*/}
@@ -31,18 +31,15 @@ jobs:
             exit 1
           fi
 
-          TAG=$ENV-${GITHUB_SHA}
-
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-      # 🔐 Docker Hub login
+      # 🔐 Docker login
       - name: Login DockerHub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" \
           | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 🌐 Set API URL
+      # 🌐 API URL per environment
       - name: Set API URL
         id: apiurl
         run: |
@@ -58,18 +55,18 @@ jobs:
             echo "url=https://identitree-api.geoplanph.com/api/v1" >> $GITHUB_OUTPUT
           fi
 
-      # 🐳 Build API
+      # 🐳 Build API (ONLY latest tag)
       - name: Build API
         run: |
           docker build \
-            -t $API_IMAGE:${{ steps.vars.outputs.tag }} \
+            -t $API_IMAGE:${{ steps.vars.outputs.env }}-latest \
             -f apps/api/Dockerfile .
 
-      # 🌐 Build WEB
+      # 🌐 Build WEB (ONLY latest tag)
       - name: Build WEB
         run: |
           docker build \
-            -t $WEB_IMAGE:${{ steps.vars.outputs.tag }} \
+            -t $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest \
             -f apps/web/Dockerfile \
             --build-arg NEXT_PUBLIC_API_BASE_URL=${{ steps.apiurl.outputs.url }} \
             .
@@ -77,8 +74,8 @@ jobs:
       # 📤 Push images
       - name: Push images
         run: |
-          docker push $API_IMAGE:${{ steps.vars.outputs.tag }}
-          docker push $WEB_IMAGE:${{ steps.vars.outputs.tag }}
+          docker push $API_IMAGE:${{ steps.vars.outputs.env }}-latest
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest
 
       # 🚀 Deploy to VPS
       - name: Deploy to VPS
@@ -91,7 +88,6 @@ jobs:
             set -e
 
             ENV=${{ steps.vars.outputs.env }}
-            TAG=${{ steps.vars.outputs.tag }}
 
             case "$ENV" in
               dev) DEPLOY_DIR="$HOME/docker-apps/identitree/dev" ;;
@@ -102,28 +98,17 @@ jobs:
 
             cd "$DEPLOY_DIR"
 
-            export TAG=$TAG
+            echo "Deploying $ENV using latest images"
 
-            echo "Deploying $ENV with tag $TAG"
-
-            # 📦 Pull latest images
+            # 📦 Pull latest images (overwrites local reference)
             docker compose pull
 
-            # 🔥 Force recreate containers (FIX: no stale containers)
-            docker compose down
+            # 🚀 Restart only changed containers (NO docker down!)
+            docker compose up -d --force-recreate
 
-            # 🧠 Start DB first
-            docker compose up -d db
-
-            # ⏳ Wait for DB (FIX for Prisma crash)
-            sleep 10
-
-            # 🧠 Prisma migration (DO NOT REMOVE - preserved)
+            # 🧠 Prisma migration (KEEP THIS EXACTLY)
             docker compose run --rm api \
               sh -lc 'cd /app/apps/api && npx prisma migrate deploy --schema=prisma/schema.prisma'
 
-            # 🚀 Start everything fresh
-            docker compose up -d
-
-            # 🧹 Cleanup unused images
+            # 🧹 Cleanup unused images/layers
             docker image prune -f
