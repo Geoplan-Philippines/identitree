@@ -16,8 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🧠 Set environment + tag
-      - name: Set env + tag
+      # 🧠 Set environment
+      - name: Set env
         id: vars
         run: |
           BRANCH=${GITHUB_REF##*/}
@@ -26,18 +26,15 @@ jobs:
           if [ "$BRANCH" = "staging" ]; then ENV=staging; fi
           if [ "$BRANCH" = "main" ]; then ENV=prod; fi
 
-          TAG=$ENV-${GITHUB_SHA}
-
           echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-      # 🔐 Docker Hub login
+      # 🔐 Login
       - name: Login DockerHub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" \
           | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 🧠 Decide API URL per environment
+      # 🌐 API URL
       - name: Set API URL
         id: apiurl
         run: |
@@ -57,25 +54,25 @@ jobs:
       - name: Build API
         run: |
           docker build \
-            -t $API_IMAGE:${{ steps.vars.outputs.tag }} \
+            -t $API_IMAGE:${{ steps.vars.outputs.env }}-latest \
             -f apps/api/Dockerfile .
 
-      # 🌐 Build WEB (with env injection)
+      # 🌐 Build WEB
       - name: Build WEB
         run: |
           docker build \
-            -t $WEB_IMAGE:${{ steps.vars.outputs.tag }} \
+            -t $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest \
             -f apps/web/Dockerfile \
             --build-arg NEXT_PUBLIC_API_BASE_URL=${{ steps.apiurl.outputs.url }} \
             .
 
-      # 📤 Push images
+      # 📤 Push
       - name: Push images
         run: |
-          docker push $API_IMAGE:${{ steps.vars.outputs.tag }}
-          docker push $WEB_IMAGE:${{ steps.vars.outputs.tag }}
+          docker push $API_IMAGE:${{ steps.vars.outputs.env }}-latest
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest
 
-      # 🚀 Deploy to VPS
+      # 🚀 Deploy
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -86,31 +83,19 @@ jobs:
             set -e
 
             ENV=${{ steps.vars.outputs.env }}
-            TAG=${{ steps.vars.outputs.tag }}
+            cd "$HOME/docker-apps/identitree/$ENV"
 
-            case "$ENV" in
-              dev) DEPLOY_DIR="$HOME/docker-apps/identitree/dev" ;;
-              staging) DEPLOY_DIR="$HOME/docker-apps/identitree/stg" ;;
-              prod) DEPLOY_DIR="$HOME/docker-apps/identitree/prod" ;;
-              *) echo "Unknown environment: $ENV"; exit 1 ;;
-            esac
+            export TAG=$ENV-latest
 
-            cd "$DEPLOY_DIR"
+            echo "Deploying $ENV using $TAG"
 
-            export TAG=$TAG
-
-            echo "Deploying $ENV with tag $TAG"
-
-            # 📦 Pull latest images
             docker compose pull
-
-            # 🧠 Prisma migration FIRST (important)
             docker compose up -d db
-            docker compose run --rm api \
-              sh -lc 'cd /app/apps/api && npx prisma migrate deploy --schema=prisma/schema.prisma'
+            sleep 10
 
-            # 🚀 Restart containers
+            docker compose run --rm api \
+              sh -c "npx prisma migrate deploy"
+
             docker compose up -d
 
-            # 🧹 cleanup
             docker image prune -f
