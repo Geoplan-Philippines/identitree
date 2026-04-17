@@ -16,8 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🧠 Set environment
-      - name: Set env
+      # 🧠 Set environment + tag
+      - name: Set env + tag
         id: vars
         run: |
           BRANCH=${GITHUB_REF##*/}
@@ -26,15 +26,23 @@ jobs:
           if [ "$BRANCH" = "staging" ]; then ENV=staging; fi
           if [ "$BRANCH" = "main" ]; then ENV=prod; fi
 
-          echo "env=$ENV" >> $GITHUB_OUTPUT
+          if [ -z "$ENV" ]; then
+            echo "Invalid branch"
+            exit 1
+          fi
 
-      # 🔐 Login
+          TAG=$ENV-${GITHUB_SHA}
+
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      # 🔐 Docker Hub login
       - name: Login DockerHub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" \
           | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 🌐 API URL
+      # 🌐 Set API URL
       - name: Set API URL
         id: apiurl
         run: |
@@ -54,25 +62,25 @@ jobs:
       - name: Build API
         run: |
           docker build \
-            -t $API_IMAGE:${{ steps.vars.outputs.env }}-latest \
+            -t $API_IMAGE:${{ steps.vars.outputs.tag }} \
             -f apps/api/Dockerfile .
 
       # 🌐 Build WEB
       - name: Build WEB
         run: |
           docker build \
-            -t $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest \
+            -t $WEB_IMAGE:${{ steps.vars.outputs.tag }} \
             -f apps/web/Dockerfile \
             --build-arg NEXT_PUBLIC_API_BASE_URL=${{ steps.apiurl.outputs.url }} \
             .
 
-      # 📤 Push
+      # 📤 Push images
       - name: Push images
         run: |
-          docker push $API_IMAGE:${{ steps.vars.outputs.env }}-latest
-          docker push $WEB_IMAGE:${{ steps.vars.outputs.env }}-latest
+          docker push $API_IMAGE:${{ steps.vars.outputs.tag }}
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.tag }}
 
-      # 🚀 Deploy
+      # 🚀 Deploy to VPS
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -83,19 +91,39 @@ jobs:
             set -e
 
             ENV=${{ steps.vars.outputs.env }}
-            cd "$HOME/docker-apps/identitree/$ENV"
+            TAG=${{ steps.vars.outputs.tag }}
 
-            export TAG=$ENV-latest
+            case "$ENV" in
+              dev) DEPLOY_DIR="$HOME/docker-apps/identitree/dev" ;;
+              staging) DEPLOY_DIR="$HOME/docker-apps/identitree/stg" ;;
+              prod) DEPLOY_DIR="$HOME/docker-apps/identitree/prod" ;;
+              *) echo "Unknown environment: $ENV"; exit 1 ;;
+            esac
 
-            echo "Deploying $ENV using $TAG"
+            cd "$DEPLOY_DIR"
 
+            export TAG=$TAG
+
+            echo "Deploying $ENV with tag $TAG"
+
+            # 📦 Pull latest images
             docker compose pull
+
+            # 🔥 Force recreate containers (FIX: no stale containers)
+            docker compose down
+
+            # 🧠 Start DB first
             docker compose up -d db
+
+            # ⏳ Wait for DB (FIX for Prisma crash)
             sleep 10
 
+            # 🧠 Prisma migration (DO NOT REMOVE - preserved)
             docker compose run --rm api \
-              sh -c "npx prisma migrate deploy"
+              sh -lc 'cd /app/apps/api && npx prisma migrate deploy --schema=prisma/schema.prisma'
 
+            # 🚀 Start everything fresh
             docker compose up -d
 
+            # 🧹 Cleanup unused images
             docker image prune -f
