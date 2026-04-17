@@ -9,6 +9,9 @@ COPY . .
 # Install deps
 RUN npm install
 
+# Generate Prisma client
+RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+
 # Build ONLY api
 RUN npm run build --workspace=api
 
