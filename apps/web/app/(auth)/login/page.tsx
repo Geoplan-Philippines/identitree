@@ -1,7 +1,10 @@
 import { AuthCard } from "@/components/auth/auth-card";
 import { LoginForm } from "@/components/auth/login-form";
+import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirects";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  await redirectAuthenticatedUserAwayFromGuestPages();
+
   return (
     <AuthCard
       title="Sign in to your account"

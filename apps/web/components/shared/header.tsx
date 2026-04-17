@@ -20,11 +20,6 @@ export function Header() {
     [0, 64],
     ["oklch(0.91 0 0 / 0)", "oklch(0.91 0 0 / 1)"],
   );
-  const boxShadow = useTransform(
-    scrollY,
-    [0, 64],
-    ["0 1px 0 oklch(0 0 0 / 0)", "0 1px 0 oklch(0.91 0 0 / 1)"],
-  );
 
   if (pathname !== "/") {
     return null;

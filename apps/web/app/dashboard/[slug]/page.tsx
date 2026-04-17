@@ -1,9 +1,12 @@
+import { requireOrganizationAccess } from "@/lib/auth/redirects";
+
 type DashboardPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 export default async function DashboardSlugPage({ params }: DashboardPageProps) {
   const { slug } = await params;
+  await requireOrganizationAccess(slug);
 
   return (
     <section className="main-container space-y-1">

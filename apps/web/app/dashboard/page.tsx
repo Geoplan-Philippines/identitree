@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { requireOrganization } from "@/lib/auth/redirects";
 
-export default function DashboardIndexPage() {
+export default async function DashboardIndexPage() {
+  await requireOrganization();
+
   return (
     <section className="main-container flex flex-col items-center justify-center py-24 text-center">
       <div className="mb-5 flex size-12 items-center justify-center rounded-xl border border-border bg-muted">
