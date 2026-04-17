@@ -21,16 +21,24 @@ RUN npm install --include=dev --workspaces --include-workspace-root
 # -------------------------
 FROM base AS builder
 
+# Copy source code and lock files
 COPY . .
 
+# Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 
-# 🔥 Prisma generate (IMPORTANT)
+# Prisma generate (IMPORTANT)
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 
 # Build API with workspace-local Nest CLI binary
-RUN cd apps/api && ./node_modules/.bin/nest build
+RUN cd apps/api && npm run build
+# Debug: List contents of src and dist
+RUN ls -l /app/apps/api/src || echo "src missing"
+RUN ls -l /app/apps/api/dist || echo "dist missing"
+
+# Debug: List contents of dist directory after build
+RUN ls -l /app/apps/api/dist || echo "dist directory not found"
 
 # -------------------------
 # 4. Production image
