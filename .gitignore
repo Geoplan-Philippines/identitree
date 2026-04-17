@@ -29,10 +29,12 @@ dist
 
 
 # Debug
-npm-debug.log*
+npm-debug.log*x``
 yarn-debug.log*
 yarn-error.log*
 
 # Misc
 .DS_Store
 *.pem
+
+./.github

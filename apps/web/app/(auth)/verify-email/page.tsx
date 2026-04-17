@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
-import { getApiBasePath } from "@/lib/base-url";
+import { getApiBaseURL } from "@/lib/base-url";
 import { authService } from "@/lib/services/auth.service";
 
 type VerificationStatus =
@@ -29,7 +29,7 @@ export default function VerifyEmailPage() {
   const verified = searchParams.get("verified") === "1";
   const errorCode = searchParams.get("error");
   const emailFromQuery = searchParams.get("email");
-  const apiBaseURL = getApiBasePath();
+  const apiBaseURL = getApiBaseURL();
 
   const checkVerificationStatus = useCallback(async () => {
     setStatus("loading");
@@ -69,35 +69,37 @@ export default function VerifyEmailPage() {
 
     if (token) {
       void (async () => {
-        const tokenStatus = await authService.getVerificationTokenStatus(token);
-
-        if (tokenStatus.status === "already-verified") {
-          setStatus("already-verified");
-          setEmail(tokenStatus.email ?? emailFromQuery);
-          return;
+        try {
+          // Call the backend API to verify the email
+          const callbackURL = `${window.location.origin}/verify-email?verified=1&email=${encodeURIComponent(emailFromQuery ?? "")}`;
+          const verifyURL = `${apiBaseURL}/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
+          const response = await fetch(verifyURL, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!response.ok) {
+            if (response.status === 410) {
+              setStatus("expired");
+            } else if (response.status === 400) {
+              setStatus("invalid-link");
+            } else {
+              setStatus("error");
+            }
+            setErrorMessage(`Verification failed (${response.status})`);
+            return;
+          }
+          // If successful, treat as verified
+          setStatus("verified");
+          setEmail(emailFromQuery);
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Could not verify your email link."
+          );
         }
-
-        if (tokenStatus.status === "expired") {
-          setStatus("expired");
-          return;
-        }
-
-        if (tokenStatus.status === "invalid") {
-          setStatus("invalid-link");
-          return;
-        }
-
-        const callbackURL = `${window.location.origin}/verify-email?verified=1&email=${encodeURIComponent(tokenStatus.email ?? "")}`;
-        const verifyURL = `${apiBaseURL}/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
-        window.location.assign(verifyURL);
-      })().catch((error: unknown) => {
-        setStatus("error");
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Could not verify your email link.",
-        );
-      });
+      })();
       return;
     }
 

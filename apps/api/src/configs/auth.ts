@@ -16,6 +16,7 @@ export const auth = betterAuth({
   baseURL: getAuthBaseURL(env.authUrl),
   trustedOrigins: [
     env.frontendUrl,
+    'http://localhost:3000',
     'https://identitree-dev.geoplanph.com',
     'https://identitree-stg.geoplanph.com',
     'https://identitree.geoplanph.com',
@@ -36,6 +37,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     sendOnSignIn: true,
     sendVerificationEmail: async ({ user, url, token }) => {
+      // Use frontend URL for verification link so user lands on UI
       const verificationLink = token
         ? `${env.frontendUrl}/verify-email?token=${encodeURIComponent(token)}`
         : url;

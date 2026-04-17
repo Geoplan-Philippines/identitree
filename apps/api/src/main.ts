@@ -14,6 +14,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       env.frontendUrl,
+      'http://localhost:3000',
       'https://identitree-dev.geoplanph.com',
       'https://identitree-stg.geoplanph.com',
       'https://identitree.geoplanph.com',
