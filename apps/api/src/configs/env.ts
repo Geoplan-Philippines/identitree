@@ -7,7 +7,7 @@ export const env = {
   port: Number(process.env.PORT || 8000),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   authSecret: process.env.BETTER_AUTH_SECRET || '',
-  authUrl: process.env.BETTER_AUTH_URL || 'http://localhost:8000/api',
+  authUrl: process.env.BETTER_AUTH_URL || 'http://localhost:8000/api/v1',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
   resendApiKey: process.env.RESEND_API_KEY || '',

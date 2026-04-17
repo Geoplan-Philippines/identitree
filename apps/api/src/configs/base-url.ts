@@ -1,4 +1,4 @@
-const DEFAULT_API_PATH = '/api';
+const DEFAULT_API_PATH = '/api/v1';
 const DEFAULT_AUTH_ORIGIN = 'http://localhost:8000';
 
 function normalizeBasePath(value: string | undefined, fallback: string) {
