@@ -2,6 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 
+import { createApiUrl } from "@/lib/api/config";
+
 export type AppSession = {
   user: {
     id: string;
@@ -28,21 +30,11 @@ type UserOrganizationResponse = {
   hasOrganization: boolean;
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
-
-function getApiBaseUrl() {
-  return (
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    DEFAULT_API_BASE_URL
-  );
-}
-
 async function requestAuthApi<T>(
   path: string,
   cookieHeader: string,
 ): Promise<T | null> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const response = await fetch(createApiUrl(path), {
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
     cache: "no-store",
   });

@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+import { createApiUrl, getApiBaseUrl } from "@/lib/api/config";
 
 export class ApiError extends Error {
   constructor(
@@ -21,16 +21,12 @@ class ApiClient {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl =
-      baseUrl ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      DEFAULT_API_BASE_URL;
+    this.baseUrl = baseUrl || getApiBaseUrl();
   }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const { method = "GET", body, headers } = options;
-    const response = await fetch(`${this.baseUrl}${path}`, {
+    const response = await fetch(createApiUrl(path, this.baseUrl), {
       method,
       credentials: "include",
       headers: {

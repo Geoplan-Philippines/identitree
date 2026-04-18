@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
+import { getAuthApiBaseUrl } from "@/lib/api/config";
 import { authService } from "@/lib/services/auth.service";
 
 type VerificationStatus =
@@ -28,10 +29,7 @@ export function VerifyEmailStatus() {
   const verified = searchParams.get("verified") === "1";
   const errorCode = searchParams.get("error");
   const emailFromQuery = searchParams.get("email");
-  const apiBaseURL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8000";
+  const authApiBaseURL = getAuthApiBaseUrl();
 
   const checkVerificationStatus = useCallback(async () => {
     setStatus("loading");
@@ -90,7 +88,7 @@ export function VerifyEmailStatus() {
         }
 
         const callbackURL = `${window.location.origin}/verify-email?verified=1&email=${encodeURIComponent(tokenStatus.email ?? "")}`;
-        const verifyURL = `${apiBaseURL}/auth/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
+        const verifyURL = `${authApiBaseURL}/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
         window.location.assign(verifyURL);
       })().catch((error: unknown) => {
         setStatus("error");
@@ -117,7 +115,7 @@ export function VerifyEmailStatus() {
 
     void checkVerificationStatus();
   }, [
-    apiBaseURL,
+    authApiBaseURL,
     checkVerificationStatus,
     emailFromQuery,
     errorCode,

@@ -1,13 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { jwtVerify } from 'jose';
 import { JWTExpired } from 'jose/errors';
-import { DatabaseService } from '../../configs/database';
 
 import { RegisterDto } from './dto/register.dto';
 import { auth } from '../../configs/auth';
 import { env } from '../../configs/env';
 import { LoginDto } from './dto/login.dto';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { PrismaService } from '../../shared/database/prisma.service';
 
 type AuthResult = {
   token: string | null;
@@ -24,10 +24,10 @@ type AuthResult = {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
 
   private async findOrganizationSlugByUserId(userId: string) {
-    const member = await this.db.member.findFirst({
+    const member = await this.prisma.member.findFirst({
       where: { userId },
       include: { organization: true },
       orderBy: { createdAt: 'asc' },
@@ -102,7 +102,7 @@ export class AuthService {
   async createOrganization(dto: CreateOrganizationDto) {
     const { userId, name, slug } = dto;
 
-    const existingOrganization = await this.db.organization.findUnique({
+    const existingOrganization = await this.prisma.organization.findUnique({
       where: { slug },
     });
 
@@ -110,7 +110,7 @@ export class AuthService {
       throw new BadRequestException('Organization slug already exists');
     }
 
-    const existingMembership = await this.db.member.findFirst({
+    const existingMembership = await this.prisma.member.findFirst({
       where: { userId },
       include: { organization: true },
     });
@@ -122,7 +122,7 @@ export class AuthService {
       };
     }
 
-    const organization = await this.db.organization.create({
+    const organization = await this.prisma.organization.create({
       data: {
         name,
         slug,
@@ -157,7 +157,7 @@ export class AuthService {
         return { status: 'invalid' } as const;
       }
 
-      const user = await this.db.user.findUnique({
+      const user = await this.prisma.user.findUnique({
         where: { email },
       });
 

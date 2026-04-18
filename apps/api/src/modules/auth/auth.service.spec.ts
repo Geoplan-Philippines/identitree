@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { DatabaseService } from '../../configs/database';
+import { PrismaService } from '../../shared/database/prisma.service';
 import { auth } from '../../configs/auth';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -45,7 +45,7 @@ describe('AuthService', () => {
       },
     };
 
-    service = new AuthService(db as unknown as DatabaseService);
+    service = new AuthService(db as unknown as PrismaService);
     jest.clearAllMocks();
   });
 
