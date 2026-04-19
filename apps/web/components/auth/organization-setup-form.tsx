@@ -27,11 +27,17 @@ const organizationSchema = z.object({
 
 type OrganizationSetupValues = z.infer<typeof organizationSchema>;
 
-export function OrganizationSetupForm() {
+type OrganizationSetupFormProps = {
+  userId?: string;
+};
+
+export function OrganizationSetupForm({
+  userId: serverUserId,
+}: OrganizationSetupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, setOrganizationSlug } = useAuth();
-  const userId = searchParams.get("userId") ?? user?.id ?? "";
+  const userId = searchParams.get("userId") ?? serverUserId ?? user?.id ?? "";
 
   const form = useForm<OrganizationSetupValues>({
     resolver: zodResolver(organizationSchema),

@@ -41,12 +41,11 @@ Copy-Item apps/web/.env.example apps/web/.env
 
 Then update `apps/web/.env`:
 
-- `NEXT_PUBLIC_API_BASE_URL`: backend base URL, usually `http://localhost:8000`
+- `NEXT_PUBLIC_API_BASE_URL`: versioned backend API base URL, usually `http://localhost:8000/api/v1`
 
-The frontend reads this value in:
+The frontend reads this value through one shared helper:
 
-- `apps/web/lib/api/client.ts`
-- `apps/web/lib/auth-client.ts`
+- `apps/web/lib/api/config.ts`
 
 ### 3. Run the web app
 

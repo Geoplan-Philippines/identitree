@@ -118,7 +118,7 @@ export function LoginForm() {
         />
 
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+          {form.formState.isSubmitting ? "Logging in..." : "Log in"}
         </Button>
 
         <FieldSeparator>OR</FieldSeparator>

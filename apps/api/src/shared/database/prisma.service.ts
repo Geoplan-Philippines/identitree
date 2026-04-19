@@ -1,10 +1,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import { env } from './env';
+import { env } from '../../configs/env';
 
 @Injectable()
-export class DatabaseService
+export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
@@ -22,7 +22,6 @@ export class DatabaseService
 
   async onModuleInit() {
     await this.$connect();
-    console.log('Connected to PostgreSQL database');
   }
 
   async onModuleDestroy() {

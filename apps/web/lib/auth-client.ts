@@ -1,8 +1,9 @@
 import { createAuthClient } from "better-auth/react";
-import { getAuthBaseURL } from "@/lib/base-url";
+
+import { getAuthApiBaseUrl } from "@/lib/api/config";
 
 const authClientOptions = {
-  baseURL: getAuthBaseURL(),
+  baseURL: getAuthApiBaseUrl(),
 } as const;
 
 export const authClient: ReturnType<typeof createAuthClient> = createAuthClient(

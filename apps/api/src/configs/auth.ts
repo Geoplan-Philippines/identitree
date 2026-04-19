@@ -1,17 +1,18 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { DatabaseService } from './database';
+import { PrismaService } from '../shared/database/prisma.service';
 import { env } from './env';
 import { sendAuthEmail } from './email';
 import { getAuthBaseURL } from './base-url';
 
 // Use the centralized database connection
-const db = new DatabaseService();
+const db = new PrismaService();
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
     provider: 'postgresql',
   }),
+  basePath: '/api/v1/auth',
   secret: env.authSecret,
   baseURL: getAuthBaseURL(env.authUrl),
   trustedOrigins: [
