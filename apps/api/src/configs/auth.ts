@@ -3,6 +3,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaService } from '../shared/database/prisma.service';
 import { env } from './env';
 import { sendAuthEmail } from './email';
+import { getAuthBaseURL } from './base-url';
 
 // Use the centralized database connection
 const db = new PrismaService();
@@ -13,8 +14,14 @@ export const auth = betterAuth({
   }),
   basePath: '/api/v1/auth',
   secret: env.authSecret,
-  baseURL: env.authUrl,
-  trustedOrigins: [env.frontendUrl],
+  baseURL: getAuthBaseURL(env.authUrl),
+  trustedOrigins: [
+    env.frontendUrl,
+    'http://localhost:3000',
+    'https://identitree-dev.geoplanph.com',
+    'https://identitree-stg.geoplanph.com',
+    'https://identitree.geoplanph.com',
+  ],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -31,6 +38,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     sendOnSignIn: true,
     sendVerificationEmail: async ({ user, url, token }) => {
+      // Use frontend URL for verification link so user lands on UI
       const verificationLink = token
         ? `${env.frontendUrl}/verify-email?token=${encodeURIComponent(token)}`
         : url;
