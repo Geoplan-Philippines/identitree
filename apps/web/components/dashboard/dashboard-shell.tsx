@@ -217,13 +217,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   <Bell className="size-4" aria-hidden="true" />
                 </Button>
 
-                <Button
-                  asChild
-                  size="sm"
-                  className="hidden h-8 rounded-md px-3 text-xs font-medium sm:inline-flex shadow-sm"
-                >
+                <Button asChild>
                   <Link href="#">
-                    <Plus className="size-3.5 mr-1" aria-hidden="true" />
+                    <Plus className="size-3.5" aria-hidden="true" />
                     New card
                   </Link>
                 </Button>

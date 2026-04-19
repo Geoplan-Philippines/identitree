@@ -25,6 +25,7 @@ model User {
   accounts Account[]
   sessions Session[]
   members  Member[]
+  owner    Profile[]
 }
 
 model Account {
@@ -78,7 +79,9 @@ model Organization {
 
   createdAt DateTime @default(now())
 
-  members Member[]
+  members  Member[]
+  profile  Profile[]
+  nfcCard  NfcCard[]
 }
 
 model Member {
@@ -91,4 +94,77 @@ model Member {
 
   user         User         @relation(fields: [userId], references: [id])
   organization Organization @relation(fields: [organizationId], references: [id])
+}
+
+// model Template {
+//   id                 String @id @default(cuid())
+
+//   organizationId     String?       @map("organization_id")
+//   organization       Organization  @relation(fields: [organizationId], references: [id])
+// }
+
+model Profile {
+  id                   String         @id @default(cuid())
+
+  organizationId       String?        @map("organization_id")
+  organization         Organization?  @relation(fields: [organizationId], references: [id])
+
+  ownerUserId          String?        @map("owner_user_id")
+  owner                User?          @relation(fields: [ownerUserId], references: [id])
+
+  // templateId        String         @map("template_id")
+  // template          Template       @relation(fields: [templateId], references: [id])
+  
+  // templateKey          String         @default("default") @map("template_key")
+
+  firstName            String         @map("first_name")
+  lastName             String         @map("last_name")
+  email                String
+  avatarUrl            String?        @map("avatar_url")
+  positionTitle        String         @map("position_title")
+  contactNumber        String         @map("contact_number")
+  linkedInUsername     String?        @map("linkedin_username")
+  whatsappNumber       String?        @map("whatsapp_number")
+  viberNumber          String?        @map("viber_number")
+
+  nfcCard              NfcCard[]
+
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+
+  @@map("profile")
+}
+
+model NfcCard {
+  id                   String             @id @default(cuid())
+
+  organizationId       String?            @map("organization_id")
+  organization         Organization?      @relation(fields: [organizationId], references: [id])
+
+  profileId            String?            @map("profile_id")
+  profile              Profile?           @relation(fields: [profileId], references: [id])
+  
+  hardwareId           String?            @map("hardware_id") @unique
+  cardType             NfcCardType        @map("card_type")
+  encodedUrl           String             @map("encoded_url")
+  status               NfcCardStatus      @default(UNASSIGNED)
+
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  @@map("nfc_card")
+}
+
+enum NfcCardType {
+  GEOPLAN_ISSUED
+  CUSTOMER_OWNED
+}
+
+enum NfcCardStatus {
+  UNASSIGNED
+  UNACTIVATED
+  ACTIVE
+  INACTIVE
+  LOST
+  REPLACED
 }
