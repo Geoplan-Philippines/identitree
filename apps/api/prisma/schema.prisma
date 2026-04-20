@@ -12,6 +12,7 @@ datasource db {
 }
 
 // Database schema
+
 model User {
   id            String   @id @default(cuid())
   name          String?
@@ -22,10 +23,13 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // relations
-  accounts Account[]
-  sessions Session[]
-  members  Member[]
-  owner    Profile[]
+  accounts    Account[]
+  sessions    Session[]
+  members     Member[]
+  owner       Profile[]
+  invitations Invitation[]
+
+  @@map("user")
 }
 
 model Account {
@@ -47,6 +51,8 @@ model Account {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
 }
 
 model Session {
@@ -59,7 +65,11 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user                 User    @relation(fields: [userId], references: [id])
+  activeOrganizationId String?
+
+  @@index([userId])
+  @@map("session")
 }
 
 model Verification {
@@ -69,6 +79,9 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
 
 model Organization {
@@ -79,9 +92,13 @@ model Organization {
 
   createdAt DateTime @default(now())
 
-  members  Member[]
-  profile  Profile[]
-  nfcCard  NfcCard[]
+  members     Member[]
+  profile     Profile[]
+  nfcCard     NfcCard[]
+  metadata    String?
+  invitations Invitation[]
+
+  @@map("organization")
 }
 
 model Member {
@@ -94,6 +111,10 @@ model Member {
 
   user         User         @relation(fields: [userId], references: [id])
   organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
 }
 
 // model Template {
@@ -104,53 +125,53 @@ model Member {
 // }
 
 model Profile {
-  id                   String         @id @default(cuid())
+  id String @id @default(cuid())
 
-  organizationId       String?        @map("organization_id")
-  organization         Organization?  @relation(fields: [organizationId], references: [id])
+  organizationId String?       @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  ownerUserId          String?        @map("owner_user_id")
-  owner                User?          @relation(fields: [ownerUserId], references: [id])
+  ownerUserId String? @map("owner_user_id")
+  owner       User?   @relation(fields: [ownerUserId], references: [id])
 
   // templateId        String         @map("template_id")
   // template          Template       @relation(fields: [templateId], references: [id])
-  
+
   // templateKey          String         @default("default") @map("template_key")
 
-  firstName            String         @map("first_name")
-  lastName             String         @map("last_name")
-  email                String
-  avatarUrl            String?        @map("avatar_url")
-  positionTitle        String         @map("position_title")
-  contactNumber        String         @map("contact_number")
-  linkedInUsername     String?        @map("linkedin_username")
-  whatsappNumber       String?        @map("whatsapp_number")
-  viberNumber          String?        @map("viber_number")
+  firstName        String  @map("first_name")
+  lastName         String  @map("last_name")
+  email            String
+  avatarUrl        String? @map("avatar_url")
+  positionTitle    String  @map("position_title")
+  contactNumber    String  @map("contact_number")
+  linkedInUsername String? @map("linkedin_username")
+  whatsappNumber   String? @map("whatsapp_number")
+  viberNumber      String? @map("viber_number")
 
-  nfcCard              NfcCard[]
+  nfcCard NfcCard[]
 
-  createdAt            DateTime       @default(now()) @map("created_at")
-  updatedAt            DateTime       @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("profile")
 }
 
 model NfcCard {
-  id                   String             @id @default(cuid())
+  id String @id @default(cuid())
 
-  organizationId       String?            @map("organization_id")
-  organization         Organization?      @relation(fields: [organizationId], references: [id])
+  organizationId String?       @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  profileId            String?            @map("profile_id")
-  profile              Profile?           @relation(fields: [profileId], references: [id])
-  
-  hardwareId           String?            @map("hardware_id") @unique
-  cardType             NfcCardType        @map("card_type")
-  encodedUrl           String             @map("encoded_url")
-  status               NfcCardStatus      @default(UNASSIGNED)
+  profileId String?  @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id])
 
-  createdAt            DateTime           @default(now()) @map("created_at")
-  updatedAt            DateTime           @updatedAt @map("updated_at")
+  hardwareId String?       @map("hardware_id") @unique
+  cardType   NfcCardType   @map("card_type")
+  encodedUrl String        @map("encoded_url")
+  status     NfcCardStatus @default(UNASSIGNED)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("nfc_card")
 }
@@ -167,4 +188,21 @@ enum NfcCardStatus {
   INACTIVE
   LOST
   REPLACED
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
 }

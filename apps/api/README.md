@@ -115,6 +115,16 @@ If you want to clear local data during development, use the provided script:
 npm run db:clear -- --force
 ```
 
+### 4. Generate Better Auth types and client
+
+If you change your Better Auth config or want to regenerate the Better Auth client/types, run:
+
+```bash
+npx @better-auth/cli generate --config=src/configs/auth.ts
+```
+
+This will generate the latest types and client code for Better Auth, using your current config.
+
 ## Run the API
 
 Development mode:
