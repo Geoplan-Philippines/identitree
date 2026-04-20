@@ -37,6 +37,11 @@ export function getApiBasePath() {
 }
 
 export function getApiBaseURL() {
+  // Server-side: prefer internal URL for Docker inter-container networking
+  if (typeof window === "undefined" && process.env.INTERNAL_API_BASE_URL) {
+    return process.env.INTERNAL_API_BASE_URL.replace(/\/+$/, "");
+  }
+
   const configuredBaseURL =
     process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
 
@@ -78,6 +83,12 @@ export function getAuthBasePath() {
 }
 
 export function getAuthBaseURL() {
+  // Server-side: prefer internal URL for Docker inter-container networking
+  if (typeof window === "undefined" && process.env.INTERNAL_API_BASE_URL) {
+    const internalBase = process.env.INTERNAL_API_BASE_URL.replace(/\/+$/, "");
+    return withAuthPath(internalBase);
+  }
+
   const authPath = getAuthBasePath();
   const configuredBaseURL =
     process.env.NEXT_PUBLIC_AUTH_URL ||

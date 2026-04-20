@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: identitree
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/identitree?schema=public
+      - BETTER_AUTH_SECRET=K8Yxt0X6fzPEXSuhVtrKmzmEE9BdI530
+      - BETTER_AUTH_URL=http://localhost:8000/api/v1
+      - FRONTEND_URL=http://localhost:3000
+      - PORT=8000
+      - GOOGLE_CLIENT_ID=4533709701-86gh42vvmh22h2s8lnrb7621vau3au46.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - RESEND_API_KEY=re_eAE6Y8sf_2KvEBhTdM1BCgwuNr51BHx55
+      - RESEND_FROM_EMAIL=Identitree <noreply@identitree.geoplanph.com>
+      - RESEND_VERIFY_TEMPLATE_ID=verification
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+      - INTERNAL_API_BASE_URL=http://api:8000/api/v1
+      - PORT=3000
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=4533709701-86gh42vvmh22h2s8lnrb7621vau3au46.apps.googleusercontent.com
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

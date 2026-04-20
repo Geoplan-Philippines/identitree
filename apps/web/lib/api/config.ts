@@ -10,6 +10,11 @@ function withLeadingSlash(path: string) {
 }
 
 export function getApiBaseUrl() {
+  // Server-side: prefer internal URL for Docker inter-container networking
+  if (typeof window === "undefined" && process.env.INTERNAL_API_BASE_URL) {
+    return trimTrailingSlash(process.env.INTERNAL_API_BASE_URL);
+  }
+
   return trimTrailingSlash(
     process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL,
   );
