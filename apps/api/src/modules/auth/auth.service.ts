@@ -1,162 +1,29 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { jwtVerify } from 'jose';
 import { JWTExpired } from 'jose/errors';
 
-import { RegisterDto } from './dto/register.dto';
-import { auth } from '../../configs/auth';
 import { env } from '../../configs/env';
-import { LoginDto } from './dto/login.dto';
-import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { PrismaService } from '../../shared/database/prisma.service';
-
-type AuthResult = {
-  token: string | null;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string | null;
-    emailVerified?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-  };
-};
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService) {}
 
-  private async findOrganizationSlugByUserId(userId: string) {
-    const member = await this.prisma.member.findFirst({
-      where: { userId },
-      include: { organization: true },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    return member?.organization.slug ?? null;
-  }
-
-  private async withOrganization(result: AuthResult) {
-    const organizationSlug = await this.findOrganizationSlugByUserId(
-      result.user.id,
-    );
-
-    return {
-      ...result,
-      organizationSlug,
-    };
-  }
-
-  async register(dto: RegisterDto) {
-    const { email, password, name } = dto;
-
-    try {
-      // Use Better Auth's sign-up method
-      // Better Auth handles password hashing, validation, and user creation
-      const result = (await auth.api.signUpEmail({
-        body: {
-          email,
-          password,
-          name,
-        },
-      })) as AuthResult;
-
-      // Better Auth returns the user and token on success
-      return this.withOrganization(result);
-    } catch (error) {
-      // Better Auth throws errors on failure
-      const message =
-        error instanceof Error ? error.message : 'Failed to register user';
-      throw new BadRequestException(message);
-    }
-  }
-
-  async login(dto: LoginDto) {
-    const { email, password } = dto;
-
-    try {
-      const result = (await auth.api.signInEmail({
-        body: {
-          email,
-          password,
-        },
-      })) as AuthResult;
-
-      return this.withOrganization(result);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to login user';
-      throw new BadRequestException(message);
-    }
-  }
-
-  async getUserOrganization(userId: string) {
-    const organizationSlug = await this.findOrganizationSlugByUserId(userId);
-
-    return {
-      organizationSlug,
-      hasOrganization: Boolean(organizationSlug),
-    };
-  }
-
-  async createOrganization(dto: CreateOrganizationDto) {
-    const { userId, name, slug } = dto;
-
-    const existingOrganization = await this.prisma.organization.findUnique({
-      where: { slug },
-    });
-
-    if (existingOrganization) {
-      throw new BadRequestException('Organization slug already exists');
-    }
-
-    const existingMembership = await this.prisma.member.findFirst({
-      where: { userId },
-      include: { organization: true },
-    });
-
-    if (existingMembership) {
-      return {
-        organizationSlug: existingMembership.organization.slug,
-        alreadyMember: true,
-      };
-    }
-
-    const organization = await this.prisma.organization.create({
-      data: {
-        name,
-        slug,
-        members: {
-          create: {
-            userId,
-            role: 'owner',
-          },
-        },
-      },
-    });
-
-    return {
-      organizationSlug: organization.slug,
-      alreadyMember: false,
-    };
-  }
-
   async getVerificationTokenStatus(token: string) {
     try {
-      const jwt = await jwtVerify(
-        token,
-        new TextEncoder().encode(env.authSecret),
-        {
-          algorithms: ['HS256'],
-        },
-      );
-      const payload = jwt.payload as { email?: string };
-      const email = payload.email?.toLowerCase();
+      const verification = await this.prisma.verification.findFirst({
+        where: { value: token },
+      });
 
-      if (!email) {
+      if (!verification) {
         return { status: 'invalid' } as const;
       }
 
+      if (verification.expiresAt < new Date()) {
+        return { status: 'expired' } as const;
+      }
+
+      const email = verification.identifier;
       const user = await this.prisma.user.findUnique({
         where: { email },
       });
@@ -171,10 +38,7 @@ export class AuthService {
 
       return { status: 'ready', email: user.email } as const;
     } catch (error) {
-      if (error instanceof JWTExpired) {
-        return { status: 'expired' } as const;
-      }
-
+      console.error('Error checking verification token status:', error);
       return { status: 'invalid' } as const;
     }
   }

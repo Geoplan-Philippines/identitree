@@ -1,15 +1,13 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { PrismaService } from '../shared/database/prisma.service';
+import { organization } from 'better-auth/plugins';
 import { env } from './env';
 import { sendAuthEmail } from './email';
 import { getAuthBaseURL } from './base-url';
-
-// Use the centralized database connection
-const db = new PrismaService();
+import { prisma } from '../shared/database/prisma';
 
 export const auth = betterAuth({
-  database: prismaAdapter(db, {
+  database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
   basePath: '/api/v1/auth',
@@ -38,7 +36,6 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     sendOnSignIn: true,
     sendVerificationEmail: async ({ user, url, token }) => {
-      // Use frontend URL for verification link so user lands on UI
       const verificationLink = token
         ? `${env.frontendUrl}/verify-email?token=${encodeURIComponent(token)}`
         : url;
@@ -73,4 +70,5 @@ export const auth = betterAuth({
       prompt: 'select_account',
     },
   },
+  plugins: [organization()],
 });

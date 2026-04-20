@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Profile } from '@prisma/client';
 
 import { PrismaService } from '../../shared/database/prisma.service';
-import { OrganizationsService } from '../organizations/organizations.service';
+import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateProfileDTO } from './dto/create-profile.dto';
 
 type CreateProfileInput = {
-  currentUserId: string;
+  user: AuthContext;
   payload: CreateProfileDTO;
 };
 
@@ -14,26 +14,29 @@ type CreateProfileInput = {
 export class ProfilesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly organizationsService: OrganizationsService,
   ) {}
 
   /**
    * Creates a profile for the authenticated user within their organization.
    *
-   * Resolves the organization first, then persists the profile with the
-   * resolved organizationId and the caller's userId as the owner.
+   * Uses the organization context provided by the session.
    */
   async createProfile({
-    currentUserId,
+    user,
     payload,
   }: CreateProfileInput): Promise<Profile> {
-    const organization =
-      await this.organizationsService.resolveUserOrganization(currentUserId);
+    const { userId, organizationId } = user;
+
+    if (!organizationId) {
+      throw new ForbiddenException(
+        'You must select or create an organization before performing this action',
+      );
+    }
 
     return this.prisma.profile.create({
       data: {
-        ownerUserId: currentUserId,
-        organizationId: organization.id,
+        ownerUserId: userId,
+        organizationId: organizationId,
         ...payload,
       },
     });

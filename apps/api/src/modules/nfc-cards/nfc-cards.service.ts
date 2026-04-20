@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { NfcCard } from '@prisma/client';
 
 import { PrismaService } from '../../shared/database/prisma.service';
-import { OrganizationsService } from '../organizations/organizations.service';
+import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
 
 type CreateNfcCardInput = {
-  currentUserId: string;
+  user: AuthContext;
   payload: CreateNfcCardDTO;
 };
 
@@ -14,25 +14,28 @@ type CreateNfcCardInput = {
 export class NfcCardsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly organizationsService: OrganizationsService,
   ) {}
 
   /**
    * Creates a new NFC card scoped to the user's organization.
    *
-   * Resolves the organization first, then persists the card with
-   * the resolved organizationId.
+   * Uses the organization context provided by the session.
    */
   async createNfcCard({
-    currentUserId,
+    user,
     payload,
   }: CreateNfcCardInput): Promise<NfcCard> {
-    const organization =
-      await this.organizationsService.resolveUserOrganization(currentUserId);
+    const { organizationId } = user;
+
+    if (!organizationId) {
+      throw new ForbiddenException(
+        'You must select or create an organization before performing this action',
+      );
+    }
 
     return this.prisma.nfcCard.create({
       data: {
-        organizationId: organization.id,
+        organizationId: organizationId,
         ...payload,
       },
     });
@@ -41,17 +44,21 @@ export class NfcCardsService {
   /**
    * Returns all NFC cards that belong to the user's organization.
    *
-   * Resolves the organization first so cards from other orgs are
-   * never exposed, even if the caller supplies a spoofed ID.
+   * Uses the organization context provided by the session.
    */
   async getAllNfcCardsByOrganizationId(
-    currentUserId: string,
+    user: AuthContext,
   ): Promise<NfcCard[]> {
-    const organization =
-      await this.organizationsService.resolveUserOrganization(currentUserId);
+    const { organizationId } = user;
+
+    if (!organizationId) {
+      throw new ForbiddenException(
+        'You must select or create an organization before performing this action',
+      );
+    }
 
     return this.prisma.nfcCard.findMany({
-      where: { organizationId: organization.id },
+      where: { organizationId: organizationId },
       orderBy: { createdAt: 'desc' },
     });
   }

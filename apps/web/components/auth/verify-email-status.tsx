@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { getAuthApiBaseUrl } from "@/lib/api/config";
+import { authClient } from "@/lib/auth-client";
 import { authService } from "@/lib/services/auth.service";
 
 type VerificationStatus =
@@ -36,16 +37,16 @@ export function VerifyEmailStatus() {
     setErrorMessage(null);
 
     try {
-      const session = await authService.getSession();
+      const { data: sessionData, error } = await authClient.getSession();
 
-      if (!session?.user) {
+      if (error || !sessionData?.user) {
         setEmail(null);
         setStatus("no-session");
         return;
       }
 
-      setEmail(session.user.email);
-      setStatus(session.user.emailVerified ? "verified" : "not-verified");
+      setEmail(sessionData.user.email);
+      setStatus(sessionData.user.emailVerified ? "verified" : "not-verified");
     } catch (error) {
       setStatus("error");
       setErrorMessage(
@@ -69,35 +70,38 @@ export function VerifyEmailStatus() {
 
     if (token) {
       void (async () => {
-        const tokenStatus = await authService.getVerificationTokenStatus(token);
-
-        if (tokenStatus.status === "already-verified") {
-          setStatus("already-verified");
-          setEmail(tokenStatus.email ?? emailFromQuery);
-          return;
+        try {
+          // POST the token to Better Auth's built-in verification endpoint
+          const callbackURL = `${window.location.origin}/verify-email?verified=1`;
+          const response = await fetch(`${authApiBaseURL}/verify-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, callbackURL }),
+            credentials: "include",
+          });
+          if (response.redirected) {
+            window.location.assign(response.url);
+            return;
+          }
+          const result = await response.json();
+          if (result?.error === "TOKEN_EXPIRED") {
+            setStatus("expired");
+            return;
+          }
+          if (result?.error) {
+            setStatus("invalid-link");
+            return;
+          }
+          setStatus("verified");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Could not verify your email link.",
+          );
         }
-
-        if (tokenStatus.status === "expired") {
-          setStatus("expired");
-          return;
-        }
-
-        if (tokenStatus.status === "invalid") {
-          setStatus("invalid-link");
-          return;
-        }
-
-        const callbackURL = `${window.location.origin}/verify-email?verified=1&email=${encodeURIComponent(tokenStatus.email ?? "")}`;
-        const verifyURL = `${authApiBaseURL}/verify-email?token=${encodeURIComponent(token)}&callbackURL=${encodeURIComponent(callbackURL)}`;
-        window.location.assign(verifyURL);
-      })().catch((error: unknown) => {
-        setStatus("error");
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Could not verify your email link.",
-        );
-      });
+      })();
       return;
     }
 

@@ -14,8 +14,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authService } from "@/lib/services/auth.service";
 import { useAuth } from "@/providers/auth-provider";
+import { authClient } from "@/lib/auth-client";
 
 const organizationSchema = z.object({
   name: z.string().min(2, "Organization name is required."),
@@ -56,15 +56,21 @@ export function OrganizationSetupForm({
     }
 
     try {
-      const result = await authService.createOrganization({
-        userId,
+      const { data: organization, error } = await authClient.organization.create({
         name: data.name,
         slug: data.slug,
       });
 
-      toast.success(result.alreadyMember ? "Organization already linked" : "Organization created");
-      setOrganizationSlug(result.organizationSlug);
-      router.push(`/dashboard/${result.organizationSlug}`);
+      if (error) {
+        throw new Error(error.message || "Failed to create organization");
+      }
+
+      toast.success("Organization created");
+
+      if (organization) {
+        setOrganizationSlug(organization.slug);
+        router.push(`/dashboard/${organization.slug}`);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to create organization";

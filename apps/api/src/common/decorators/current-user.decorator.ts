@@ -8,16 +8,21 @@ import { fromNodeHeaders } from 'better-auth/node';
 
 import { auth } from '../../configs/auth';
 
+export type AuthContext = {
+  userId: string;
+  organizationId: string | null;
+};
+
 /**
- * Extracts the authenticated user's ID from the Better Auth session.
+ * Extracts the authenticated user's context (ID and active organization) from the Better Auth session.
  *
  * Usage:
- *   async myHandler(@CurrentUser() userId: string) { ... }
+ *   async myHandler(@CurrentUser() user: AuthContext) { ... }
  *
  * Throws UnauthorizedException if no valid session is present.
  */
 export const CurrentUser = createParamDecorator(
-  async (_data: unknown, ctx: ExecutionContext): Promise<string> => {
+  async (_data: unknown, ctx: ExecutionContext): Promise<AuthContext> => {
     const request = ctx.switchToHttp().getRequest<Request>();
 
     const session = await auth.api.getSession({
@@ -30,6 +35,9 @@ export const CurrentUser = createParamDecorator(
       );
     }
 
-    return session.user.id;
+    return {
+      userId: session.user.id,
+      organizationId: session.session.activeOrganizationId || null,
+    };
   },
 );

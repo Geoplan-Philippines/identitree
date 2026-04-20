@@ -8,6 +8,7 @@ import {
 import { Profile } from '@prisma/client';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthContext } from '../../common/decorators/current-user.decorator';
 import { HttpExceptionFilter } from '../../common/filters/http-exception.filter';
 import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { ProfilesService } from './profiles.service';
@@ -24,11 +25,11 @@ export class ProfilesController {
    */
   @Post()
   async createProfile(
-    @CurrentUser() currentUserId: string,
+    @CurrentUser() user: AuthContext,
     @Body() createProfileDTO: CreateProfileDTO,
   ): Promise<Profile> {
     return this.profilesService.createProfile({
-      currentUserId,
+      user,
       payload: createProfileDTO,
     });
   }

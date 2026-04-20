@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors } from 
 import { NfcCard } from '@prisma/client';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthContext } from '../../common/decorators/current-user.decorator';
 import { HttpExceptionFilter } from '../../common/filters/http-exception.filter';
 import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { NfcCardsService } from './nfc-cards.service';
@@ -18,11 +19,11 @@ export class NfcCardsController {
    */
   @Post()
   async createNfcCard(
-    @CurrentUser() currentUserId: string,
+    @CurrentUser() user: AuthContext,
     @Body() createNfcCardDTO: CreateNfcCardDTO,
   ): Promise<NfcCard> {
     return this.nfcCardsService.createNfcCard({
-      currentUserId,
+      user,
       payload: createNfcCardDTO,
     });
   }
@@ -32,9 +33,9 @@ export class NfcCardsController {
    */
   @Get()
   async getAllNfcCardsByOrganizationId(
-    @CurrentUser() currentUserId: string,
+    @CurrentUser() user: AuthContext,
   ): Promise<NfcCard[]> {
-    return this.nfcCardsService.getAllNfcCardsByOrganizationId(currentUserId);
+    return this.nfcCardsService.getAllNfcCardsByOrganizationId(user);
   }
 
   /**

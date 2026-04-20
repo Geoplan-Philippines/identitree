@@ -35,21 +35,27 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const result = await authService.login(data);
-      const organization = await authService.getUserOrganization(result.user.id);
-
-      setAuth({
-        ...result,
-        organizationSlug: organization.organizationSlug,
+      const { data: session, error } = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
       });
+
+      if (error) {
+        throw new Error(error.message || "Login failed");
+      }
+
+      const { data: orgs } = await authClient.organization.list();
+      const hasOrganization = orgs && orgs.length > 0;
+      const organizationSlug = (hasOrganization && orgs?.[0]) ? orgs[0].slug : null;
+
       toast.success("Login successful");
 
-      if (organization.organizationSlug) {
-        router.push(`/dashboard/${organization.organizationSlug}`);
+      if (organizationSlug) {
+        router.push(`/dashboard/${organizationSlug}`);
         return;
       }
 
-      router.push(`/organization/setup?userId=${result.user.id}`);
+      router.push(`/organization/setup?userId=${session?.user.id}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Login failed. Please try again.";
