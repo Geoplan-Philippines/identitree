@@ -1,16 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
 
-import { authService, type AuthResponse, type AuthUser } from "@/lib/services/auth.service";
+import { authClient } from "@/lib/auth-client";
+import { type AuthResponse, type AuthUser } from "@/lib/services/auth.service";
 
 type AuthState = {
   user: AuthUser | null;
@@ -32,73 +32,63 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    token: null,
-    organizationSlug: null,
-  });
-  const [isHydrated, setIsHydrated] = useState(false);
+  const router = useRouter();
+  const { data: sessionData, isPending: isSessionPending } =
+    authClient.useSession();
+  const { data: activeOrg, isPending: isOrgPending } =
+    authClient.useActiveOrganization();
 
-  useEffect(() => {
-    async function hydrateFromSessionCookie() {
-      try {
-        const session = await authService.getSession();
-
-        if (!session?.user?.id) {
-          setState({ user: null, token: null, organizationSlug: null });
-          setIsHydrated(true);
-          return;
-        }
-
-        const organization = await authService.getUserOrganization(session.user.id);
-
-        setState({
-          user: session.user,
-          token: session.session.token,
-          organizationSlug: organization.organizationSlug,
-        });
-      } catch {
-        setState({ user: null, token: null, organizationSlug: null });
-      } finally {
-        setIsHydrated(true);
-      }
-    }
-
-    void hydrateFromSessionCookie();
-  }, []);
+  const user = (sessionData?.user as AuthUser) || null;
+  const token = sessionData?.session.token || null;
+  const organizationSlug = activeOrg?.slug || null;
 
   const setAuth = useCallback((payload: AuthResponse) => {
-    const nextState: AuthState = {
-      user: payload.user,
-      token: payload.token,
-      organizationSlug: payload.organizationSlug,
-    };
-
-    setState(nextState);
+    // Better Auth's useSession is reactive, so manual setting is usually not needed.
+    // For compatibility with legacy manual login calls, we log the call.
+    // Ideally, consumers should switch to authClient.signIn.* or authClient.useSession().
+    console.debug(
+      "setAuth called. Session should update reactively via Better Auth hooks.",
+      payload,
+    );
   }, []);
 
-  const setOrganizationSlug = useCallback((slug: string | null) => {
-    setState((prev) => {
-      return { ...prev, organizationSlug: slug };
+  const setOrganizationSlug = useCallback(async (slug: string | null) => {
+    await authClient.organization.setActive({
+      organizationSlug: slug ?? undefined,
     });
   }, []);
 
-  const clearAuth = useCallback(() => {
-    setState({ user: null, token: null, organizationSlug: null });
-  }, []);
+  const clearAuth = useCallback(async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/login");
+        },
+      },
+    });
+  }, [router]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      user: state.user,
-      token: state.token,
-      organizationSlug: state.organizationSlug,
-      isAuthenticated: Boolean(state.user),
-      isHydrated,
+      user,
+      token,
+      organizationSlug,
+      isAuthenticated: Boolean(user),
+      isHydrated: !isSessionPending && (!user || !isOrgPending),
       setAuth,
       setOrganizationSlug,
       clearAuth,
     }),
-    [state, isHydrated, setAuth, setOrganizationSlug, clearAuth],
+    [
+      user,
+      token,
+      organizationSlug,
+      isSessionPending,
+      isOrgPending,
+      setAuth,
+      setOrganizationSlug,
+      clearAuth,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

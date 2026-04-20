@@ -41,7 +41,7 @@ Copy-Item apps/api/.env.example apps/api/.env
 Then update `apps/api/.env`:
 
 - `BETTER_AUTH_SECRET`: a strong random secret
-- `BETTER_AUTH_URL`: backend base URL, usually `http://localhost:8000`
+- `BETTER_AUTH_URL`: backend origin without `/api/v1`, usually `http://localhost:8000`
 - `PORT`: backend port, usually `8000`
 - `FRONTEND_URL`: frontend base URL, usually `http://localhost:3000`
 - `GOOGLE_CLIENT_ID`: Google OAuth client ID
@@ -60,7 +60,7 @@ Resend notes:
 For local Google OAuth, the redirect URI should be:
 
 ```text
-http://localhost:8000/auth/callback/google
+http://localhost:8000/api/v1/auth/callback/google
 ```
 
 ### 3. Prepare the database
@@ -115,6 +115,16 @@ If you want to clear local data during development, use the provided script:
 npm run db:clear -- --force
 ```
 
+### 4. Generate Better Auth types and client
+
+If you change your Better Auth config or want to regenerate the Better Auth client/types, run:
+
+```bash
+npx @better-auth/cli generate --config=src/configs/auth.ts
+```
+
+This will generate the latest types and client code for Better Auth, using your current config.
+
 ## Run the API
 
 Development mode:
@@ -138,19 +148,19 @@ npm run start:prod
 Default local API URL:
 
 ```text
-http://localhost:8000
+http://localhost:8000/api/v1
 ```
 
 ## Auth routes
 
-Better Auth is mounted under `/auth`.
+Better Auth is mounted under `/api/v1/auth`.
 
 Common routes used by the web app include:
 
-- `POST /auth/sign-up/email`
-- `POST /auth/sign-in/email`
-- `GET /auth/get-session`
-- `GET /auth/callback/google`
+- `POST /api/v1/auth/sign-up/email`
+- `POST /api/v1/auth/sign-in/email`
+- `GET /api/v1/auth/get-session`
+- `GET /api/v1/auth/callback/google`
 
 ## Project scripts
 
@@ -171,4 +181,4 @@ npm run db:clear -- --force
 
 - The backend uses a centralized `DatabaseService`.
 - `prisma.config.ts` reads `DATABASE_URL` through `dotenv`.
-- The frontend should point to this service through `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`.
+- The frontend should point to this service through `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1`.

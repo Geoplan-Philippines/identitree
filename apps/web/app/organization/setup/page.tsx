@@ -1,7 +1,10 @@
 import { AuthCard } from "@/components/auth/auth-card";
 import { OrganizationSetupForm } from "@/components/auth/organization-setup-form";
+import { requireNoOrganization } from "@/lib/auth/redirects";
 
-export default function OrganizationSetupPage() {
+export default async function OrganizationSetupPage() {
+  const session = await requireNoOrganization();
+
   return (
     <AuthCard
       title="Set up your organization"
@@ -10,7 +13,7 @@ export default function OrganizationSetupPage() {
       footerHref="/login"
       footerActionText="Sign in"
     >
-      <OrganizationSetupForm />
+      <OrganizationSetupForm userId={session.user.id} />
     </AuthCard>
   );
 }

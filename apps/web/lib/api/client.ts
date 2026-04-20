@@ -1,6 +1,4 @@
-import { getApiBaseURL } from "@/lib/base-url";
-
-const DEFAULT_API_BASE_URL = getApiBaseURL();
+import { createApiUrl, getApiBaseUrl } from "@/lib/api/config";
 
 export class ApiError extends Error {
   constructor(
@@ -23,12 +21,12 @@ class ApiClient {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || DEFAULT_API_BASE_URL;
+    this.baseUrl = baseUrl || getApiBaseUrl();
   }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const { method = "GET", body, headers } = options;
-    const response = await fetch(`${this.baseUrl}${path}`, {
+    const response = await fetch(createApiUrl(path, this.baseUrl), {
       method,
       credentials: "include",
       headers: {
