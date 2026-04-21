@@ -1,46 +1,31 @@
-FROM node:22-slim AS base
+FROM node:24-alpine AS base
 WORKDIR /app
-
-# ---------- PRUNE ----------
-FROM base AS pruner
+RUN apk add --no-cache libc6-compat
 RUN npm install -g turbo
 
+FROM base AS pruner
 COPY . .
-RUN turbo prune web --docker
+RUN turbo prune --scope=@identitree/web --docker
 
-# ---------- INSTALL ----------
-FROM base AS installer
+FROM node:24-alpine AS installer
 WORKDIR /app
-
+RUN apk add --no-cache libc6-compat
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
+RUN npm ci
 
-# ✅ FIX: ensures Next.js + SWC dependencies exist
-RUN npm ci --legacy-peer-deps
-
+FROM installer AS builder
 COPY --from=pruner /app/out/full/ .
+RUN npm run build -- --filter=@identitree/web
 
-# ---------- BUILD ----------
-FROM base AS builder
+FROM node:24-alpine AS runner
 WORKDIR /app
-
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app .
-
-# ⚠️ FIX FOR SWC ERROR
-RUN npm install @swc/helpers --no-save
-
-RUN npx turbo run build --filter=web
-
-# ---------- RUNNER ----------
-FROM node:22-slim AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
+ENV NODE_ENV=staging
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# ✅ standalone output: self-contained server.js — no `next` CLI needed
+RUN apk add --no-cache libc6-compat
+
 COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public

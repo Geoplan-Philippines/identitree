@@ -1,51 +1,32 @@
-FROM node:22-slim AS base
+FROM node:24-alpine AS base
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y openssl
-
-# ---------- PRUNE ----------
-FROM base AS pruner
+RUN apk add --no-cache libc6-compat
 RUN npm install -g turbo
+
+FROM base AS pruner
 COPY . .
-RUN turbo prune api --docker
+RUN turbo prune --scope=@identitree/api --docker
 
-# ---------- INSTALL ----------
-FROM base AS installer
+FROM node:24-alpine AS installer
 WORKDIR /app
-
+RUN apk add --no-cache libc6-compat
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
-
 RUN npm ci
 
+FROM installer AS builder
 COPY --from=pruner /app/out/full/ .
-
-# ---------- BUILD ----------
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app .
-
 RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
-RUN npx turbo run build --filter=api
+RUN npm run build -- --filter=@identitree/api
 
-# ---------- RUNNER ----------
-FROM node:22-slim AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV=staging
 
-# Prisma needs openssl at runtime
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache libc6-compat
 
-ENV NODE_ENV=production
+COPY --from=builder /app ./
 
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 8000
 
-# ✅ Copy Prisma schema + migrations so we can run migrate deploy at startup
-COPY --from=builder /app/apps/api/prisma ./prisma
-COPY --from=builder /app/apps/api/prisma.config.ts ./prisma.config.ts
-
-# Entrypoint: run migrations then start the server
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && node dist/src/main.js"]
+CMD ["node", "apps/api/dist/main.js"]
