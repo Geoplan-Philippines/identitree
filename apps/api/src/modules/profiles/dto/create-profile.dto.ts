@@ -27,7 +27,7 @@ export class CreateProfileDTO {
 
   @IsOptional()
   @IsString()
-  linkedInUsername?: string;
+  linkedinUsername?: string;
 
   @IsOptional()
   @IsString()

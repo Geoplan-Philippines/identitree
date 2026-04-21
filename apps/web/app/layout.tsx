@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { Header } from "@/components/shared/header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/providers/auth-provider";
+import { TanstackQueryProvider } from "@/providers/tanstack-query-provider";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -26,11 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased bg-background text-foreground overflow-x-hidden">
-        <AuthProvider>
-          <Header />
-          <Toaster position="top-right" closeButton richColors />
-          {children}
-        </AuthProvider>
+        <TanstackQueryProvider>
+          <AuthProvider>
+            <Header />
+            <Toaster position="top-right" closeButton richColors />
+            {children}
+          </AuthProvider>
+        </TanstackQueryProvider>
       </body>
     </html>
   );

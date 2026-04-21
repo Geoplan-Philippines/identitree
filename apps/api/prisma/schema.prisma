@@ -1,7 +1,7 @@
 // Notes for AI / Contributors:
 // For fucks sake dipshit, 
 // Follow existing formatting, (alignment, spacing, ordering)
-// TODO: only add indexes where you filter often.
+// NOTE: only add indexes where you filter often.
 
 generator client {
   provider = "prisma-client-js"
