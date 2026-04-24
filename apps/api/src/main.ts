@@ -24,12 +24,13 @@ async function bootstrap() {
       env.authUrl,
       env.frontendUrl,
       'http://localhost:3000',
-      'https://identitree-stg.geoplanph.com'
+      'https://identitree-stg.geoplanph.com',
+      'https://identitree.geoplanph.com'
     ],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
-      'Content-Type', 
-      'Authorization', 
+      'Content-Type',
+      'Authorization',
       'x-better-auth-session-token',
       'x-requested-with'
     ],
