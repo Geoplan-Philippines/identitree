@@ -1,5 +1,5 @@
 // Notes for AI / Contributors:
-// For fucks sake dipshit, 
+// For fucks sake dipshit,
 // Follow existing formatting, (alignment, spacing, ordering)
 // NOTE: only add indexes where you filter often.
 
@@ -19,7 +19,7 @@ model User {
   emailVerified             Boolean         @default(false) @map("email_verified")
 
   createdAt                 DateTime        @default(now()) @map("created_at")
-  updatedAt                 DateTime        @updatedAt @map("updated_at") 
+  updatedAt                 DateTime        @updatedAt @map("updated_at")
 
   accounts                  Account[]
   sessions                  Session[]
@@ -105,7 +105,7 @@ model Organization {
   @@map("organization")
 }
 
-// NOTE: 
+// NOTE:
 // - how about adding OrganizationMemberRole enum for role?
 // - also, unique constraint for userId, and organizationId?
 model Member {
@@ -190,7 +190,7 @@ model Invitation {
   role                      String?
   status                    String         @default("pending")
   expiresAt                 DateTime       @map("expires_at")
-  
+
   organizationId            String         @map("organization_id")
   organization              Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 

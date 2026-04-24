@@ -9,6 +9,10 @@ function isLocalHostname(hostname: string) {
   );
 }
 
+function isDevelopment() {
+  return process.env.NODE_ENV === "development";
+}
+
 function withAuthPath(pathname: string) {
   return pathname.endsWith("/auth") ? pathname : `${pathname}/auth`;
 }
@@ -54,26 +58,34 @@ export function getApiBaseURL() {
       const path = normalizeBasePath(configuredBaseURL, DEFAULT_API_PATH);
 
       if (typeof window !== "undefined") {
-        if (isLocalHostname(window.location.hostname)) {
-          return `${DEFAULT_LOCAL_ORIGIN}${path}`;
+        if (configuredBaseURL.startsWith("/")) {
+          return `${window.location.origin}${path}`;
         }
 
-        return path;
+        if (isDevelopment() && isLocalHostname(window.location.hostname)) {
+          return `${DEFAULT_LOCAL_ORIGIN}${path}`;
+        }
       }
-
-      return `${DEFAULT_LOCAL_ORIGIN}${path}`;
     }
   }
 
   if (typeof window !== "undefined") {
-    if (isLocalHostname(window.location.hostname)) {
+    if (isDevelopment() && isLocalHostname(window.location.hostname)) {
       return `${DEFAULT_LOCAL_ORIGIN}${DEFAULT_API_PATH}`;
     }
 
-    return DEFAULT_API_PATH;
+    throw new Error(
+      "NEXT_PUBLIC_API_BASE_URL is required in non-development environments."
+    );
   }
 
-  return `${DEFAULT_LOCAL_ORIGIN}${DEFAULT_API_PATH}`;
+  if (isDevelopment()) {
+    return `${DEFAULT_LOCAL_ORIGIN}${DEFAULT_API_PATH}`;
+  }
+
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL is required in non-development environments."
+  );
 }
 
 export function getAuthBasePath() {
@@ -103,22 +115,26 @@ export function getAuthBaseURL() {
       return `${parsed.origin}${withAuthPath(basePath)}`;
     } catch {
       if (configuredBaseURL.startsWith("/") && typeof window !== "undefined") {
-        if (isLocalHostname(window.location.hostname)) {
-          return `${DEFAULT_LOCAL_ORIGIN}${authPath}`;
-        }
-
         return `${window.location.origin}${authPath}`;
       }
     }
   }
 
   if (typeof window !== "undefined") {
-    if (isLocalHostname(window.location.hostname)) {
+    if (isDevelopment() && isLocalHostname(window.location.hostname)) {
       return `${DEFAULT_LOCAL_ORIGIN}${authPath}`;
     }
 
-    return `${window.location.origin}${authPath}`;
+    throw new Error(
+      "NEXT_PUBLIC_API_BASE_URL or NEXT_PUBLIC_AUTH_URL is required in non-development environments."
+    );
   }
 
-  return `${DEFAULT_LOCAL_ORIGIN}${authPath}`;
+  if (isDevelopment()) {
+    return `${DEFAULT_LOCAL_ORIGIN}${authPath}`;
+  }
+
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL or NEXT_PUBLIC_AUTH_URL is required in non-development environments."
+  );
 }

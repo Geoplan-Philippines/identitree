@@ -6,6 +6,9 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Trust proxy for Better Auth cookies behind Traefik
+  app.getHttpAdapter().getInstance().set('trust proxy', true);
+
   app.setGlobalPrefix('api/v1');
 
   app.useGlobalPipes(
@@ -18,12 +21,18 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      env.authUrl, 
-      env.frontendUrl, 
-      'http://localhost:3000'
+      env.authUrl,
+      env.frontendUrl,
+      'http://localhost:3000',
+      'https://identitree-stg.geoplanph.com'
     ],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: [
+      'Content-Type', 
+      'Authorization', 
+      'x-better-auth-session-token',
+      'x-requested-with'
+    ],
     credentials: true,
   });
 

@@ -13,11 +13,20 @@ export const auth = betterAuth({
   basePath: '/api/v1/auth',
   secret: env.authSecret,
   baseURL: getAuthBaseURL(env.authUrl),
+  advanced: env.authCookieDomain
+    ? {
+        crossSubDomainCookies: {
+          enabled: true,
+          domain: env.authCookieDomain,
+        },
+      }
+    : undefined,
   trustedOrigins: [
     env.frontendUrl,
     'http://localhost:3000',
     'https://identitree-dev.geoplanph.com',
     'https://identitree-stg.geoplanph.com',
+    'https://identitree-staging.geoplanph.com',
     'https://identitree.geoplanph.com',
   ],
   emailAndPassword: {

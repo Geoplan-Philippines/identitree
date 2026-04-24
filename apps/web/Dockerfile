@@ -1,50 +1,43 @@
-FROM node:22-slim AS base
+FROM node:24-alpine AS base
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
+RUN corepack prepare npm@11.8.0 --activate
 
-# ---------- PRUNE ----------
-FROM base AS pruner
 RUN npm install -g turbo
 
+FROM base AS pruner
 COPY . .
 RUN turbo prune web --docker
 
-# ---------- INSTALL ----------
-FROM base AS installer
+FROM node:24-alpine AS installer
 WORKDIR /app
-
+RUN apk add --no-cache libc6-compat
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
+RUN npm ci
 
-# ✅ FIX: ensures Next.js + SWC dependencies exist
-RUN npm ci --legacy-peer-deps
+FROM installer AS builder
+# Set API base URL for build (staging)
+ENV NEXT_PUBLIC_API_BASE_URL=https://identitree-stg-api.geoplanph.com/api/v1
 
 COPY --from=pruner /app/out/full/ .
+RUN npm run build -- --filter=web
 
-# ---------- BUILD ----------
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app .
-
-# ⚠️ FIX FOR SWC ERROR
-RUN npm install @swc/helpers --no-save
-
-RUN npx turbo run build --filter=web
-
-# ---------- RUNNER ----------
-FROM node:22-slim AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
+FROM node:24-alpine AS runner
+WORKDIR /app/apps/web
+ENV NODE_ENV=staging
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# ✅ standalone output: self-contained server.js — no `next` CLI needed
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
+RUN apk add --no-cache libc6-compat
+
+COPY --from=builder /app/apps/web/.next/standalone/apps/web/ ./
+COPY --from=builder /app/apps/web/.next/standalone/node_modules ../../node_modules
+COPY --from=builder /app/apps/web/.next/static ./.next/static
+COPY --from=builder /app/apps/web/public ./public
 
 EXPOSE 3000
 
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "server.js"]
