@@ -14,6 +14,7 @@ import { toNodeHandler } from 'better-auth/node';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { auth } from '../../configs/auth';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,11 +28,13 @@ export class AuthController {
     this.nodeAuthHandler = toNodeHandler(auth);
   }
 
+  @RateLimit(20, 60000)
   @Get('verify-email-status/:token')
   async getVerificationTokenStatus(@Param('token') token: string) {
     return this.authService.getVerificationTokenStatus(token);
   }
 
+  @RateLimit(20, 60000)
   @Post('verify-email')
   async verifyEmail(@Body() body: { token: string }) {
     // We omit callbackURL here to prevent Better Auth from throwing a Redirect error.
@@ -44,6 +47,7 @@ export class AuthController {
   }
 
   // Let Better Auth handle all auth routes
+  @RateLimit(60, 60000)
   @All('*')
   handler(@Req() req: Request, @Res() res: Response): unknown {
     return this.nodeAuthHandler(req, res);
