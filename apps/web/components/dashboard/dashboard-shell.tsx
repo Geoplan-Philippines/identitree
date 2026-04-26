@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Nfc,
+  LogOut,
   Palette,
   Plus,
   Settings,
@@ -38,6 +39,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { logoutAction } from "@/lib/auth/actions";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -143,6 +145,14 @@ function DashboardSidebar() {
                 <span>Settings</span>
               </Link>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <form action={logoutAction}>
+              <SidebarMenuButton type="submit" tooltip="Log out">
+                <LogOut aria-hidden="true" />
+                <span>Log out</span>
+              </SidebarMenuButton>
+            </form>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="Account">
