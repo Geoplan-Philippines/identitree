@@ -13,16 +13,18 @@ import { HttpExceptionFilter } from '../../common/filters/http-exception.filter'
 import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDTO } from './dto/create-profile.dto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 
 @Controller('profiles')
 @UseInterceptors(ResponseInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class ProfilesController {
-  constructor(private readonly profilesService: ProfilesService) {}
+  constructor(private readonly profilesService: ProfilesService) { }
 
   /**
    * Creates a profile for the authenticated user under their organization.
    */
+  @RateLimit(10, 60000)
   @Post()
   async createProfile(
     @CurrentUser() user: AuthContext,
