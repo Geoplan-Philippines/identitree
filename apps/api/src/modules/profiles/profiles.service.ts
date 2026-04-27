@@ -4,6 +4,7 @@ import { Profile } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateProfileDTO } from './dto/create-profile.dto';
+import { CloudinaryService } from '../../shared/cloudinary/cloudinary.service';
 
 type CreateProfileInput = {
   user: AuthContext;
@@ -14,6 +15,7 @@ type CreateProfileInput = {
 export class ProfilesService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly cloudinary: CloudinaryService,
   ) {}
 
   /**
@@ -72,6 +74,19 @@ export class ProfilesService {
       throw new ForbiddenException(
         'You do not have permission to update this profile',
       );
+    }
+
+    // If avatarUrl is being updated, delete the old one from Cloudinary
+    if (payload.avatarUrl && existingProfile.avatarUrl && payload.avatarUrl !== existingProfile.avatarUrl) {
+      const publicId = this.cloudinary.extractPublicId(existingProfile.avatarUrl);
+      if (publicId) {
+        try {
+          await this.cloudinary.deleteImage(publicId);
+        } catch (error) {
+          console.error('Failed to delete old avatar from Cloudinary:', error);
+          // Don't block the update if deletion fails
+        }
+      }
     }
 
     return this.prisma.profile.update({

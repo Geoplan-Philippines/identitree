@@ -73,11 +73,18 @@ export function NfcProfileView({
         {/* Avatar */}
         {profile.avatarUrl && (
           <div className="flex justify-center">
-            <img
-              src={profile.avatarUrl}
-              alt="Avatar"
-              className="w-24 h-24 rounded-full object-cover border"
-            />
+            <a
+              href={profile.avatarUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:opacity-80 transition-opacity cursor-zoom-in"
+            >
+              <img
+                src={profile.avatarUrl}
+                alt="Avatar"
+                className="w-24 h-24 rounded-full object-cover border"
+              />
+            </a>
           </div>
         )}
 

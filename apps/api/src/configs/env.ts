@@ -14,4 +14,11 @@ export const env = {
   resendApiKey: process.env.RESEND_API_KEY || '',
   resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
   resendVerifyTemplateId: process.env.RESEND_VERIFY_TEMPLATE_ID || '',
+
+  // Cloudinary
+  cloudName: process.env.CLOUD_NAME || '',
+  presetName: process.env.PRESET_NAME || '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_KEY_SECRET || '',
+  cloudinaryBaseUrl: process.env.CLOUDINARY_BASE_URL || 'https://api.cloudinary.com/v1_1',
 };

@@ -11,6 +11,7 @@ import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import { useUpdateNfcCard } from "@/hooks/use-nfc-cards";
 import { Profile } from "@/lib/services/nfc-cards.service";
+import { useState } from "react";
 
 type ProfileFormProps = {
   cardId: string;
@@ -22,11 +23,14 @@ type ProfileFormProps = {
 export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: ProfileFormProps) {
   const updateMutation = useUpdateNfcCard();
   const isEditing = !!initialData;
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<CreateProfileValues>({
     resolver: zodResolver(createProfileSchema),
     defaultValues: initialData ? {
@@ -42,18 +46,47 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
     } : {},
   });
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await apiClient.post<any>("/upload/image", formData);
+
+    return response.url;
+  };
+
   const onSubmit = async (values: CreateProfileValues) => {
     try {
+      let finalAvatarUrl = values.avatarUrl;
+
+      if (imageFile) {
+        setIsUploading(true);
+        try {
+          finalAvatarUrl = await uploadToCloudinary(imageFile);
+          setValue("avatarUrl", finalAvatarUrl);
+        } catch (error) {
+          toast.error("Failed to upload image to Cloudinary");
+          setIsUploading(false);
+          return;
+        }
+        setIsUploading(false);
+      }
+
+      const finalValues = { ...values, avatarUrl: finalAvatarUrl };
+
       if (isEditing && initialData) {
         // 1. Update existing profile
-        await apiClient.patch(`/profiles/${initialData.id}`, values);
-
-        // 2. Trigger cache refresh for the NFC cards to see the updated profile
-        // We can just invalidate the cards query
+        await apiClient.patch(`/profiles/${initialData.id}`, finalValues);
         toast.success("Profile updated successfully!");
       } else {
         // 1. Create new profile
-        const profile = await apiClient.post<any>("/profiles", values);
+        const profile = await apiClient.post<any>("/profiles", finalValues);
 
         // 2. Link the profile to the NFC card
         await updateMutation.mutateAsync({ id: cardId, payload: { profileId: profile.id } });
@@ -66,6 +99,8 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
       toast.error(error.message || `Failed to ${isEditing ? 'update' : 'create'} profile`);
     }
   };
+
+  const isFormLoading = isSubmitting || isUploading;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl mx-auto p-0 bg-transparent">
@@ -112,8 +147,26 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="avatarUrl">Avatar URL (Optional)</Label>
-        <Input id="avatarUrl" {...register("avatarUrl")} placeholder="https://..." className="rounded-none" />
+        <Label htmlFor="avatarFile">Profile Photo (Optional)</Label>
+        <div className="flex items-center gap-4">
+          {(imageFile || initialData?.avatarUrl) && (
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-foreground/10 bg-muted">
+              <img
+                src={imageFile ? URL.createObjectURL(imageFile) : initialData?.avatarUrl || ""}
+                alt="Avatar preview"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
+          <div className="flex-1">
+            <Input
+              id="avatarFile"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </div>
+        </div>
         {errors.avatarUrl && <p className="text-xs text-destructive">{errors.avatarUrl.message}</p>}
       </div>
 
@@ -132,8 +185,8 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
         </div>
       </div>
 
-      <Button type="submit" className="w-full rounded-none font-bold uppercase" disabled={isSubmitting}>
-        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+      <Button type="submit" className="w-full rounded-none font-bold uppercase" disabled={isFormLoading}>
+        {isFormLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         {isEditing ? "Save Changes" : "Create Profile"}
       </Button>
     </form>

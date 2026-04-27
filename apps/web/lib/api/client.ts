@@ -26,14 +26,22 @@ class ApiClient {
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const { method = "GET", body, headers } = options;
+    
+    const isFormData = body instanceof FormData;
+    
+    const requestHeaders: HeadersInit = {
+      ...headers,
+    };
+
+    if (!isFormData) {
+      (requestHeaders as Record<string, string>)["Content-Type"] = "application/json";
+    }
+
     const response = await fetch(createApiUrl(path, this.baseUrl), {
       method,
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers: requestHeaders,
+      body: isFormData ? (body as FormData) : (body ? JSON.stringify(body) : undefined),
       cache: "no-store",
     });
 
