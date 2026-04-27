@@ -1,5 +1,5 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { NfcCard } from '@prisma/client';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { NfcCard, Prisma } from '@prisma/client';
 
 
 import { PrismaService } from '../../shared/database/prisma.service';
@@ -44,13 +44,25 @@ export class NfcCardsService {
     // Remove name from payload before saving
     const { name, ...rest } = payload;
 
-    return this.prisma.nfcCard.create({
-      data: {
-        organizationId: organizationId,
-        ...rest,
-        encodedUrl,
-      },
-    });
+    try {
+      return await this.prisma.nfcCard.create({
+        data: {
+          organizationId: organizationId,
+          ...rest,
+          encodedUrl,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // P2002 is the error code for unique constraint violation
+        if (error.code === 'P2002') {
+          throw new ConflictException(
+            'A card with this hardware ID already exists',
+          );
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -71,6 +83,7 @@ export class NfcCardsService {
 
     return this.prisma.nfcCard.findMany({
       where: { organizationId: organizationId },
+      include: { profile: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -81,12 +94,32 @@ export class NfcCardsService {
    * Throws NotFoundException if the card does not exist.
    */
   async getNfcCardById(id: string): Promise<NfcCard> {
-    const card = await this.prisma.nfcCard.findUnique({ where: { id } });
+    const card = await this.prisma.nfcCard.findUnique({
+      where: { id },
+      include: { profile: true },
+    });
 
     if (!card) {
       throw new NotFoundException(`NFC card with id "${id}" was not found`);
     }
 
     return card;
+  }
+
+  /**
+   * Updates an NFC card by its ID.
+   */
+  async updateNfcCard(id: string, data: Partial<NfcCard>): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findUnique({ where: { id } });
+
+    if (!card) {
+      throw new NotFoundException(`NFC card with id "${id}" was not found`);
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id },
+      data,
+      include: { profile: true },
+    });
   }
 }

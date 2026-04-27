@@ -158,7 +158,7 @@ model Profile {
 model NfcCard {
   id                        String          @id @default(cuid())
 
-  hardwareId                String?         @map("hardware_id") @unique
+  hardwareId                String?         @map("hardware_id")
   cardType                  NfcCardType     @map("card_type")
   encodedUrl                String          @map("encoded_url")
   status                    NfcCardStatus   @default(UNASSIGNED)

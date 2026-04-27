@@ -23,7 +23,7 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { NewNfcCardDialog } from "@/components/dashboard/new-nfc-card-dialog";
+import { NewNfcCardDialog } from "@/components/nfc/new-nfc-card-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -213,19 +213,19 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <SidebarProvider className="flex-1 overflow-hidden" style={{ minHeight: "calc(100svh - 48px)" }}>
           <DashboardSidebar />
           {/* Add mt-12 so the inset starts below the banner */}
-          <SidebarInset className="overflow-x-hidden mt-12 bg-background min-h-[calc(100svh-48px)]">
-            <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-md md:px-5">
+          <SidebarInset className="flex flex-col overflow-hidden mt-12 bg-background h-[calc(100svh-48px)]">
+            <header className="flex-none flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4 md:px-5">
               <div className="flex items-center gap-3">
                 <SidebarTrigger
-                  className="-ml-1 size-8 rounded-md"
+                  className="-ml-1 size-8 rounded-none"
                   aria-label="Toggle sidebar"
                 />
 
                 <div className="h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
 
                 <div className="min-w-0">
-                  <h2 className="truncate text-[13px] font-medium text-foreground">
-                    Overview
+                  <h2 className="truncate text-[13px] font-black uppercase tracking-widest text-foreground">
+                    Management
                   </h2>
                 </div>
               </div>
@@ -235,7 +235,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-md hover:bg-muted"
+                  className="size-8 rounded-none hover:bg-muted"
                   aria-label="Notifications"
                 >
                   <Bell className="size-4" aria-hidden="true" />
@@ -245,9 +245,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
               </div>
             </header>
 
-            <div className="flex-1 px-4 py-8 md:px-6">
+            <main className="flex-1 overflow-y-auto px-4 py-8 md:px-6 min-h-0 scrollbar-hide">
               {children}
-            </div>
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </TooltipProvider>

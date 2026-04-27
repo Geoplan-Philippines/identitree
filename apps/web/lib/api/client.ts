@@ -46,11 +46,33 @@ class ApiClient {
       throw new ApiError(response.status, data, message);
     }
 
+    // If the response follows the standard ApiResponse envelope { statusCode, message, data }
+    // return only the data part to the caller.
+    if (data && typeof data === "object" && "data" in data && "statusCode" in data) {
+      return data.data as T;
+    }
+
     return data as T;
+  }
+
+  get<T>(path: string, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "GET", headers });
   }
 
   post<T>(path: string, body: unknown, headers?: HeadersInit) {
     return this.request<T>(path, { method: "POST", body, headers });
+  }
+
+  put<T>(path: string, body: unknown, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "PUT", body, headers });
+  }
+
+  patch<T>(path: string, body: unknown, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "PATCH", body, headers });
+  }
+
+  delete<T>(path: string, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "DELETE", headers });
   }
 
   private async parseResponse(response: Response): Promise<unknown> {

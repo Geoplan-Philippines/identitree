@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createNfcCard } from "@/lib/services/nfc-cards.service";
+import { useCreateNfcCard } from "@/hooks/use-nfc-cards";
 import { createNfcCardSchema, CreateNfcCardValues } from "@/lib/zod/nfc-cards";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
@@ -12,25 +12,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export function NewNfcCardDialog({ onCreated }: { onCreated?: () => void }) {
   const [open, setOpen] = useState(false);
+  const createMutation = useCreateNfcCard();
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CreateNfcCardValues>({
     resolver: zodResolver(createNfcCardSchema),
     defaultValues: { cardType: "GEOPLAN_ISSUED" },
   });
 
   const onSubmit = async (values: CreateNfcCardValues) => {
-    await createNfcCard(values);
-    setOpen(false);
-    reset();
-    onCreated?.();
+    try {
+      await createMutation.mutateAsync(values);
+      toast.success("NFC card created successfully");
+      setOpen(false);
+      reset();
+      onCreated?.();
+    } catch (error: any) {
+      const message = error.message || "Failed to create NFC card";
+      toast.error(message);
+    }
   };
 
   return (
@@ -74,8 +83,8 @@ export function NewNfcCardDialog({ onCreated }: { onCreated?: () => void }) {
             <DialogClose asChild>
               <Button type="button" variant="ghost">Cancel</Button>
             </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Card"}
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? "Creating..." : "Create Card"}
             </Button>
           </div>
         </form>

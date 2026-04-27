@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors, Patch } from '@nestjs/common';
 import { NfcCard } from '@prisma/client';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -8,6 +8,7 @@ import { ResponseInterceptor } from '../../common/interceptors/response.intercep
 import { NfcCardsService } from './nfc-cards.service';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
 
 @Controller('nfc-cards')
 @UseInterceptors(ResponseInterceptor)
@@ -48,5 +49,17 @@ export class NfcCardsController {
   @Get(':id')
   async getNfcCardById(@Param('id') id: string): Promise<NfcCard> {
     return this.nfcCardsService.getNfcCardById(id);
+  }
+
+  /**
+   * Updates an NFC card by ID.
+   */
+  @RateLimit(20, 60000)
+  @Patch(':id')
+  async updateNfcCard(
+    @Param('id') id: string,
+    @Body() body: UpdateNfcCardDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.updateNfcCard(id, body as any);
   }
 }
