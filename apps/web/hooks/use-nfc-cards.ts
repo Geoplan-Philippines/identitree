@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getNfcCards, createNfcCard, NfcCard, updateNfcCard } from "@/lib/services/nfc-cards.service";
+import { getNfcCards, createNfcCard, NfcCard, updateNfcCard, getPublicProfile } from "@/lib/services/nfc-cards.service";
 
 export function useNfcCards() {
   return useQuery({
@@ -25,6 +25,7 @@ export function useCreateNfcCard() {
     },
   });
 }
+
 export function useUpdateNfcCard() {
   const queryClient = useQueryClient();
 
@@ -38,5 +39,13 @@ export function useUpdateNfcCard() {
         return oldData.map(card => card.id === updatedCard.id ? updatedCard : card);
       });
     },
+  });
+}
+
+export function usePublicProfile(orgSlug: string, profileSlug: string) {
+  return useQuery({
+    queryKey: ["public-profile", orgSlug, profileSlug],
+    queryFn: () => getPublicProfile(orgSlug, profileSlug),
+    enabled: !!orgSlug && !!profileSlug,
   });
 }

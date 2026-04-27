@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
@@ -46,5 +47,17 @@ export class ProfilesController {
     @Body() payload: Partial<Profile>,
   ): Promise<Profile> {
     return this.profilesService.updateProfile(user, id, payload);
+  }
+
+  /**
+   * Retrieves a public profile by organization and profile slug.
+   */
+  @RateLimit(50, 60000)
+  @Get(':orgSlug/:profileSlug')
+  async getProfileBySlug(
+    @Param('orgSlug') orgSlug: string,
+    @Param('profileSlug') profileSlug: string,
+  ): Promise<Profile> {
+    return this.profilesService.getProfileBySlug(orgSlug, profileSlug);
   }
 }

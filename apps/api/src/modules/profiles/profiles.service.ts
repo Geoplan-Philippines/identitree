@@ -94,4 +94,33 @@ export class ProfilesService {
       data: payload,
     });
   }
+
+  /**
+   * Retrieves a public profile by organization slug and profile slug (from NFC card).
+   */
+  async getProfileBySlug(orgSlug: string, profileSlug: string): Promise<Profile> {
+    const profile = await this.prisma.profile.findFirst({
+      where: {
+        organization: {
+          slug: orgSlug,
+        },
+        nfcCards: {
+          some: {
+            encodedUrl: {
+              endsWith: `/${profileSlug}`,
+            },
+          },
+        },
+      },
+      include: {
+        organization: true,
+      },
+    });
+
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+
+    return profile;
+  }
 }

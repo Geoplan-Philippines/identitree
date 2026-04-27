@@ -37,9 +37,19 @@ export class NfcCardsService {
     }
 
 
+    // Fetch organization slug
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { slug: true },
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
     // Generate slug and encodedUrl from name
     const slug = slugify(payload.name);
-    const encodedUrl = `${env.frontendUrl}/dashboard/geoplan/${slug}`;
+    const encodedUrl = `${env.frontendUrl}/${organization.slug}/${slug}`;
 
     // Remove name from payload before saving
     const { name, ...rest } = payload;

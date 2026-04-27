@@ -52,3 +52,8 @@ export async function createNfcCard(payload: CreateNfcCardPayload): Promise<NfcC
 export async function updateNfcCard(id: string, payload: Partial<NfcCard>): Promise<NfcCard> {
   return apiClient.patch<NfcCard>(`/nfc-cards/${id}`, payload);
 }
+
+export async function getPublicProfile(orgSlug: string, profileSlug: string): Promise<Profile> {
+  return apiClient.get<Profile>(`/profiles/${orgSlug}/${profileSlug}`);
+}
+
