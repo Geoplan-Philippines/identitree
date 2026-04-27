@@ -23,7 +23,7 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { NewNfcCardDialog } from "@/components/nfc/new-nfc-card-dialog";
+import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -241,7 +241,14 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   <Bell className="size-4" aria-hidden="true" />
                 </Button>
 
-                <NewNfcCardDialog />
+                <NfcCardDialog
+                  trigger={
+                    <Button>
+                      <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
+                      New card
+                    </Button>
+                  }
+                />
               </div>
             </header>
 

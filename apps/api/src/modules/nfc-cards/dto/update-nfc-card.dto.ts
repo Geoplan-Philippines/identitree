@@ -17,4 +17,8 @@ export class UpdateNfcCardDTO {
   @IsOptional()
   @IsString()
   profileId?: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
 }

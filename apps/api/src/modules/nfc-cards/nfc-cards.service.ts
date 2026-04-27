@@ -5,6 +5,7 @@ import { NfcCard, Prisma } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
+import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
 import { slugify } from './slugify';
 import { env } from '../../configs/env';
 
@@ -119,16 +120,30 @@ export class NfcCardsService {
   /**
    * Updates an NFC card by its ID.
    */
-  async updateNfcCard(id: string, data: Partial<NfcCard>): Promise<NfcCard> {
-    const card = await this.prisma.nfcCard.findUnique({ where: { id } });
+  async updateNfcCard(id: string, data: UpdateNfcCardDTO): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findUnique({ 
+      where: { id },
+      include: { organization: true }
+    });
 
     if (!card) {
       throw new NotFoundException(`NFC card with id "${id}" was not found`);
     }
 
+    const updateData: any = { ...data };
+
+    if (data.name) {
+      if (!card.organization) {
+        throw new NotFoundException('Organization not found for this card');
+      }
+      const slug = slugify(data.name);
+      updateData.encodedUrl = `${env.frontendUrl}/${card.organization.slug}/${slug}`;
+      delete updateData.name;
+    }
+
     return this.prisma.nfcCard.update({
       where: { id },
-      data,
+      data: updateData,
       include: { profile: true },
     });
   }

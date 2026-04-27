@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NfcCard } from "@/lib/services/nfc-cards.service";
 import { NfcProfileView } from "@/components/nfc/nfc-profile-view";
 import { ProfileForm } from "@/components/nfc/profile-form";
+import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ export default function CardsPage() {
   const { data, isLoading, error, refetch } = useNfcCards();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Reset editing state when selection changes
   useEffect(() => {
@@ -158,7 +160,17 @@ export default function CardsPage() {
               </div>
             </div>
             <div className="flex gap-2.5">
-              <Button variant="outline" size="sm">Edit Card</Button>
+              <NfcCardDialog
+                initialData={selectedCard}
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                trigger={
+                  <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+                    Edit Card
+                  </Button>
+                }
+                onSuccess={refetch}
+              />
               <Button variant="destructive" size="sm">Deactivate</Button>
             </div>
           </div>
