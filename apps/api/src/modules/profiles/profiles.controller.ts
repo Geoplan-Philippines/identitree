@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Param,
+  Patch,
   Post,
   UseFilters,
   UseInterceptors,
@@ -34,5 +36,15 @@ export class ProfilesController {
       user,
       payload: createProfileDTO,
     });
+  }
+
+  @RateLimit(20, 60000)
+  @Patch(':id')
+  async updateProfile(
+    @CurrentUser() user: AuthContext,
+    @Param('id') id: string,
+    @Body() payload: Partial<Profile>,
+  ): Promise<Profile> {
+    return this.profilesService.updateProfile(user, id, payload);
   }
 }

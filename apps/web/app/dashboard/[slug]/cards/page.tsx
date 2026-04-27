@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNfcCards } from "@/hooks/use-nfc-cards";
 import { Button } from "@/components/ui/button";
 import { ensureArray } from "@/lib/utils/ensureArray";
@@ -15,6 +15,12 @@ import { cn } from "@/lib/utils";
 export default function CardsPage() {
   const { data, isLoading, error, refetch } = useNfcCards();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Reset editing state when selection changes
+  useEffect(() => {
+    setIsEditing(false);
+  }, [selectedCardId]);
 
   if (isLoading) {
     return (
@@ -71,8 +77,8 @@ export default function CardsPage() {
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Type</span>
                     <span className="font-bold text-sm uppercase">{card.cardType.replace("_", " ")}</span>
                   </div>
-                  <Badge 
-                    variant={card.profile ? "default" : "secondary"} 
+                  <Badge
+                    variant={card.profile ? "default" : "secondary"}
                     className="text-[9px] h-4 rounded-none px-1.5 uppercase font-bold"
                   >
                     {card.profile ? "ASSIGNED" : card.status}
@@ -143,18 +149,29 @@ export default function CardsPage() {
                     <h3 className="text-xs font-black text-foreground uppercase tracking-[0.2em]">Connected Profile</h3>
                   </div>
 
-                  {selectedCard.profile ? (
-                    <div className="bg-background rounded-none border-border shadow-xl overflow-hidden">
-                      <NfcProfileView profile={selectedCard.profile} cardId={selectedCard.id} />
+                  {selectedCard.profile && !isEditing ? (
+                    <div className="bg-background rounded-none overflow-hidden">
+                      <NfcProfileView
+                        profile={selectedCard.profile}
+                        cardId={selectedCard.id}
+                        onEdit={() => setIsEditing(true)}
+                      />
                     </div>
                   ) : (
                     <div className="bg-background rounded-none border-border p-12 flex flex-col items-center justify-center text-center space-y-10 shadow-inner">
-                      <div className="space-y-4">
-                        <h4 className="text-2xl font-black tracking-tight uppercase">Empty Profile</h4>
-                        <p className="text-sm text-muted-foreground max-w-[320px] mx-auto leading-relaxed font-medium">This card is ready for a digital identity. Create a profile below to activate it.</p>
-                      </div>
-                      <div className="w-full pt-12 border-t border-foreground/5">
-                        <ProfileForm cardId={selectedCard.id} />
+                      {!isEditing && (
+                        <div className="space-y-4">
+                          <h4 className="text-2xl font-black tracking-tight uppercase">Empty Profile</h4>
+                          <p className="text-sm text-muted-foreground max-w-[320px] mx-auto leading-relaxed font-medium">This card is ready for a digital identity. Create a profile below to activate it.</p>
+                        </div>
+                      )}
+                      <div className={cn("w-full pt-12", !isEditing && "border-t border-foreground/5")}>
+                        <ProfileForm
+                          cardId={selectedCard.id}
+                          initialData={selectedCard.profile}
+                          onSuccess={() => setIsEditing(false)}
+                          onCancel={selectedCard.profile ? () => setIsEditing(false) : undefined}
+                        />
                       </div>
                     </div>
                   )}

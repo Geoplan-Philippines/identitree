@@ -41,4 +41,42 @@ export class ProfilesService {
       },
     });
   }
+
+  /**
+   * Updates a profile for the authenticated user within their organization.
+   *
+   * Uses the organization context provided by the session.
+   */
+  async updateProfile(
+    user: AuthContext,
+    id: string,
+    payload: Partial<Profile>,
+  ): Promise<Profile> {
+    const { organizationId } = user;
+
+    if (!organizationId) {
+      throw new ForbiddenException(
+        'You must select or create an organization before performing this action',
+      );
+    }
+
+    // Ensure the profile belongs to the user's organization
+    const existingProfile = await this.prisma.profile.findFirst({
+      where: {
+        id,
+        organizationId,
+      },
+    });
+
+    if (!existingProfile) {
+      throw new ForbiddenException(
+        'You do not have permission to update this profile',
+      );
+    }
+
+    return this.prisma.profile.update({
+      where: { id },
+      data: payload,
+    });
+  }
 }
