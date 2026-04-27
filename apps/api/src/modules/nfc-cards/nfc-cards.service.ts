@@ -1,9 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { NfcCard } from '@prisma/client';
 
+
 import { PrismaService } from '../../shared/database/prisma.service';
 import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
+import { slugify } from './slugify';
+import { env } from '../../configs/env';
 
 type CreateNfcCardInput = {
   user: AuthContext;
@@ -33,10 +36,19 @@ export class NfcCardsService {
       );
     }
 
+
+    // Generate slug and encodedUrl from name
+    const slug = slugify(payload.name);
+    const encodedUrl = `${env.frontendUrl}/dashboard/geoplan/${slug}`;
+
+    // Remove name from payload before saving
+    const { name, ...rest } = payload;
+
     return this.prisma.nfcCard.create({
       data: {
         organizationId: organizationId,
-        ...payload,
+        ...rest,
+        encodedUrl,
       },
     });
   }

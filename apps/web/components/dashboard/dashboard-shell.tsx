@@ -23,6 +23,7 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { NewNfcCardDialog } from "@/components/dashboard/new-nfc-card-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -185,8 +186,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <span className="flex items-center gap-2">
           Try Pro for free — <span className="hidden opacity-80 sm:inline text-white/80">our most popular plan for content creators and businesses.</span>
         </span>
-        <Link 
-          href="/pricing" 
+        <Link
+          href="/pricing"
           className="flex h-7 items-center justify-center rounded-full bg-[#E5F5EC]/10 px-3 text-[11px] font-bold text-[#10B981] border border-[#10B981]/20 transition-colors hover:bg-[#10B981]/20 hover:border-[#10B981]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 uppercase tracking-wide"
         >
           <Zap className="mr-1.5 size-[11px] fill-current" aria-hidden="true" />
@@ -227,12 +228,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   <Bell className="size-4" aria-hidden="true" />
                 </Button>
 
-                <Button asChild>
-                  <Link href="#">
-                    <Plus className="size-3.5" aria-hidden="true" />
-                    New card
-                  </Link>
-                </Button>
+                <NewNfcCardDialog />
               </div>
             </header>
 
