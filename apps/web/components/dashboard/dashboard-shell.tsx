@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { logoutAction } from "@/lib/auth/actions";
+import { useParams, usePathname } from "next/navigation";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -53,14 +54,6 @@ type DashboardLink = {
   isActive?: boolean;
 };
 
-const primaryLinks: DashboardLink[] = [
-  { label: "Overview", href: "#", icon: LayoutDashboard, isActive: true },
-  { label: "Cards", href: "#", icon: IdCard },
-  { label: "Contacts", href: "#", icon: ContactRound },
-  { label: "Teams", href: "#", icon: Users },
-  { label: "Templates", href: "#", icon: LayoutTemplate },
-];
-
 const growthLinks: DashboardLink[] = [
   { label: "Analytics", href: "#", icon: BarChart3 },
   { label: "Brand kit", href: "#", icon: Palette },
@@ -69,6 +62,19 @@ const growthLinks: DashboardLink[] = [
 ];
 
 function DashboardSidebar() {
+  const params = useParams();
+  const pathname = usePathname();
+
+  const slug = params?.slug as string;
+
+  const primaryLinks: DashboardLink[] = [
+    { label: "Overview", href: `/dashboard/${slug}`, icon: LayoutDashboard },
+    { label: "Cards", href: `/dashboard/${slug}/cards`, icon: IdCard },
+    { label: "Contacts", href: `/dashboard/${slug}/contacts`, icon: ContactRound },
+    { label: "Teams", href: `/dashboard/${slug}/teams`, icon: Users },
+    { label: "Templates", href: `/dashboard/${slug}/templates`, icon: LayoutTemplate },
+  ];
+
   return (
     <Sidebar collapsible="icon" className="border-r border-border top-12 !h-[calc(100svh-48px)]">
       {/* Hand-rolled header to perfectly match the main header height (h-14) without extra gaps */}
@@ -97,23 +103,30 @@ function DashboardSidebar() {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {primaryLinks.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.isActive}
-                    tooltip={item.label}
-                  >
-                    <Link
-                      href={item.href}
-                      aria-current={item.isActive ? "page" : undefined}
+              {primaryLinks.map((item) => {
+                const isOverview = item.href === `/dashboard/${slug}`;
+                const isActive = isOverview
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(item.href + "/");
+
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
                     >
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <item.icon aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
