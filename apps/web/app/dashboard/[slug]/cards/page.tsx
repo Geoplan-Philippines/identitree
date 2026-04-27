@@ -11,6 +11,8 @@ import { ProfileForm } from "@/components/nfc/profile-form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Copy, MoveLeftIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CardsPage() {
   const { data, isLoading, error, refetch } = useNfcCards();
@@ -97,9 +99,29 @@ export default function CardsPage() {
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Encoded URL</span>
                     <div className="h-px flex-1 bg-border/40" />
                   </div>
-                  <span className="text-[11px] text-foreground font-medium truncate font-mono bg-muted px-2 py-1 border border-border">
-                    {card.encodedUrl}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={card.encodedUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-foreground font-medium truncate font-mono bg-muted px-2 py-1 border border-border flex-1 hover:bg-muted/80 transition-colors cursor-alias"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {card.encodedUrl}
+                    </a>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 rounded-none border border-border hover:bg-muted"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(card.encodedUrl);
+                        toast.success("URL copied to clipboard!");
+                      }}
+                    >
+                      <Copy size={12} />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1 relative z-10">
@@ -121,9 +143,9 @@ export default function CardsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSelectedCardId(null)}
-                className="rounded-none hover:bg-muted w-auto px-2"
+                className="rounded-none hover:bg-muted"
               >
-                <span className="text-xs font-black uppercase">Back</span>
+                <MoveLeftIcon size={20} />
               </Button>
               <div className="space-y-0.5">
                 <h3 className="font-black text-lg tracking-tight uppercase">Card Details</h3>
