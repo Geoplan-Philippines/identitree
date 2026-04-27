@@ -53,10 +53,44 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
 
   if (error || !profile) {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-2xl font-bold">Profile not found</h1>
-        <p className="text-muted-foreground mt-2">The profile you are looking for does not exist or has been moved.</p>
-        <Button className="mt-4" onClick={() => window.location.href = '/'}>Go Home</Button>
+      <div className="min-h-svh flex flex-col items-center justify-center p-6 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]">
+        <div className="w-full max-w-[430px] space-y-12">
+          {/* Card-like container */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative aspect-[1.586/1] rounded-2xl border border-foreground/10 bg-white/80 backdrop-blur-sm p-8 flex flex-col justify-between shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)]"
+          >
+             {/* Decorative element */}
+             <div className="absolute top-0 right-0 p-6 flex items-center gap-2">
+                <div className="size-8 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200">
+                   <Nfc className="size-4 text-slate-400" />
+                </div>
+             </div>
+
+             <div className="space-y-4">
+                <div className="size-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                   <Nfc className="size-6 text-slate-400" />
+                </div>
+                <div>
+                   <h2 className="text-xl font-bold tracking-tight text-slate-900">Card not found</h2>
+                   <p className="mt-1.5 text-sm font-medium text-slate-500 leading-relaxed">
+                      The profile linked to this NFC card is either inactive or doesn't exist.
+                   </p>
+                </div>
+             </div>
+          </motion.div>
+
+          {/* Action button below */}
+          <div className="text-center">
+             <Button 
+                onClick={() => window.location.href = '/'}
+                className="font-bold px-8 h-11"
+             >
+                Go Home
+             </Button>
+          </div>
+        </div>
       </div>
     );
   }

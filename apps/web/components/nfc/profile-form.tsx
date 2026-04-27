@@ -89,9 +89,9 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
         const profile = await apiClient.post<any>("/profiles", finalValues);
 
         // 2. Link the profile to the NFC card
-        await updateMutation.mutateAsync({ id: cardId, payload: { profileId: profile.id } });
+        await updateMutation.mutateAsync({ id: cardId, payload: { profileId: profile.id, status: "ACTIVE" } });
 
-        toast.success("Profile created and linked to card!");
+        toast.success("Profile created and activated!");
       }
 
       onSuccess?.();

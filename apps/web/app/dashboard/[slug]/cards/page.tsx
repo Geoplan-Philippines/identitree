@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNfcCards } from "@/hooks/use-nfc-cards";
+import { useNfcCards, useUpdateNfcCard } from "@/hooks/use-nfc-cards";
 import { Button } from "@/components/ui/button";
 import { ensureArray } from "@/lib/utils/ensureArray";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,9 +14,21 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Copy, MoveLeftIcon } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function CardsPage() {
   const { data, isLoading, error, refetch } = useNfcCards();
+  const updateMutation = useUpdateNfcCard();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -171,7 +183,46 @@ export default function CardsPage() {
                 }
                 onSuccess={refetch}
               />
-              <Button variant="destructive" size="sm">Deactivate</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant={selectedCard.status === "ACTIVE" ? "destructive" : "default"}
+                    size="sm"
+                    disabled={selectedCard.status === "UNASSIGNED" || updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? "Updating..." : (selectedCard.status === "ACTIVE" ? "Deactivate" : "Activate")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-none">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-bold text-lg">
+                      {selectedCard.status === "ACTIVE" ? "Deactivate Card?" : "Activate Card?"}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="font-medium text-slate-600">
+                      {selectedCard.status === "ACTIVE"
+                        ? "This will hide your profile from the public. You can reactivate it anytime."
+                        : "This will make your profile visible to anyone who scans your card."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-none border border-black font-bold uppercase">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className={cn(
+                        "rounded-none font-bold uppercase",
+                        selectedCard.status === "ACTIVE" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
+                      )}
+                      onClick={async () => {
+                        const newStatus = selectedCard.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+                        await updateMutation.mutateAsync({ id: selectedCard.id, payload: { status: newStatus as any } });
+                        toast.success(`Card ${newStatus.toLowerCase()}d!`);
+                        refetch();
+                      }}
+                    >
+                      Confirm
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 

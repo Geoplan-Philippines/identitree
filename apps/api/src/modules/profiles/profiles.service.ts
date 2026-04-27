@@ -109,6 +109,7 @@ export class ProfilesService {
             encodedUrl: {
               endsWith: `/${profileSlug}`,
             },
+            status: "ACTIVE",
           },
         },
       },

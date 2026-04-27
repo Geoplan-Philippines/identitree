@@ -28,11 +28,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="antialiased bg-background text-foreground overflow-x-hidden">
         <TanstackQueryProvider>
-          <AuthProvider>
-            <Header />
-            <Toaster position="top-right" closeButton richColors />
-            {children}
-          </AuthProvider>
+          <Header />
+          <Toaster position="top-right" closeButton richColors />
+          {children}
         </TanstackQueryProvider>
       </body>
     </html>
