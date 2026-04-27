@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Copy, MoveLeftIcon } from "lucide-react";
 import { toast } from "sonner";
+import { CardFilters } from "@/components/nfc/card-filters";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,8 @@ export default function CardsPage() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   // Reset editing state when selection changes
   useEffect(() => {
@@ -50,6 +53,20 @@ export default function CardsPage() {
   if (error) return <p className="text-red-500">Failed to load cards.</p>;
 
   const cards = ensureArray(data) as NfcCard[];
+
+  const filteredCards = cards.filter((card) => {
+    const matchesSearch = 
+      card.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.hardwareId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.profile?.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.profile?.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.cardType.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus = statusFilter === "ALL" || card.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   const selectedCard = cards.find((c) => c.id === selectedCardId) || null;
 
   if (cards.length === 0) {
@@ -63,21 +80,25 @@ export default function CardsPage() {
         "transition-all duration-300 flex flex-col gap-4",
         selectedCardId ? "w-80" : "w-full"
       )}>
-        <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-black tracking-tight uppercase">NFC Cards</h2>
-            <Badge variant="secondary" className="rounded-none px-2 py-0.5 text-[10px] font-bold">
-              {cards.length}
-            </Badge>
-          </div>
-        </div>
+        <CardFilters 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          count={filteredCards.length}
+        />
 
         <ScrollArea className="flex-1 pr-4 min-h-0">
           <div className={cn(
             "grid gap-5 pb-16",
             selectedCardId ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           )}>
-            {cards.map((card) => (
+            {filteredCards.length === 0 ? (
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-muted rounded-none">
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No matching cards</p>
+              </div>
+            ) : (
+              filteredCards.map((card) => (
               <div
                 key={card.id}
                 className={cn(
@@ -143,7 +164,7 @@ export default function CardsPage() {
                   <span className="text-[11px] font-mono text-muted-foreground font-bold">{card.hardwareId || "N/A"}</span>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </ScrollArea>
       </div>
