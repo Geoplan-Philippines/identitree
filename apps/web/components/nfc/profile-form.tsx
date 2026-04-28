@@ -115,7 +115,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name</Label>
           <Input id="firstName" {...register("firstName")} placeholder="John" className="rounded-none" />
@@ -170,18 +170,21 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
         {errors.avatarUrl && <p className="text-xs text-destructive">{errors.avatarUrl.message}</p>}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="linkedinUsername">LinkedIn (Optional)</Label>
           <Input id="linkedinUsername" {...register("linkedinUsername")} placeholder="johndoe" className="rounded-none" />
+          {errors.linkedinUsername && <p className="text-xs text-destructive">{errors.linkedinUsername.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="whatsappNumber">WhatsApp (Optional)</Label>
-          <Input id="whatsappNumber" {...register("whatsappNumber")} placeholder="1234567890" className="rounded-none" />
+          <Input id="whatsappNumber" {...register("whatsappNumber")} placeholder="09123456789" className="rounded-none" />
+          {errors.whatsappNumber && <p className="text-xs text-destructive">{errors.whatsappNumber.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="viberNumber">Viber (Optional)</Label>
-          <Input id="viberNumber" {...register("viberNumber")} placeholder="1234567890" className="rounded-none" />
+          <Input id="viberNumber" {...register("viberNumber")} placeholder="09123456789" className="rounded-none" />
+          {errors.viberNumber && <p className="text-xs text-destructive">{errors.viberNumber.message}</p>}
         </div>
       </div>
 

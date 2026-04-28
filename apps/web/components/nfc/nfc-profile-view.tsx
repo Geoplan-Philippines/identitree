@@ -19,8 +19,6 @@ function Field({
   value?: string | null;
   icon?: any;
 }) {
-  if (!value) return null;
-
   return (
     <div className="flex items-start gap-3">
       {Icon && (
@@ -28,11 +26,13 @@ function Field({
           <Icon size={16} />
         </div>
       )}
-      <div className="space-y-1">
+      <div className="space-y-1 min-w-0">
         <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
           {label}
         </p>
-        <p className="text-sm font-semibold break-words">{value}</p>
+        <p className="text-sm font-semibold break-all">
+          {value || <span className="text-muted-foreground/50 italic">Not provided</span>}
+        </p>
       </div>
     </div>
   );
@@ -44,8 +44,8 @@ export function NfcProfileView({
   onEdit,
 }: NfcProfileViewProps) {
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
-      <div className="p-6 space-y-6">
+    <div className="max-w-xl mx-auto sm:px-4 py-6">
+      <div className="sm:p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -112,33 +112,29 @@ export function NfcProfileView({
         )}
 
         {/* Socials */}
-        {(profile.linkedinUsername ||
-          profile.whatsappNumber ||
-          profile.viberNumber) && (
-            <div className="pt-4 border-t space-y-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
-                Social & Messaging
-              </p>
+        <div className="pt-4 border-t space-y-4">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+            Social & Messaging
+          </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Field
-                  label="LinkedIn"
-                  value={profile.linkedinUsername}
-                  icon={LinkIcon}
-                />
-                <Field
-                  label="WhatsApp"
-                  value={profile.whatsappNumber}
-                  icon={Phone}
-                />
-                <Field
-                  label="Viber"
-                  value={profile.viberNumber}
-                  icon={Phone}
-                />
-              </div>
-            </div>
-          )}
+          <div className="flex flex-col gap-4">
+            <Field
+              label="LinkedIn"
+              value={profile.linkedinUsername}
+              icon={LinkIcon}
+            />
+            <Field
+              label="WhatsApp"
+              value={profile.whatsappNumber}
+              icon={Phone}
+            />
+            <Field
+              label="Viber"
+              value={profile.viberNumber}
+              icon={Phone}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
