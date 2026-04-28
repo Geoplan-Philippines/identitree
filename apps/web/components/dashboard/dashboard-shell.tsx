@@ -40,8 +40,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { logoutAction } from "@/lib/auth/actions";
-import { useParams, usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -64,6 +64,7 @@ const growthLinks: DashboardLink[] = [
 function DashboardSidebar() {
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
 
   const slug = params?.slug as string;
 
@@ -161,12 +162,16 @@ function DashboardSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <form action={logoutAction}>
-              <SidebarMenuButton type="submit" tooltip="Log out">
-                <LogOut aria-hidden="true" />
-                <span>Log out</span>
-              </SidebarMenuButton>
-            </form>
+            <SidebarMenuButton 
+              tooltip="Log out"
+              onClick={async () => {
+                await authClient.signOut();
+                router.push("/login");
+              }}
+            >
+              <LogOut aria-hidden="true" />
+              <span>Log out</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="Account">
