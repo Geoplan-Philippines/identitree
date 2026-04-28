@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
+  Patch,
   Post,
   UseFilters,
   UseInterceptors,
@@ -34,5 +37,27 @@ export class ProfilesController {
       user,
       payload: createProfileDTO,
     });
+  }
+
+  @RateLimit(20, 60000)
+  @Patch(':id')
+  async updateProfile(
+    @CurrentUser() user: AuthContext,
+    @Param('id') id: string,
+    @Body() payload: Partial<Profile>,
+  ): Promise<Profile> {
+    return this.profilesService.updateProfile(user, id, payload);
+  }
+
+  /**
+   * Retrieves a public profile by organization and profile slug.
+   */
+  @RateLimit(50, 60000)
+  @Get(':orgSlug/:profileSlug')
+  async getProfileBySlug(
+    @Param('orgSlug') orgSlug: string,
+    @Param('profileSlug') profileSlug: string,
+  ): Promise<Profile> {
+    return this.profilesService.getProfileBySlug(orgSlug, profileSlug);
   }
 }

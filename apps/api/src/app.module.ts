@@ -8,6 +8,7 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
 import { PrismaService } from './shared/database/prisma.service';
 import { NfcCardsModule } from './modules/nfc-cards/nfc-cards.module';
 import { RateLimitModule } from './common/decorators/rate-limit.decorator';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RateLimitModule } from './common/decorators/rate-limit.decorator';
     ProfilesModule,
     NfcCardsModule,
     RateLimitModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
