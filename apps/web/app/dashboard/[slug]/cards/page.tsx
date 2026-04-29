@@ -12,7 +12,8 @@ import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Copy, MoveLeftIcon } from "lucide-react";
+import { Copy, MoveLeftIcon, QrCode } from "lucide-react";
+import { downloadQrCode } from "@/lib/utils/qr-code";
 import { toast } from "sonner";
 import { CardFilters } from "@/components/nfc/card-filters";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -157,6 +158,25 @@ export default function CardsPage() {
                         }}
                       >
                         <Copy size={12} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 rounded-none border border-border hover:bg-muted"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try {
+                            const qrUrl = new URL(card.encodedUrl);
+                            qrUrl.searchParams.set("ref", "qr");
+                            downloadQrCode(qrUrl.toString(), `card-${card.id}-qr.png`);
+                            toast.success("QR Code downloaded!");
+                          } catch (err) {
+                            console.error("Invalid URL", err);
+                            toast.error("Failed to generate QR Code");
+                          }
+                        }}
+                      >
+                        <QrCode size={12} />
                       </Button>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, type KeyboardEvent } from "react";
+import { use, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { motion } from "motion/react";
 import {
   ArrowUpRight,
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePublicProfile } from "@/hooks/use-nfc-cards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { analyticsService, type AnalyticsChannel } from "@/lib/services/analytics.service";
 
 type PublicProfilePageProps = {
   params: Promise<{ slug: string; profileSlug: string }>;
@@ -39,6 +40,26 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
   const { slug, profileSlug } = use(params);
   const { data: profile, isLoading, error } = usePublicProfile(slug, profileSlug);
   const [isFlipped, setIsFlipped] = useState(false);
+  const hasTrackedView = useRef(false);
+
+  const getChannel = (): AnalyticsChannel => {
+    if (typeof window === "undefined") return "DIRECT_LINK";
+    const search = window.location.search.toLowerCase();
+    if (search.includes("qr")) return "QR_SCAN";
+    if (search.includes("nfc")) return "NFC_TAP";
+    return "DIRECT_LINK";
+  };
+
+  useEffect(() => {
+    if (profile?.id && !hasTrackedView.current) {
+      hasTrackedView.current = true;
+      analyticsService.trackEvent({
+        profileId: profile.id,
+        eventType: "PROFILE_VIEW",
+        channel: getChannel(),
+      }).catch(console.error);
+    }
+  }, [profile?.id]);
 
   if (isLoading) {
     return (
@@ -326,7 +347,17 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
               size="lg"
               className="h-12 w-full rounded-md shadow-[0_16px_35px_rgba(15,23,42,0.14)]"
             >
-              <a href={vCardHref} download={`${profile.firstName}-${profile.lastName}.vcf`}>
+              <a 
+                href={vCardHref} 
+                download={`${profile.firstName}-${profile.lastName}.vcf`}
+                onClick={() => {
+                  analyticsService.trackEvent({
+                    profileId: profile.id,
+                    eventType: "SAVE_CONTACT",
+                    channel: getChannel(),
+                  }).catch(console.error);
+                }}
+              >
                 <Download className="size-4" aria-hidden="true" />
                 Save Contact
               </a>
