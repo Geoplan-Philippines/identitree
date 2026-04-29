@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Post,
   UploadedFile,
@@ -14,8 +15,11 @@ export class UploadController {
 
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const result = await this.cloudinaryService.uploadImage(file);
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('folder') folder?: string,
+  ) {
+    const result = await this.cloudinaryService.uploadImage(file, folder);
     return {
       url: result.secure_url,
       publicId: result.public_id,
