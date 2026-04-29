@@ -1,6 +1,7 @@
-import { Body, Controller, Ip, Post } from '@nestjs/common';
+import { Body, Controller, Get, Ip, Param, Post } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { CreateAnalyticsEventDto } from './dto/create-analytics-event.dto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -21,5 +22,11 @@ export class AnalyticsController {
       // We'll throw the error directly which Nest will map to 500/404 based on the exception type.
       throw error;
     }
+  }
+
+  @RateLimit(20, 60000)
+  @Get('stats/:slug')
+  async getStats(@Param('slug') slug: string) {
+    return this.analyticsService.getStatsBySlug(slug);
   }
 }

@@ -54,12 +54,7 @@ type DashboardLink = {
   isActive?: boolean;
 };
 
-const growthLinks: DashboardLink[] = [
-  { label: "Analytics", href: "#", icon: BarChart3 },
-  { label: "Brand kit", href: "#", icon: Palette },
-  { label: "NFC devices", href: "#", icon: Nfc },
-  { label: "Billing", href: "#", icon: CreditCard },
-];
+
 
 function DashboardSidebar() {
   const params = useParams();
@@ -74,6 +69,13 @@ function DashboardSidebar() {
     { label: "Contacts", href: `/dashboard/${slug}/contacts`, icon: ContactRound },
     { label: "Teams", href: `/dashboard/${slug}/teams`, icon: Users },
     { label: "Templates", href: `/dashboard/${slug}/templates`, icon: LayoutTemplate },
+  ];
+
+  const growthLinks: DashboardLink[] = [
+    { label: "Analytics", href: `/dashboard/${slug}/analytics`, icon: BarChart3 },
+    { label: "Brand kit", href: "#", icon: Palette },
+    { label: "NFC devices", href: "#", icon: Nfc },
+    { label: "Billing", href: "#", icon: CreditCard },
   ];
 
   return (
@@ -136,16 +138,24 @@ function DashboardSidebar() {
           <SidebarGroupLabel>Growth</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {growthLinks.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild tooltip={item.label}>
-                    <Link href={item.href}>
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {growthLinks.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

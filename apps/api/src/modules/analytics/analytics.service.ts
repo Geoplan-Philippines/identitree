@@ -51,6 +51,85 @@ export class AnalyticsService {
     });
   }
 
+  async getStatsBySlug(slug: string) {
+    const org = await this.prisma.organization.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+
+    if (!org) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where: {
+        organizationId: org.id,
+        occurredAt: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      select: {
+        eventType: true,
+        channel: true,
+        occurredAt: true,
+      },
+      orderBy: {
+        occurredAt: 'asc',
+      },
+    });
+
+    // Process events into daily stats
+    const statsMap = new Map<string, { 
+      date: string; 
+      views: number; 
+      saves: number;
+      nfc: number;
+      qr: number;
+      direct: number;
+    }>();
+
+    // Initialize the last 30 days
+    for (let i = 0; i < 30; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0];
+      statsMap.set(dateKey, { 
+        date: dateKey, 
+        views: 0, 
+        saves: 0,
+        nfc: 0,
+        qr: 0,
+        direct: 0,
+      });
+    }
+
+    events.forEach((event) => {
+      const dateKey = event.occurredAt.toISOString().split('T')[0];
+      const dayStat = statsMap.get(dateKey);
+      if (dayStat) {
+        if (event.eventType === 'PROFILE_VIEW') {
+          dayStat.views++;
+        } else if (event.eventType === 'SAVE_CONTACT') {
+          dayStat.saves++;
+        }
+
+        if (event.channel === 'NFC_TAP') {
+          dayStat.nfc++;
+        } else if (event.channel === 'QR_SCAN') {
+          dayStat.qr++;
+        } else if (event.channel === 'DIRECT_LINK') {
+          dayStat.direct++;
+        }
+      }
+    });
+
+    return Array.from(statsMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+
   private async getLocationFromIp(ip: string): Promise<{ country: string; city: string } | null> {
     if (!ip || ip === '127.0.0.1' || ip === '::1') return null;
     try {

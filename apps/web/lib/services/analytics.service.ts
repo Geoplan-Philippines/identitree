@@ -34,6 +34,17 @@ class AnalyticsService {
       body: payload,
     });
   }
+
+  async getStats(slug: string) {
+    return apiClient.request<{ 
+      date: string; 
+      views: number; 
+      saves: number;
+      nfc: number;
+      qr: number;
+      direct: number;
+    }[]>(`/analytics/stats/${slug}`);
+  }
 }
 
 export const analyticsService = new AnalyticsService();
