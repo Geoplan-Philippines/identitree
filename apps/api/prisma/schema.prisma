@@ -101,6 +101,7 @@ model Organization {
   profiles                  Profile[]
   nfcCards                  NfcCard[]
   invitations               Invitation[]
+  analyticsEvents           AnalyticsEvent[]
 
   @@map("organization")
 }
@@ -148,6 +149,7 @@ model Profile {
   // template               Template        @relation(fields: [templateId], references: [id])
 
   nfcCards                   NfcCard[]
+  analyticsEvents           AnalyticsEvent[]
 
   createdAt                 DateTime        @default(now()) @map("created_at")
   updatedAt                 DateTime        @updatedAt @map("updated_at")
@@ -168,6 +170,8 @@ model NfcCard {
 
   profileId                 String?         @map("profile_id")
   profile                   Profile?        @relation(fields: [profileId], references: [id])
+
+  analyticsEvents           AnalyticsEvent[]
 
   createdAt                 DateTime        @default(now()) @map("created_at")
   updatedAt                 DateTime        @updatedAt @map("updated_at")
@@ -205,6 +209,35 @@ model Invitation {
   @@map("invitation")
 }
 
+model AnalyticsEvent {
+  id                        String             @id @default(cuid())
+
+  organizationId            String             @map("organization_id")
+  organization              Organization       @relation(fields: [organizationId], references: [id])
+
+  profileId                 String             @map("profile_id")
+  profile                   Profile            @relation(fields: [profileId], references: [id])
+
+  nfcCardId                 String?            @map("nfc_card_id")
+  nfcCard                   NfcCard?           @relation(fields: [nfcCardId], references: [id])
+
+  eventType                 AnalyticsEventType @map("event_type")
+  channel                   AnalyticsChannel
+
+  occurredAt                DateTime           @default(now()) @map("occurred_at")
+  visitorIp                 String?            @map("visitor_ip")
+  country                   String?
+  city                      String?
+
+  createdAt                 DateTime           @default(now()) @map("created_at")
+  updatedAt                 DateTime           @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@index([profileId])
+  @@index([nfcCardId])
+  @@map("analytics_event")
+}
+
 enum NfcCardType {
   GEOPLAN_ISSUED
   CUSTOMER_OWNED
@@ -217,4 +250,15 @@ enum NfcCardStatus {
   INACTIVE
   LOST
   REPLACED
+}
+
+enum AnalyticsChannel {
+  NFC_TAP
+  QR_SCAN
+  DIRECT_LINK
+}
+
+enum AnalyticsEventType {
+  PROFILE_VIEW
+  SAVE_CONTACT
 }
