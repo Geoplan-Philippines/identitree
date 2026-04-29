@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { CardFilters } from "@/components/nfc/card-filters";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -147,37 +148,48 @@ export default function CardsPage() {
                       >
                         {card.encodedUrl}
                       </a>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 rounded-none border border-border hover:bg-muted"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(card.encodedUrl);
-                          toast.success("URL copied to clipboard!");
-                        }}
-                      >
-                        <Copy size={12} />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 rounded-none border border-border hover:bg-muted"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          try {
-                            const qrUrl = new URL(card.encodedUrl);
-                            qrUrl.searchParams.set("ref", "qr");
-                            downloadQrCode(qrUrl.toString(), `card-${card.id}-qr.png`);
-                            toast.success("QR Code downloaded!");
-                          } catch (err) {
-                            console.error("Invalid URL", err);
-                            toast.error("Failed to generate QR Code");
-                          }
-                        }}
-                      >
-                        <QrCode size={12} />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 rounded-none border border-border hover:bg-muted"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(card.encodedUrl);
+                              toast.success("URL copied to clipboard!");
+                            }}
+                          >
+                            <Copy size={12} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Copy URL</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 rounded-none border border-border hover:bg-muted"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              try {
+                                const qrUrl = new URL(card.encodedUrl);
+                                qrUrl.searchParams.set("ref", "qr");
+                                downloadQrCode(qrUrl.toString(), `card-${card.id}-qr.png`);
+                                toast.success("QR Code downloaded!");
+                              } catch (err) {
+                                console.error("Invalid URL", err);
+                                toast.error("Failed to generate QR Code");
+                              }
+                            }}
+                          >
+                            <QrCode size={12} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Download QR Code</TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
 
