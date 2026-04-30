@@ -47,7 +47,7 @@ export class AuthController {
   }
 
   // Let Better Auth handle all auth routes
-  @RateLimit(60, 60000)
+  // @RateLimit(60, 60000)
   @All('*')
   handler(@Req() req: Request, @Res() res: Response): unknown {
     return this.nodeAuthHandler(req, res);
