@@ -35,7 +35,16 @@ class AnalyticsService {
     });
   }
 
-  async getStats(slug: string) {
+  async getStats(slug: string, filters: { from?: string; to?: string; profileId?: string; channel?: AnalyticsChannel } = {}) {
+    const params = new URLSearchParams();
+    if (filters.from) params.append("from", filters.from);
+    if (filters.to) params.append("to", filters.to);
+    if (filters.profileId) params.append("profileId", filters.profileId);
+    if (filters.channel) params.append("channel", filters.channel);
+
+    const queryString = params.toString();
+    const url = `/analytics/stats/${slug}${queryString ? `?${queryString}` : ""}`;
+
     return apiClient.request<{ 
       date: string; 
       views: number; 
@@ -43,7 +52,7 @@ class AnalyticsService {
       nfc: number;
       qr: number;
       direct: number;
-    }[]>(`/analytics/stats/${slug}`);
+    }[]>(url);
   }
 }
 

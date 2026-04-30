@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Ip, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Ip, Param, Post, Query } from '@nestjs/common';
+import { AnalyticsChannel } from '@prisma/client';
 import { AnalyticsService } from './analytics.service';
 import { CreateAnalyticsEventDto } from './dto/create-analytics-event.dto';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
@@ -26,7 +27,13 @@ export class AnalyticsController {
 
   @RateLimit(20, 60000)
   @Get('stats/:slug')
-  async getStats(@Param('slug') slug: string) {
-    return this.analyticsService.getStatsBySlug(slug);
+  async getStats(
+    @Param('slug') slug: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('profileId') profileId?: string,
+    @Query('channel') channel?: AnalyticsChannel,
+  ) {
+    return this.analyticsService.getStatsBySlug(slug, { from, to, profileId, channel });
   }
 }

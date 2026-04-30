@@ -124,4 +124,18 @@ export class ProfilesService {
 
     return profile;
   }
+
+  /**
+   * Retrieves all profiles for a given organization.
+   */
+  async getProfilesByOrganization(organizationId: string): Promise<Profile[]> {
+    return this.prisma.profile.findMany({
+      where: {
+        organizationId,
+      },
+      orderBy: {
+        lastName: 'asc',
+      },
+    });
+  }
 }

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { AnalyticsChannel } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { CreateAnalyticsEventDto } from './dto/create-analytics-event.dto';
 
@@ -51,7 +52,15 @@ export class AnalyticsService {
     });
   }
 
-  async getStatsBySlug(slug: string) {
+  async getStatsBySlug(
+    slug: string, 
+    filters: { 
+      from?: string; 
+      to?: string; 
+      profileId?: string; 
+      channel?: AnalyticsChannel 
+    } = {}
+  ) {
     const org = await this.prisma.organization.findUnique({
       where: { slug },
       select: { id: true },
@@ -61,16 +70,31 @@ export class AnalyticsService {
       throw new NotFoundException('Organization not found');
     }
 
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const endDate = filters.to ? new Date(filters.to) : new Date();
+    const startDate = filters.from ? new Date(filters.from) : new Date();
+    
+    if (!filters.from) {
+      startDate.setDate(endDate.getDate() - 30);
+    }
+
+    const where: any = {
+      organizationId: org.id,
+      occurredAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    if (filters.profileId) {
+      where.profileId = filters.profileId;
+    }
+
+    if (filters.channel) {
+      where.channel = filters.channel;
+    }
 
     const events = await this.prisma.analyticsEvent.findMany({
-      where: {
-        organizationId: org.id,
-        occurredAt: {
-          gte: thirtyDaysAgo,
-        },
-      },
+      where,
       select: {
         eventType: true,
         channel: true,
@@ -91,11 +115,15 @@ export class AnalyticsService {
       direct: number;
     }>();
 
-    // Initialize the last 30 days
-    for (let i = 0; i < 30; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateKey = d.toISOString().split('T')[0];
+    // Initialize the range
+    const current = new Date(startDate);
+    // Set to start of day to avoid issues with time comparison
+    current.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    while (current.getTime() <= end.getTime()) {
+      const dateKey = current.toISOString().split('T')[0];
       statsMap.set(dateKey, { 
         date: dateKey, 
         views: 0, 
@@ -104,6 +132,7 @@ export class AnalyticsService {
         qr: 0,
         direct: 0,
       });
+      current.setDate(current.getDate() + 1);
     }
 
     events.forEach((event) => {
