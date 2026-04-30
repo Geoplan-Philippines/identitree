@@ -14,6 +14,17 @@ export class CloudinaryService {
         (error, result) => {
           if (error) return reject(error);
           if (!result) return reject(new Error('Cloudinary upload failed: No result returned'));
+
+          const url = result.secure_url;
+          const uploadToken = '/upload/';
+          const uploadIndex = url.indexOf(uploadToken);
+
+          if (uploadIndex !== -1) {
+            const before = url.substring(0, uploadIndex + uploadToken.length);
+            const after = url.substring(uploadIndex + uploadToken.length);
+            result.secure_url = `${before}f_auto,q_auto/${after}`;
+          }
+
           resolve(result);
         }
       );
