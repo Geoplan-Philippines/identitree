@@ -251,8 +251,8 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
                   </div>
 
                   <div className="relative flex h-full flex-col justify-between">
-                    <div>
-                      <p className="text-lg font-semibold leading-none text-foreground">
+                    <div className="pr-24 sm:pr-32">
+                      <p className="text-lg font-semibold leading-none text-foreground break-words">
                         {profile.firstName} {profile.lastName}
                       </p>
                       <p className="mt-2 text-xs font-medium text-muted-foreground">
