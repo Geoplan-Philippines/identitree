@@ -110,7 +110,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
   return (
     <div className="space-y-6">
       {/* Filters Bar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 rounded-xl border bg-card/50 backdrop-blur-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 rounded-none border bg-card/50 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 ml-1">
@@ -186,7 +186,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2">
           {/* ... skeletons ... */}
-          <Card className="rounded-xl overflow-hidden">
+          <Card className="rounded-none overflow-hidden">
             <CardHeader>
               <Skeleton className="h-5 w-40 mb-2" />
               <Skeleton className="h-4 w-60" />
@@ -195,7 +195,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
               <Skeleton className="h-[300px] w-full" />
             </CardContent>
           </Card>
-          <Card className="rounded-xl overflow-hidden">
+          <Card className="rounded-none overflow-hidden">
             <CardHeader>
               <Skeleton className="h-5 w-40 mb-2" />
               <Skeleton className="h-4 w-60" />
@@ -206,7 +206,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
           </Card>
         </div>
       ) : error || !data ? (
-        <div className="h-[400px] flex items-center justify-center border border-dashed rounded-xl bg-muted/50">
+        <div className="h-[400px] flex items-center justify-center border border-dashed rounded-none bg-muted/50">
           <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest">Failed to load analytics data</p>
         </div>
       ) : (
@@ -215,7 +215,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
           isFetching && "opacity-60 pointer-events-none"
         )}>
           {/* Interaction Chart */}
-          <Card className="rounded-xl overflow-hidden">
+          <Card className="rounded-none overflow-hidden">
             <CardHeader>
               <CardTitle className="text-base font-semibold">Engagement Activity</CardTitle>
               <CardDescription>Daily views and contact saves</CardDescription>
@@ -264,7 +264,7 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
           </Card>
 
           {/* Channel Breakdown */}
-          <Card className="rounded-xl overflow-hidden">
+          <Card className="rounded-none overflow-hidden">
             <CardHeader>
               <CardTitle className="text-base font-semibold">Acquisition Source</CardTitle>
               <CardDescription>Breakdown by entry point</CardDescription>

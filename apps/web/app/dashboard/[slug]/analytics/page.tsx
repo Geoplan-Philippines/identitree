@@ -10,17 +10,16 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
   await requireOrganizationAccess(slug);
 
   return (
-    <section className="main-container space-y-8 py-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold text-foreground tracking-tight uppercase font-black">Analytics</h1>
-        <p className="text-sm text-muted-foreground font-medium">
-          Monitor your organization's digital reach and engagement.
-        </p>
+    <div className="flex flex-col gap-6 p-1">
+      <div className="flex flex-col gap-4 px-2">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-black tracking-tight uppercase">Analytics</h1>
+        </div>
       </div>
 
       <div className="grid gap-6">
         <AnalyticsChart slug={slug} />
       </div>
-    </section>
+    </div>
   );
 }
