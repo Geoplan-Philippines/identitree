@@ -74,8 +74,12 @@ export class AnalyticsService {
     const startDate = filters.from ? new Date(filters.from) : new Date();
     
     if (!filters.from) {
-      startDate.setDate(endDate.getDate() - 30);
+      startDate.setUTCDate(endDate.getUTCDate() - 30);
     }
+
+    // Adjust boundaries to cover the entire start and end days in UTC
+    startDate.setUTCHours(0, 0, 0, 0);
+    endDate.setUTCHours(23, 59, 59, 999);
 
     const where: any = {
       organizationId: org.id,
@@ -117,10 +121,9 @@ export class AnalyticsService {
 
     // Initialize the range
     const current = new Date(startDate);
-    // Set to start of day to avoid issues with time comparison
-    current.setHours(0, 0, 0, 0);
+    current.setUTCHours(0, 0, 0, 0);
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     while (current.getTime() <= end.getTime()) {
       const dateKey = current.toISOString().split('T')[0];
@@ -132,7 +135,7 @@ export class AnalyticsService {
         qr: 0,
         direct: 0,
       });
-      current.setDate(current.getDate() + 1);
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     events.forEach((event) => {
