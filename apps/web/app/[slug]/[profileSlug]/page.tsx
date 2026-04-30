@@ -125,7 +125,12 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
       icon: MessageCircle,
       external: true,
     },
-    { label: "Call", href: `tel:${profile.contactNumber}`, icon: Phone },
+    { 
+      label: "Viber", 
+      href: profile.viberNumber ? `viber://contact?number=${profile.viberNumber.replace(/\D/g, "")}` : `viber://contact?number=${profile.contactNumber.replace(/\D/g, "")}`, 
+      icon: Phone,
+      external: true
+    },
     {
       label: "LinkedIn",
       href: profile.linkedinUsername ? (profile.linkedinUsername.startsWith("http") ? profile.linkedinUsername : `https://linkedin.com/in/${profile.linkedinUsername}`) : "#",
@@ -133,7 +138,7 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
       external: true,
     },
     { label: "Email", href: `mailto:${profile.email}`, icon: Mail },
-  ].filter(action => action.href !== "#");
+  ].filter(action => action.href !== "#" && !action.href.endsWith("null"));
 
   const vCard = [
     "BEGIN:VCARD",
@@ -143,6 +148,11 @@ export default function PublicProfilePage({ params }: PublicProfilePageProps) {
     `ORG:${(profile as any).organization?.name || "Identitree"}`,
     `TITLE:${profile.positionTitle}`,
     `TEL;TYPE=CELL:${profile.contactNumber}`,
+    `TEL;TYPE=Viber:${profile.viberNumber || profile.contactNumber}`,
+    `item1.TEL:${profile.viberNumber || profile.contactNumber}`,
+    `item1.X-ABLabel:Viber`,
+    `item2.URL:viber://contact?number=${(profile.viberNumber || profile.contactNumber).replace(/\D/g, "")}`,
+    `item2.X-ABLabel:Viber Link`,
     `EMAIL:${profile.email}`,
     "END:VCARD",
   ].join("\n");
