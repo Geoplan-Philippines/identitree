@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -47,6 +48,18 @@ export class ProfilesController {
     @Body() payload: Partial<Profile>,
   ): Promise<Profile> {
     return this.profilesService.updateProfile(user, id, payload);
+  }
+
+  /**
+   * Retrieves all profiles for the user's organization.
+   */
+  @RateLimit(20, 60000)
+  @Get()
+  async getProfiles(@CurrentUser() user: AuthContext): Promise<Profile[]> {
+    if (!user.organizationId) {
+      throw new ForbiddenException('No organization selected');
+    }
+    return this.profilesService.getProfilesByOrganization(user.organizationId);
   }
 
   /**

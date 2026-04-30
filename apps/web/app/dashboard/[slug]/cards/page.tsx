@@ -9,6 +9,7 @@ import { NfcCard } from "@/lib/services/nfc-cards.service";
 import { NfcProfileView } from "@/components/nfc/nfc-profile-view";
 import { ProfileForm } from "@/components/nfc/profile-form";
 import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
+import { QrCodeTooltipContent } from "@/components/nfc/qr-code-tooltip-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -188,7 +189,9 @@ export default function CardsPage() {
                             <QrCode size={12} />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Download QR Code</TooltipContent>
+                        <TooltipContent className="p-2 border-border shadow-lg">
+                          <QrCodeTooltipContent url={card.encodedUrl} />
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                   </div>
