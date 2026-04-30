@@ -1,11 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getNfcCards, createNfcCard, NfcCard, updateNfcCard, getPublicProfile } from "@/lib/services/nfc-cards.service";
+import {  createNfcCard, NfcCard, updateNfcCard, getPublicProfile } from "@/lib/services/nfc-cards.service";
 
 export function useNfcCards() {
   return useQuery({
     queryKey: ["nfc-cards"],
-    queryFn: getNfcCards,
+    queryFn: async () => {
+      const res = await fetch("/api/nfc-cards");
+      if (!res.ok) throw new Error("Failed to fetch NFC cards");
 
+      const json = await res.json();
+      return (json?.data ?? json) as NfcCard[];
+    },
     staleTime: 1000 * 60 * 5, // 5 minutes (data considered fresh)
     gcTime: 1000 * 60 * 10,   // cache kept for 10 minutes
   });
@@ -45,7 +50,13 @@ export function useUpdateNfcCard() {
 export function usePublicProfile(orgSlug: string, profileSlug: string) {
   return useQuery({
     queryKey: ["public-profile", orgSlug, profileSlug],
-    queryFn: () => getPublicProfile(orgSlug, profileSlug),
+    queryFn: async () => {
+      const res = await fetch(`/api/profiles/${orgSlug}/${profileSlug}`);
+      if (!res.ok) throw new Error("Failed to fetch public profile");
+
+      const json = await res.json();
+      return (json?.data ?? json);
+    },
     enabled: !!orgSlug && !!profileSlug,
   });
 }
