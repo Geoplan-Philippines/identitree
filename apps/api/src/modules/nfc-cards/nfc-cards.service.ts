@@ -191,4 +191,27 @@ export class NfcCardsService {
       encodedUrl: card.encodedUrl,
     };
   }
+
+  /**
+   * Registers a customer-owned card.
+   * Links a hardware ID to an existing NFC card record found by its encoded URL.
+   */
+  async registerCustomerCard(encodedUrl: string, hardwareId: string): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findUnique({
+      where: { encodedUrl },
+    });
+
+    if (!card) {
+      throw new NotFoundException(`This link was not found. Please copy the URL link from your profile page.`);
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id: card.id },
+      data: {
+        hardwareId,
+        status: 'ACTIVE',
+      },
+      include: { profile: true },
+    });
+  }
 }

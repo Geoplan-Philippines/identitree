@@ -75,12 +75,20 @@ export class NfcCardsController {
     return this.nfcCardsService.linkHardwareId(body.encodedUrl, body.hardwareId);
   }
 
-  /**
-   * Checks the status of a card by hardware ID (Public).
-   */
   @RateLimit(20, 60000)
   @Get('public-check/:hardwareId')
   async publicCheck(@Param('hardwareId') hardwareId: string) {
     return this.nfcCardsService.checkCardStatus(hardwareId);
+  }
+
+  /**
+   * Registers a customer-owned card (Public).
+   */
+  @RateLimit(10, 60000)
+  @Post('public-register-customer')
+  async publicRegisterCustomer(
+    @Body() body: LinkHardwareDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.registerCustomerCard(body.encodedUrl, body.hardwareId);
   }
 }

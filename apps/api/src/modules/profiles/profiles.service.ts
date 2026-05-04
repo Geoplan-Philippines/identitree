@@ -5,6 +5,7 @@ import { PrismaService } from '../../shared/database/prisma.service';
 import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateProfileDTO } from './dto/create-profile.dto';
 import { CloudinaryService } from '../../shared/cloudinary/cloudinary.service';
+import { slugify } from '../nfc-cards/slugify';
 
 type CreateProfileInput = {
   user: AuthContext;

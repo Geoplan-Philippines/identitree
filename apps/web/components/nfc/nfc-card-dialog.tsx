@@ -61,7 +61,7 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
     } else if (!isEditing && actualOpen) {
       reset({
         name: "",
-        cardType: "GEOPLAN_ISSUED",
+        cardType: "CUSTOMER_OWNED",
         hardwareId: "",
       });
     }
