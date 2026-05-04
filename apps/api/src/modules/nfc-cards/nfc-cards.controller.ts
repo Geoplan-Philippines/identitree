@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors, Patch, Query } from '@nestjs/common';
 import { NfcCard } from '@prisma/client';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -41,6 +41,16 @@ export class NfcCardsController {
     @CurrentUser() user: AuthContext,
   ): Promise<NfcCard[]> {
     return this.nfcCardsService.getAllNfcCardsByOrganizationId(user);
+  }
+
+  /**
+   * Public endpoint to check if a card exists by its encoded URL.
+   */
+  @RateLimit(30, 60000)
+  @Get('public-exists')
+  async publicExists(@Query('url') url: string) {
+    const card = await this.nfcCardsService.findCardByUrl(url);
+    return { exists: !!card };
   }
 
   /**

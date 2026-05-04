@@ -214,4 +214,13 @@ export class NfcCardsService {
       include: { profile: true },
     });
   }
+
+  /**
+   * Internal helper to find a card by its encoded URL.
+   */
+  async findCardByUrl(encodedUrl: string): Promise<NfcCard | null> {
+    return this.prisma.nfcCard.findUnique({
+      where: { encodedUrl },
+    });
+  }
 }
