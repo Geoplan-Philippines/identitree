@@ -1,8 +1,38 @@
+"use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Zap, Link as LinkIcon, PenLine, CheckCircle2, Nfc, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function NfcRegistrationDocsPage() {
+  const [activeId, setActiveId] = useState("");
+
+  useEffect(() => {
+    const sectionIds = ["overview", "activate-page", "dashboard-setup", "manual-activation"];
+    
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100;
+      
+      for (const id of sectionIds) {
+        const element = document.getElementById(id);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetHeight = element.offsetHeight;
+          
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveId(id);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="flex gap-10 xl:gap-16">
       {/* Main Content */}
@@ -420,15 +450,20 @@ export default function NfcRegistrationDocsPage() {
             </p>
             <ul className="space-y-1.5 border-l border-border pl-3">
               {[
-                { href: "#overview", label: "Overview" },
-                { href: "#activate-page", label: "Quick Activation" },
-                { href: "#dashboard-setup", label: "Dashboard Setup" },
-                { href: "#manual-activation", label: "Manual Activation" },
+                { id: "overview", label: "Overview" },
+                { id: "activate-page", label: "Quick Activation" },
+                { id: "dashboard-setup", label: "Dashboard Setup" },
+                { id: "manual-activation", label: "Manual Activation" },
               ].map((item) => (
-                <li key={item.href}>
+                <li key={item.id}>
                   <a
-                    href={item.href}
-                    className="block text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5"
+                    href={`#${item.id}`}
+                    className={cn(
+                      "block text-xs transition-all duration-200 py-0.5",
+                      activeId === item.id 
+                        ? "text-foreground font-black translate-x-1" 
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
                   >
                     {item.label}
                   </a>
