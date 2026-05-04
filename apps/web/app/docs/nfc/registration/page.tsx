@@ -1,20 +1,14 @@
 
-import { Zap, Smartphone, Link as LinkIcon, Download, PenLine, CheckCircle2, ChevronRight, Image as ImageIcon } from "lucide-react";
-
-function ImagePlaceholder({ label }: { label: string }) {
-  return (
-    <div className="relative aspect-[16/9] w-full overflow-hidden border border-border bg-muted/30 flex flex-col items-center justify-center gap-2">
-      <ImageIcon className="size-8 text-muted-foreground/40" />
-      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</span>
-    </div>
-  );
-}
+import Link from "next/link";
+import { Zap, Link as LinkIcon, PenLine, CheckCircle2, Nfc, ExternalLink } from "lucide-react";
 
 export default function NfcRegistrationDocsPage() {
   return (
-    <div className="space-y-16">
+    <div className="flex gap-10 xl:gap-16">
+      {/* Main Content */}
+      <div className="flex-1 min-w-0 space-y-16">
       {/* Header */}
-      <section className="space-y-4">
+      <section id="overview" className="space-y-4">
         <div className="flex items-center gap-3 text-muted-foreground mb-2">
           <Zap className="size-4" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">NFC Guide</span>
@@ -27,8 +21,56 @@ export default function NfcRegistrationDocsPage() {
         </p>
       </section>
 
+      {/* Quick Activation Section */}
+      <section id="activate-page" className="space-y-8">
+        <div className="flex items-center gap-4">
+          <div className="h-px flex-1 bg-border" />
+          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">Method 1: Quick Activation</h2>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
+          <div className="space-y-5">
+            <div className="flex size-10 items-center justify-center bg-foreground text-background text-sm font-bold">
+              <Nfc className="size-5" />
+            </div>
+            <h3 className="text-xl font-bold uppercase tracking-tight text-foreground">Use the Activate Page</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The fastest way to link a customer-owned NFC card. Visit the activation portal, paste your profile link, then tap your card to the back of your phone — the card is written and registered in a single step.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">Requirement:</span> Chrome browser on an Android phone with NFC enabled.
+            </p>
+            <Link
+              href="/activate"
+              target="_blank"
+              className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-foreground/90 transition-colors"
+            >
+              <ExternalLink className="size-3.5" />
+              Go to Activate Page
+            </Link>
+          </div>
+
+          {/* Activate Page Screenshot */}
+          <div className="relative w-full max-w-[280px] overflow-hidden border border-border bg-muted/30 mx-auto lg:mx-0">
+            <a
+              href="https://res.cloudinary.com/djfuei11u/image/upload/v1777876753/viber_image_2026-05-04_14-38-36-681_kvjllt.jpg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full cursor-zoom-in"
+            >
+              <img
+                src="https://res.cloudinary.com/djfuei11u/image/upload/v1777876753/viber_image_2026-05-04_14-38-36-681_kvjllt.jpg"
+                alt="Identitree Activate Page - NFC Card Registration"
+                className="w-full object-contain"
+              />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Phase 1: Dashboard Setup */}
-      <section className="space-y-12">
+      <section id="dashboard-setup" className="space-y-12">
         <div className="flex items-center gap-4">
           <div className="h-px flex-1 bg-border" />
           <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">Phase 1: Dashboard Configuration</h2>
@@ -91,7 +133,7 @@ export default function NfcRegistrationDocsPage() {
       </section>
 
       {/* Phase 2: Physical Encoding */}
-      <section className="space-y-12">
+      <section id="manual-activation" className="space-y-12">
         <div className="flex items-center gap-4">
           <div className="h-px flex-1 bg-border" />
           <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">Phase 2: Card Encoding</h2>
@@ -365,6 +407,72 @@ export default function NfcRegistrationDocsPage() {
           To track performance, append <code className="bg-background/20 px-1.5 py-0.5 font-mono">?ref=nfc_tap</code> to your URL. This allows Identitree to distinguish between QR codes, direct links, and physical card taps.
         </p>
       </div>
+
+      </div> {/* End main content */}
+
+      {/* Right Sidebar — On this page */}
+      <aside className="hidden xl:block w-52 shrink-0">
+        <div className="sticky top-20 space-y-6">
+          {/* On this page */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              On this page
+            </p>
+            <ul className="space-y-1.5 border-l border-border pl-3">
+              {[
+                { href: "#overview", label: "Overview" },
+                { href: "#activate-page", label: "Quick Activation" },
+                { href: "#dashboard-setup", label: "Dashboard Setup" },
+                { href: "#manual-activation", label: "Manual Activation" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="block text-xs text-muted-foreground hover:text-foreground transition-colors py-0.5"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Activation Methods */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              Activation Methods
+            </p>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/activate"
+                  target="_blank"
+                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                  <Nfc className="size-3.5 shrink-0" />
+                  <span>Activate Page</span>
+                  <ExternalLink className="size-3 ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                </Link>
+                <p className="text-[10px] text-muted-foreground/60 pl-5 mt-0.5 leading-relaxed">
+                  Chrome on Android only
+                </p>
+              </li>
+              <li>
+                <a
+                  href="#manual-activation"
+                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <PenLine className="size-3.5 shrink-0" />
+                  <span>Manual (NFC Tools)</span>
+                </a>
+                <p className="text-[10px] text-muted-foreground/60 pl-5 mt-0.5 leading-relaxed">
+                  Any NFC-enabled device
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }
