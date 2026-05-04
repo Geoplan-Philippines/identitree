@@ -5,11 +5,11 @@ export const createProfileSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   positionTitle: z.string().min(1, "Position title is required"),
-  contactNumber: z.string().regex(/^\d{11}$/, "Contact number must be exactly 11 digits"),
+  contactNumber: z.string().regex(/^[\d\s]{10,12}$/, "Invalid contact number format"),
   avatarUrl: z.string().url().optional().or(z.literal("")),
   linkedinUsername: z.string().optional(),
-  whatsappNumber: z.string().optional().refine(val => !val || /^\d{11}$/.test(val), "WhatsApp number must be exactly 11 digits"),
-  viberNumber: z.string().optional().refine(val => !val || /^\d{11}$/.test(val), "Viber number must be exactly 11 digits"),
+  whatsappNumber: z.string().optional().refine(val => !val || /^[\d\s]{10,12}$/.test(val), "Invalid WhatsApp format"),
+  viberNumber: z.string().optional().refine(val => !val || /^[\d\s]{10,12}$/.test(val), "Invalid Viber format"),
 });
 
 export type CreateProfileValues = z.infer<typeof createProfileSchema>;
