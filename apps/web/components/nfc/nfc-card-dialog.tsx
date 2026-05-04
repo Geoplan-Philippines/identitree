@@ -42,8 +42,8 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
     formState: { errors },
   } = useForm<CreateNfcCardValues>({
     resolver: zodResolver(createNfcCardSchema),
-    defaultValues: { 
-      cardType: "GEOPLAN_ISSUED",
+    defaultValues: {
+      cardType: "CUSTOMER_OWNED",
       name: "",
       hardwareId: "",
     },
@@ -100,14 +100,15 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 pt-2 flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="font-medium">Name</Label>
-            <Input id="name" {...register("name")}/>
+            <Input id="name" {...register("name")} />
             {errors.name && <p className="text-xs text-red-500 mt-0.5">{errors.name.message}</p>}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="cardType" className="font-medium">Card Type</Label>
-            <Select 
-              onValueChange={val => setValue("cardType", val as any)} 
+            <Select
+              onValueChange={val => setValue("cardType", val as any)}
               value={cardType}
+              disabled
             >
               <SelectTrigger id="cardType" className="w-full">
                 <SelectValue placeholder="Select card type" />
@@ -119,16 +120,16 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
             </Select>
             {errors.cardType && <p className="text-xs text-red-500 mt-0.5">{errors.cardType.message}</p>}
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2" hidden>
             <Label htmlFor="hardwareId" className="font-medium">Hardware ID <span className="text-muted-foreground font-normal">(optional)</span></Label>
-            <Input id="hardwareId" {...register("hardwareId")}/>
+            <Input id="hardwareId"  {...register("hardwareId")} />
             {errors.hardwareId && <p className="text-xs text-red-500 mt-0.5">{errors.hardwareId.message}</p>}
           </div>
           <div className="flex flex-row items-center justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => actualOnOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              {isEditing 
-                ? (updateMutation.isPending ? "Updating..." : "Update Card") 
+              {isEditing
+                ? (updateMutation.isPending ? "Updating..." : "Update Card")
                 : (createMutation.isPending ? "Creating..." : "Create Card")}
             </Button>
           </div>
