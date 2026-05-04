@@ -5,10 +5,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Smartphone, Link as LinkIcon, CheckCircle2, Loader2, CreditCard } from "lucide-react";
+import { Smartphone, CheckCircle2, Loader2, CreditCard, AlertTriangle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
+
+const faqs = [
+  {
+    q: "Does this work on any browser?",
+    a: "No. Web NFC is currently only supported on Chrome for Android. iOS and desktop browsers are not supported at this time.",
+  },
+  {
+    q: "What kind of phone do I need?",
+    a: "You need an Android phone with NFC hardware enabled. Most modern Android devices support NFC — you can check in your phone's Settings under 'Connected devices' or 'NFC'.",
+  },
+  {
+    q: "Where do I find my profile URL?",
+    a: "Visit your Identitree profile page and copy the URL from the browser address bar. It should look like: https://identitree.geoplan.ph/your-org/your-name",
+  },
+  {
+    q: "Can I activate the same card twice?",
+    a: "Yes. If you activate a card that's already been linked, the hardware ID will be updated and the URL will be re-written to the chip.",
+  },
+  {
+    q: "What if the tap fails?",
+    a: "Hold your phone steady with the NFC card flat against the back. Try removing your phone case if needed. NFC antennas are usually located near the center or top of the phone.",
+  },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-foreground hover:text-foreground/80 transition-colors"
+      >
+        {q}
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      {open && (
+        <p className="pb-4 text-sm text-muted-foreground leading-relaxed">
+          {a}
+        </p>
+      )}
+    </div>
+  );
+}
 
 export function ActivateClient() {
   const [targetUrl, setTargetUrl] = useState("");
@@ -101,6 +144,17 @@ export function ActivateClient() {
           <p className="text-sm text-muted-foreground">
             Register your personal card to your profile.
           </p>
+        </div>
+
+        {/* NFC Requirement Warning */}
+        <div className="flex items-start gap-3 border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 p-4 rounded-none">
+          <AlertTriangle className="size-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-amber-800 dark:text-amber-400">NFC-enabled Android phone required</p>
+            <p className="text-[11px] text-amber-700 dark:text-amber-500 leading-relaxed">
+              This tool requires <span className="font-bold">Chrome on Android</span> with NFC enabled. iOS and desktop browsers are not supported.
+            </p>
+          </div>
         </div>
 
         <Card className="border border-border bg-background shadow-sm rounded-none overflow-hidden">
@@ -203,6 +257,20 @@ export function ActivateClient() {
             )}
           </CardContent>
         </Card>
+
+        {/* FAQs */}
+        <div className="space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
+            Frequently Asked Questions
+          </p>
+          <Card className="border border-border bg-background rounded-none shadow-sm">
+            <CardContent className="px-6 py-0 divide-y divide-border">
+              {faqs.map((faq) => (
+                <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
 
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 text-center leading-loose">
           Secure Registration • Identitree NFC
