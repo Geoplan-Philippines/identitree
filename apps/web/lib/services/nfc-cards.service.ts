@@ -22,6 +22,11 @@ export type Profile = {
   ownerUserId?: string | null;
   createdAt: string;
   updatedAt: string;
+  organization?: {
+    name: string;
+    logo?: string;
+    website?: string;
+  } | null;
 };
 
 export type NfcCard = {
