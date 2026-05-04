@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +62,15 @@ export function ActivateClient() {
   const [hardwareId, setHardwareId] = useState<string | null>(null);
   // Gate flag — only process one NFC read after user clicks the button
   const readyToProcess = useRef(false);
+
+  const searchParams = useSearchParams();
+  const urlParam = searchParams.get("url");
+
+  useEffect(() => {
+    if (urlParam) {
+      setTargetUrl(urlParam);
+    }
+  }, [urlParam]);
 
   const handleStartLinking = async () => {
     if (!targetUrl) return;

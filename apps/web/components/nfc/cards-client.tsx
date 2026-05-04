@@ -12,7 +12,8 @@ import { QrCodeTooltipContent } from "@/components/nfc/qr-code-tooltip-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Copy, MoveLeftIcon, QrCode } from "lucide-react";
+import { Copy, MoveLeftIcon, QrCode, Nfc } from "lucide-react";
+import Link from "next/link";
 import { downloadQrCode } from "@/lib/utils/qr-code";
 import { toast } from "sonner";
 import { CardFilters } from "@/components/nfc/card-filters";
@@ -40,6 +41,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
   const updateMutation = useUpdateNfcCard();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -193,18 +195,37 @@ export function CardsClient({ initialData }: CardsClientProps) {
                     <span className="text-[11px] font-mono text-muted-foreground font-bold">{card.hardwareId || "N/A"}</span>
                   </div>
 
-                  <div className="mt-1 relative z-10">
-                    <Button 
-                      size="sm"
-                      className="w-full rounded-none font-bold uppercase text-[10px]" 
-                      variant="outline"
-                      onClick={() => setSelectedCardId(card.id)}
-                    >
-                      View Details
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        size="sm"
+                        className="w-full rounded-none font-bold uppercase text-[10px]" 
+                        variant={card.profile ? "outline" : "default"}
+                        onClick={() => setSelectedCardId(card.id)}
+                      >
+                        {card.profile ? "View Details" : "Create Profile"}
+                      </Button>
+
+                      {!card.hardwareId && card.profile && card.cardType === "CUSTOMER_OWNED" && (
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="default"
+                          className="w-full rounded-none font-bold uppercase text-[10px]"
+                        >
+                          <Link 
+                            href={`/activate?url=${encodeURIComponent(card.encodedUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Nfc className="mr-2 size-3" />
+                            Activate Card
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )))}
+                ))
+              )}
           </div>
         </ScrollArea>
       </div>
