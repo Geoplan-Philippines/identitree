@@ -18,6 +18,7 @@ import {
   Settings,
   Users,
   Zap,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -156,6 +157,26 @@ function DashboardSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Utilities</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={pathname === `/dashboard/${slug}/tools` || pathname.startsWith(`/dashboard/${slug}/tools/`)}
+                  tooltip="Tools"
+                >
+                  <Link href={`/dashboard/${slug}/tools`}>
+                    <Wrench aria-hidden="true" />
+                    <span>Tools</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

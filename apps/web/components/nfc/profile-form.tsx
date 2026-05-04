@@ -1,11 +1,16 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createProfileSchema, CreateProfileValues } from "@/lib/zod/profiles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
@@ -20,6 +25,33 @@ type ProfileFormProps = {
   onCancel?: () => void;
 };
 
+const formatPhoneDisplay = (val: string) => {
+  let clean = val.replace(/\D/g, "");
+  if (clean.startsWith("0")) {
+    clean = clean.substring(1);
+  }
+  const part = clean.slice(0, 10);
+  if (part.length <= 3) return part;
+  if (part.length <= 6) return `${part.slice(0, 3)} ${part.slice(3)}`;
+  return `${part.slice(0, 3)} ${part.slice(3, 6)} ${part.slice(6)}`;
+};
+
+const normalizePhoneForStorage = (num: string) => {
+  if (!num) return "";
+  let clean = num.replace(/\D/g, "");
+  if (clean.startsWith("63")) clean = clean.substring(2);
+  if (clean.startsWith("0")) clean = clean.substring(1);
+  return `0${clean}`; // Save as 09XXXXXXXXX
+};
+
+const stripPrefix = (num: string | undefined | null) => {
+  if (!num) return "";
+  let clean = num.replace(/\D/g, "");
+  if (clean.startsWith("63")) clean = clean.substring(2);
+  if (clean.startsWith("0")) clean = clean.substring(1);
+  return formatPhoneDisplay(clean);
+};
+
 export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: ProfileFormProps) {
   const updateMutation = useUpdateNfcCard();
   const isEditing = !!initialData;
@@ -29,6 +61,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
     setValue,
   } = useForm<CreateProfileValues>({
@@ -38,12 +71,22 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
       lastName: initialData.lastName,
       email: initialData.email,
       positionTitle: initialData.positionTitle,
-      contactNumber: initialData.contactNumber,
+      contactNumber: stripPrefix(initialData.contactNumber),
       avatarUrl: initialData.avatarUrl || "",
       linkedinUsername: initialData.linkedinUsername || "",
-      whatsappNumber: initialData.whatsappNumber || "",
-      viberNumber: initialData.viberNumber || "",
-    } : {},
+      whatsappNumber: stripPrefix(initialData.whatsappNumber),
+      viberNumber: stripPrefix(initialData.viberNumber),
+    } : {
+      firstName: "",
+      lastName: "",
+      email: "",
+      positionTitle: "",
+      contactNumber: "",
+      avatarUrl: "",
+      linkedinUsername: "",
+      whatsappNumber: "",
+      viberNumber: "",
+    },
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +121,14 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
         setIsUploading(false);
       }
 
-      const finalValues = { ...values, avatarUrl: finalAvatarUrl };
+      // Normalize phone numbers for storage (09XXXXXXXXX)
+      const finalValues = { 
+        ...values, 
+        avatarUrl: finalAvatarUrl,
+        contactNumber: normalizePhoneForStorage(values.contactNumber),
+        whatsappNumber: values.whatsappNumber ? normalizePhoneForStorage(values.whatsappNumber) : undefined,
+        viberNumber: values.viberNumber ? normalizePhoneForStorage(values.viberNumber) : undefined,
+      };
 
       if (isEditing && initialData) {
         // 1. Update existing profile
@@ -103,95 +153,194 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
   const isFormLoading = isSubmitting || isUploading;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl mx-auto p-0 bg-transparent">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black uppercase tracking-tight">
-          {isEditing ? "Edit Profile" : "Create Profile"}
-        </h3>
-        {onCancel && (
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="rounded-none uppercase font-bold text-xs">
-            Cancel
-          </Button>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <Input id="firstName" {...register("firstName")} placeholder="John" className="rounded-none" />
-          {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl mx-auto p-0 bg-transparent">
+      <FieldGroup className="gap-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-black uppercase tracking-tight">
+            {isEditing ? "Edit Profile" : "Create Profile"}
+          </h3>
+          {onCancel && (
+            <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="rounded-none uppercase font-bold text-xs">
+              Cancel
+            </Button>
+          )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input id="lastName" {...register("lastName")} placeholder="Doe" className="rounded-none" />
-          {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Controller
+            name="firstName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="firstName">First Name</FieldLabel>
+                <Input {...field} id="firstName" placeholder="John" className="rounded-none" />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+          <Controller
+            name="lastName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
+                <Input {...field} id="lastName" placeholder="Doe" className="rounded-none" />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" {...register("email")} placeholder="john.doe@example.com" className="rounded-none" />
-        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-      </div>
+        <Controller
+          name="email"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input {...field} id="email" type="email" placeholder="john.doe@example.com" className="rounded-none" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-      <div className="space-y-2">
-        <Label htmlFor="positionTitle">Position Title</Label>
-        <Input id="positionTitle" {...register("positionTitle")} placeholder="Software Engineer" className="rounded-none" />
-        {errors.positionTitle && <p className="text-xs text-destructive">{errors.positionTitle.message}</p>}
-      </div>
+        <Controller
+          name="positionTitle"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="positionTitle">Position Title</FieldLabel>
+              <Input {...field} id="positionTitle" placeholder="Software Engineer" className="rounded-none" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-      <div className="space-y-2">
-        <Label htmlFor="contactNumber">Contact Number</Label>
-        <Input id="contactNumber" {...register("contactNumber")} placeholder="+1 234 567 890" className="rounded-none" />
-        {errors.contactNumber && <p className="text-xs text-destructive">{errors.contactNumber.message}</p>}
-      </div>
+        <Controller
+          name="contactNumber"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="contactNumber">Contact Number</FieldLabel>
+              <div className="relative flex">
+                <span className="inline-flex items-center px-3 bg-muted text-foreground text-sm font-bold">
+                  +63
+                </span>
+                <Input 
+                  {...field}
+                  id="contactNumber" 
+                  onChange={(e) => {
+                    e.target.value = formatPhoneDisplay(e.target.value);
+                    field.onChange(e);
+                  }}
+                  placeholder="912 345 6789" 
+                  className="rounded-none border-l-0" 
+                />
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-      <div className="space-y-2">
-        <Label htmlFor="avatarFile">Profile Photo (Optional)</Label>
-        <div className="flex items-center gap-4">
-          {(imageFile || initialData?.avatarUrl) && (
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-foreground/10 bg-muted">
-              <img
-                src={imageFile ? URL.createObjectURL(imageFile) : initialData?.avatarUrl || ""}
-                alt="Avatar preview"
-                className="h-full w-full object-cover"
+        <Field>
+          <FieldLabel htmlFor="avatarFile">Profile Photo (Optional)</FieldLabel>
+          <div className="flex items-center gap-4">
+            {(imageFile || initialData?.avatarUrl) && (
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-foreground/10 bg-muted">
+                <img
+                  src={imageFile ? URL.createObjectURL(imageFile) : initialData?.avatarUrl || ""}
+                  alt="Avatar preview"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <Input
+                id="avatarFile"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="rounded-none"
               />
             </div>
-          )}
-          <div className="flex-1">
-            <Input
-              id="avatarFile"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
           </div>
-        </div>
-        {errors.avatarUrl && <p className="text-xs text-destructive">{errors.avatarUrl.message}</p>}
-      </div>
+          {errors.avatarUrl && <FieldError errors={[errors.avatarUrl]} />}
+        </Field>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="linkedinUsername">LinkedIn (Optional)</Label>
-          <Input id="linkedinUsername" {...register("linkedinUsername")} placeholder="johndoe" className="rounded-none" />
-          {errors.linkedinUsername && <p className="text-xs text-destructive">{errors.linkedinUsername.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="whatsappNumber">WhatsApp (Optional)</Label>
-          <Input id="whatsappNumber" {...register("whatsappNumber")} placeholder="09123456789" className="rounded-none" />
-          {errors.whatsappNumber && <p className="text-xs text-destructive">{errors.whatsappNumber.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="viberNumber">Viber (Optional)</Label>
-          <Input id="viberNumber" {...register("viberNumber")} placeholder="09123456789" className="rounded-none" />
-          {errors.viberNumber && <p className="text-xs text-destructive">{errors.viberNumber.message}</p>}
-        </div>
-      </div>
+        <FieldGroup className="pt-4 border-t gap-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Social & Messaging
+          </p>
 
-      <Button type="submit" className="w-full rounded-none font-bold uppercase" disabled={isFormLoading}>
-        {isFormLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-        {isEditing ? "Save Changes" : "Create Profile"}
-      </Button>
+          <Controller
+            name="linkedinUsername"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="linkedinUsername">LinkedIn (Optional)</FieldLabel>
+                <Input {...field} id="linkedinUsername" placeholder="johndoe" className="rounded-none" />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="whatsappNumber"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="whatsappNumber">WhatsApp (Optional)</FieldLabel>
+                <div className="relative flex">
+                  <span className="inline-flex items-center px-3 bg-muted text-foreground text-sm font-bold">
+                    +63
+                  </span>
+                  <Input 
+                    {...field}
+                    id="whatsappNumber" 
+                    onChange={(e) => {
+                      e.target.value = formatPhoneDisplay(e.target.value);
+                      field.onChange(e);
+                    }}
+                    placeholder="912 345 6789" 
+                    className="rounded-none border-l-0" 
+                  />
+                </div>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="viberNumber"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="viberNumber">Viber (Optional)</FieldLabel>
+                <div className="relative flex">
+                  <span className="inline-flex items-center px-3 bg-muted text-foreground text-sm font-bold">
+                    +63
+                  </span>
+                  <Input 
+                    {...field}
+                    id="viberNumber" 
+                    onChange={(e) => {
+                      e.target.value = formatPhoneDisplay(e.target.value);
+                      field.onChange(e);
+                    }}
+                    placeholder="912 345 6789" 
+                    className="rounded-none border-l-0" 
+                  />
+                </div>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+
+        <Button type="submit" className="w-full rounded-none font-bold uppercase" disabled={isFormLoading}>
+          {isFormLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {isEditing ? "Save Changes" : "Create Profile"}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }

@@ -62,3 +62,11 @@ export async function getPublicProfile(orgSlug: string, profileSlug: string): Pr
   return apiClient.get<Profile>(`/profiles/${orgSlug}/${profileSlug}`);
 }
 
+export async function checkNfcCardExists(url: string): Promise<{ exists: boolean }> {
+  return apiClient.get<{ exists: boolean }>(`/nfc-cards/public-exists?url=${encodeURIComponent(url)}`);
+}
+
+export async function registerCustomerCard(payload: { encodedUrl: string; hardwareId: string }): Promise<NfcCard> {
+  return apiClient.post<NfcCard>("/nfc-cards/public-register-customer", payload);
+}
+
