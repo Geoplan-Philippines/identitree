@@ -38,6 +38,22 @@ function Field({
   );
 }
 
+const displayPhone = (num: string | undefined | null) => {
+  if (!num) return null;
+  let clean = num.replace(/\D/g, "");
+  if (clean.startsWith("63")) clean = clean.substring(2);
+  if (clean.startsWith("0")) clean = clean.substring(1);
+  
+  // Format as +63 XXX XXX XXXX
+  const part = clean.slice(0, 10);
+  let formatted = `+63`;
+  if (part.length > 0) formatted += ` ${part.slice(0, 3)}`;
+  if (part.length > 3) formatted += ` ${part.slice(3, 6)}`;
+  if (part.length > 6) formatted += ` ${part.slice(6)}`;
+  
+  return formatted;
+};
+
 export function NfcProfileView({
   profile,
   cardId,
@@ -95,7 +111,7 @@ export function NfcProfileView({
           <Field label="Email" value={profile.email} icon={Mail} />
           <Field
             label="Contact Number"
-            value={profile.contactNumber}
+            value={displayPhone(profile.contactNumber)}
             icon={Phone}
           />
         </div>
@@ -125,12 +141,12 @@ export function NfcProfileView({
             />
             <Field
               label="WhatsApp"
-              value={profile.whatsappNumber}
+              value={displayPhone(profile.whatsappNumber)}
               icon={Phone}
             />
             <Field
               label="Viber"
-              value={profile.viberNumber}
+              value={displayPhone(profile.viberNumber)}
               icon={Phone}
             />
           </div>
