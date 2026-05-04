@@ -61,7 +61,13 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   const contactActions: ContactAction[] = [
     {
       label: "WhatsApp",
-      href: profile.whatsappNumber ? `https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}` : "#",
+      href: (() => {
+        let num = profile.whatsappNumber || profile.contactNumber;
+        if (!num) return "#";
+        num = num.replace(/\D/g, "");
+        if (num.startsWith("0")) num = "63" + num.substring(1);
+        return `https://wa.me/${num}`;
+      })(),
       icon: MessageCircle,
       external: true,
     },
