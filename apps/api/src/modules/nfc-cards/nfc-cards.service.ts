@@ -18,7 +18,7 @@ type CreateNfcCardInput = {
 export class NfcCardsService {
   constructor(
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /**
    * Creates a new NFC card scoped to the user's organization.
@@ -121,7 +121,7 @@ export class NfcCardsService {
    * Updates an NFC card by its ID.
    */
   async updateNfcCard(id: string, data: UpdateNfcCardDTO): Promise<NfcCard> {
-    const card = await this.prisma.nfcCard.findUnique({ 
+    const card = await this.prisma.nfcCard.findUnique({
       where: { id },
       include: { organization: true }
     });
@@ -146,5 +146,49 @@ export class NfcCardsService {
       data: updateData,
       include: { profile: true },
     });
+  }
+
+  /**
+   * Links a hardware ID to an existing NFC card record found by its encoded URL.
+   * This is a public action.
+   */
+  async linkHardwareId(encodedUrl: string, hardwareId: string): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findFirst({
+      where: { encodedUrl },
+    });
+
+    if (!card) {
+      throw new NotFoundException(`NFC card with URL "${encodedUrl}" was not found`);
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id: card.id },
+      data: {
+        hardwareId,
+        status: 'ACTIVE',
+      },
+      include: { profile: true },
+    });
+  }
+
+  /**
+   * Checks the status of a card by its hardware ID.
+   * Publicly accessible for the /claim flow.
+   */
+  async checkCardStatus(hardwareId: string) {
+    const card = await this.prisma.nfcCard.findFirst({
+      where: { hardwareId },
+      include: { profile: true },
+    });
+
+    if (!card) {
+      return { exists: false, isAssigned: false };
+    }
+
+    return {
+      exists: true,
+      isAssigned: !!card.profileId && card.status === 'ACTIVE',
+      encodedUrl: card.encodedUrl,
+    };
   }
 }

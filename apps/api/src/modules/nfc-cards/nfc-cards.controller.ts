@@ -9,6 +9,7 @@ import { NfcCardsService } from './nfc-cards.service';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
+import { LinkHardwareDTO } from './dto/link-hardware.dto';
 
 @Controller('nfc-cards')
 @UseInterceptors(ResponseInterceptor)
@@ -61,5 +62,25 @@ export class NfcCardsController {
     @Body() body: UpdateNfcCardDTO,
   ): Promise<NfcCard> {
     return this.nfcCardsService.updateNfcCard(id, body as any);
+  }
+
+  /**
+   * Links a hardware ID to an existing NFC card record (Public).
+   */
+  @RateLimit(10, 60000)
+  @Post('public-link-hardware')
+  async publicLinkHardware(
+    @Body() body: LinkHardwareDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.linkHardwareId(body.encodedUrl, body.hardwareId);
+  }
+
+  /**
+   * Checks the status of a card by hardware ID (Public).
+   */
+  @RateLimit(20, 60000)
+  @Get('public-check/:hardwareId')
+  async publicCheck(@Param('hardwareId') hardwareId: string) {
+    return this.nfcCardsService.checkCardStatus(hardwareId);
   }
 }
