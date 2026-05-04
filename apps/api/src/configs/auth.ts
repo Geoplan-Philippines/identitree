@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { organization } from 'better-auth/plugins';
 import { env } from './env';
@@ -7,6 +8,24 @@ import { getAuthBaseURL } from './base-url';
 import { prisma } from '../shared/database/prisma';
 
 export const auth = betterAuth({
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === '/sign-up/email' && ctx.method === 'POST') {
+        const body = ctx.body as any;
+        if (body?.email) {
+          const user = await prisma.user.findUnique({
+            where: { email: body.email },
+          });
+          if (user) {
+            throw new APIError('BAD_REQUEST', {
+              code: 'USER_ALREADY_EXISTS',
+              message: 'User already exists',
+            });
+          }
+        }
+      }
+    }),
+  },
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -15,11 +34,11 @@ export const auth = betterAuth({
   baseURL: getAuthBaseURL(env.authUrl),
   advanced: env.authCookieDomain
     ? {
-        crossSubDomainCookies: {
-          enabled: true,
-          domain: env.authCookieDomain,
-        },
-      }
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: env.authCookieDomain,
+      },
+    }
     : undefined,
   trustedOrigins: [
     env.frontendUrl,
@@ -58,16 +77,16 @@ export const auth = betterAuth({
         html: `<p>Verify your email using this link:</p><p><a href="${verificationLink}">${verificationLink}</a></p>`,
         template: templateId
           ? {
-              id: templateId,
-              variables: {
-                app_name: 'Identitree',
-                user_name_prefix: user.name ? ` ${user.name}` : '',
-                verify_url: verificationLink,
-                expires_in: '1 hour',
-                support_email: 'support@kukaass.app',
-                year: String(new Date().getFullYear()),
-              },
-            }
+            id: templateId,
+            variables: {
+              app_name: 'Identitree',
+              user_name_prefix: user.name ? ` ${user.name}` : '',
+              verify_url: verificationLink,
+              expires_in: '1 hour',
+              support_email: 'support@kukaass.app',
+              year: String(new Date().getFullYear()),
+            },
+          }
           : undefined,
       });
     },

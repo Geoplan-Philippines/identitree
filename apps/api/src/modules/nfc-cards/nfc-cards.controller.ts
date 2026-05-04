@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseFilters, UseInterceptors, Patch, Query } from '@nestjs/common';
 import { NfcCard } from '@prisma/client';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -7,16 +7,20 @@ import { HttpExceptionFilter } from '../../common/filters/http-exception.filter'
 import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { NfcCardsService } from './nfc-cards.service';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
+import { LinkHardwareDTO } from './dto/link-hardware.dto';
 
 @Controller('nfc-cards')
 @UseInterceptors(ResponseInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class NfcCardsController {
-  constructor(private readonly nfcCardsService: NfcCardsService) {}
+  constructor(private readonly nfcCardsService: NfcCardsService) { }
 
   /**
    * Creates a new NFC card for the authenticated user's organization.
    */
+  @RateLimit(10, 60000)
   @Post()
   async createNfcCard(
     @CurrentUser() user: AuthContext,
@@ -31,6 +35,7 @@ export class NfcCardsController {
   /**
    * Returns all NFC cards belonging to the authenticated user's organization.
    */
+  @RateLimit(20, 60000)
   @Get()
   async getAllNfcCardsByOrganizationId(
     @CurrentUser() user: AuthContext,
@@ -39,10 +44,61 @@ export class NfcCardsController {
   }
 
   /**
+   * Public endpoint to check if a card exists by its encoded URL.
+   */
+  @RateLimit(30, 60000)
+  @Get('public-exists')
+  async publicExists(@Query('url') url: string) {
+    const card = await this.nfcCardsService.findCardByUrl(url);
+    return { exists: !!card };
+  }
+
+  /**
    * Returns a single NFC card by ID. Throws 404 if not found.
    */
+  @RateLimit(20, 60000)
   @Get(':id')
   async getNfcCardById(@Param('id') id: string): Promise<NfcCard> {
     return this.nfcCardsService.getNfcCardById(id);
+  }
+
+  /**
+   * Updates an NFC card by ID.
+   */
+  @RateLimit(20, 60000)
+  @Patch(':id')
+  async updateNfcCard(
+    @Param('id') id: string,
+    @Body() body: UpdateNfcCardDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.updateNfcCard(id, body as any);
+  }
+
+  /**
+   * Links a hardware ID to an existing NFC card record (Public).
+   */
+  @RateLimit(10, 60000)
+  @Post('public-link-hardware')
+  async publicLinkHardware(
+    @Body() body: LinkHardwareDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.linkHardwareId(body.encodedUrl, body.hardwareId);
+  }
+
+  @RateLimit(20, 60000)
+  @Get('public-check/:hardwareId')
+  async publicCheck(@Param('hardwareId') hardwareId: string) {
+    return this.nfcCardsService.checkCardStatus(hardwareId);
+  }
+
+  /**
+   * Registers a customer-owned card (Public).
+   */
+  @RateLimit(10, 60000)
+  @Post('public-register-customer')
+  async publicRegisterCustomer(
+    @Body() body: LinkHardwareDTO,
+  ): Promise<NfcCard> {
+    return this.nfcCardsService.registerCustomerCard(body.encodedUrl, body.hardwareId);
   }
 }

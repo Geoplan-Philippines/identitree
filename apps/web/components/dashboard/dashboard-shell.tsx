@@ -12,16 +12,19 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Nfc,
+  LogOut,
   Palette,
   Plus,
   Settings,
   Users,
   Zap,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -38,6 +41,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -50,22 +55,30 @@ type DashboardLink = {
   isActive?: boolean;
 };
 
-const primaryLinks: DashboardLink[] = [
-  { label: "Overview", href: "#", icon: LayoutDashboard, isActive: true },
-  { label: "Cards", href: "#", icon: IdCard },
-  { label: "Contacts", href: "#", icon: ContactRound },
-  { label: "Teams", href: "#", icon: Users },
-  { label: "Templates", href: "#", icon: LayoutTemplate },
-];
 
-const growthLinks: DashboardLink[] = [
-  { label: "Analytics", href: "#", icon: BarChart3 },
-  { label: "Brand kit", href: "#", icon: Palette },
-  { label: "NFC devices", href: "#", icon: Nfc },
-  { label: "Billing", href: "#", icon: CreditCard },
-];
 
 function DashboardSidebar() {
+  const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const slug = params?.slug as string;
+
+  const primaryLinks: DashboardLink[] = [
+    { label: "Overview", href: `/dashboard/${slug}`, icon: LayoutDashboard },
+    { label: "Cards", href: `/dashboard/${slug}/cards`, icon: IdCard },
+    { label: "Contacts", href: `/dashboard/${slug}/contacts`, icon: ContactRound },
+    { label: "Teams", href: `/dashboard/${slug}/teams`, icon: Users },
+    { label: "Templates", href: `/dashboard/${slug}/templates`, icon: LayoutTemplate },
+  ];
+
+  const growthLinks: DashboardLink[] = [
+    { label: "Analytics", href: `/dashboard/${slug}/analytics`, icon: BarChart3 },
+    { label: "Brand kit", href: "#", icon: Palette },
+    { label: "NFC devices", href: "#", icon: Nfc },
+    { label: "Billing", href: "#", icon: CreditCard },
+  ];
+
   return (
     <Sidebar collapsible="icon" className="border-r border-border top-12 !h-[calc(100svh-48px)]">
       {/* Hand-rolled header to perfectly match the main header height (h-14) without extra gaps */}
@@ -94,23 +107,30 @@ function DashboardSidebar() {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {primaryLinks.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.isActive}
-                    tooltip={item.label}
-                  >
-                    <Link
-                      href={item.href}
-                      aria-current={item.isActive ? "page" : undefined}
+              {primaryLinks.map((item) => {
+                const isOverview = item.href === `/dashboard/${slug}`;
+                const isActive = isOverview
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(item.href + "/");
+
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
                     >
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <item.icon aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -119,16 +139,44 @@ function DashboardSidebar() {
           <SidebarGroupLabel>Growth</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {growthLinks.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild tooltip={item.label}>
-                    <Link href={item.href}>
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {growthLinks.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Utilities</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={pathname === `/dashboard/${slug}/tools` || pathname.startsWith(`/dashboard/${slug}/tools/`)}
+                  tooltip="Tools"
+                >
+                  <Link href={`/dashboard/${slug}/tools`}>
+                    <Wrench aria-hidden="true" />
+                    <span>Tools</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -142,6 +190,18 @@ function DashboardSidebar() {
                 <Settings aria-hidden="true" />
                 <span>Settings</span>
               </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              tooltip="Log out"
+              onClick={async () => {
+                await authClient.signOut();
+                router.push("/login");
+              }}
+            >
+              <LogOut aria-hidden="true" />
+              <span>Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -175,8 +235,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <span className="flex items-center gap-2">
           Try Pro for free — <span className="hidden opacity-80 sm:inline text-white/80">our most popular plan for content creators and businesses.</span>
         </span>
-        <Link 
-          href="/pricing" 
+        <Link
+          href="/pricing"
           className="flex h-7 items-center justify-center rounded-full bg-[#E5F5EC]/10 px-3 text-[11px] font-bold text-[#10B981] border border-[#10B981]/20 transition-colors hover:bg-[#10B981]/20 hover:border-[#10B981]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 uppercase tracking-wide"
         >
           <Zap className="mr-1.5 size-[11px] fill-current" aria-hidden="true" />
@@ -189,19 +249,19 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <SidebarProvider className="flex-1 overflow-hidden" style={{ minHeight: "calc(100svh - 48px)" }}>
           <DashboardSidebar />
           {/* Add mt-12 so the inset starts below the banner */}
-          <SidebarInset className="overflow-x-hidden mt-12 bg-background min-h-[calc(100svh-48px)]">
-            <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-md md:px-5">
+          <SidebarInset className="flex flex-col overflow-hidden mt-12 bg-background h-[calc(100svh-48px)]">
+            <header className="flex-none flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4 md:px-5">
               <div className="flex items-center gap-3">
                 <SidebarTrigger
-                  className="-ml-1 size-8 rounded-md"
+                  className="-ml-1 size-8 rounded-none"
                   aria-label="Toggle sidebar"
                 />
 
                 <div className="h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
 
                 <div className="min-w-0">
-                  <h2 className="truncate text-[13px] font-medium text-foreground">
-                    Overview
+                  <h2 className="truncate text-[13px] font-black uppercase tracking-widest text-foreground">
+                    Management
                   </h2>
                 </div>
               </div>
@@ -211,24 +271,26 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-md hover:bg-muted"
+                  className="size-8 rounded-none hover:bg-muted"
                   aria-label="Notifications"
                 >
                   <Bell className="size-4" aria-hidden="true" />
                 </Button>
 
-                <Button asChild>
-                  <Link href="#">
-                    <Plus className="size-3.5" aria-hidden="true" />
-                    New card
-                  </Link>
-                </Button>
+                <NfcCardDialog
+                  trigger={
+                    <Button>
+                      <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
+                      New card
+                    </Button>
+                  }
+                />
               </div>
             </header>
 
-            <div className="flex-1 px-4 py-8 md:px-6">
+            <main className="flex-1 overflow-y-auto px-4 py-8 md:px-6 min-h-0 scrollbar-hide">
               {children}
-            </div>
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </TooltipProvider>

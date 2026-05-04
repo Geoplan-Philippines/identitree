@@ -7,18 +7,18 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { PrismaService } from './shared/database/prisma.service';
 import { NfcCardsModule } from './modules/nfc-cards/nfc-cards.module';
+import { RateLimitModule } from './common/decorators/rate-limit.decorator';
+import { UploadModule } from './modules/upload/upload.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
     AuthModule,
     ProfilesModule,
     NfcCardsModule,
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 60,
-      },
-    ]),
+    RateLimitModule,
+    UploadModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

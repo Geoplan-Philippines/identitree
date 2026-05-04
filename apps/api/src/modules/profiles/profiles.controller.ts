@@ -1,6 +1,10 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  Patch,
   Post,
   UseFilters,
   UseInterceptors,
@@ -13,16 +17,18 @@ import { HttpExceptionFilter } from '../../common/filters/http-exception.filter'
 import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDTO } from './dto/create-profile.dto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 
 @Controller('profiles')
 @UseInterceptors(ResponseInterceptor)
 @UseFilters(HttpExceptionFilter)
 export class ProfilesController {
-  constructor(private readonly profilesService: ProfilesService) {}
+  constructor(private readonly profilesService: ProfilesService) { }
 
   /**
    * Creates a profile for the authenticated user under their organization.
    */
+  @RateLimit(10, 60000)
   @Post()
   async createProfile(
     @CurrentUser() user: AuthContext,
@@ -32,5 +38,39 @@ export class ProfilesController {
       user,
       payload: createProfileDTO,
     });
+  }
+
+  @RateLimit(20, 60000)
+  @Patch(':id')
+  async updateProfile(
+    @CurrentUser() user: AuthContext,
+    @Param('id') id: string,
+    @Body() payload: Partial<Profile>,
+  ): Promise<Profile> {
+    return this.profilesService.updateProfile(user, id, payload);
+  }
+
+  /**
+   * Retrieves all profiles for the user's organization.
+   */
+  @RateLimit(20, 60000)
+  @Get()
+  async getProfiles(@CurrentUser() user: AuthContext): Promise<Profile[]> {
+    if (!user.organizationId) {
+      throw new ForbiddenException('No organization selected');
+    }
+    return this.profilesService.getProfilesByOrganization(user.organizationId);
+  }
+
+  /**
+   * Retrieves a public profile by organization and profile slug.
+   */
+  @RateLimit(50, 60000)
+  @Get(':orgSlug/:profileSlug')
+  async getProfileBySlug(
+    @Param('orgSlug') orgSlug: string,
+    @Param('profileSlug') profileSlug: string,
+  ): Promise<Profile> {
+    return this.profilesService.getProfileBySlug(orgSlug, profileSlug);
   }
 }
