@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +59,8 @@ export function ActivateClient() {
   const [isScanning, setIsScanning] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
   const [hardwareId, setHardwareId] = useState<string | null>(null);
+  // Gate flag — only process one NFC read after user clicks the button
+  const readyToProcess = useRef(false);
 
   const handleStartLinking = async () => {
     if (!targetUrl) return;
@@ -74,7 +76,15 @@ export function ActivateClient() {
       const ndef = new (window as any).NDEFReader();
       await ndef.scan();
 
+      // Only start listening after scan is active
+      readyToProcess.current = true;
+
       ndef.onreading = async (event: any) => {
+        // Ignore reads that happen before the user clicks the button
+        if (!readyToProcess.current) return;
+        // Prevent multiple reads from firing
+        readyToProcess.current = false;
+
         try {
           const serialNumber = event.serialNumber;
           setHardwareId(serialNumber);
