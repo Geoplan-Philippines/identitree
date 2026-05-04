@@ -4,9 +4,10 @@ import { PrismaService } from '../../shared/database/prisma.service';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';
+import { CloudinaryModule } from '../../shared/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [OrganizationsModule],
+  imports: [OrganizationsModule, CloudinaryModule],
   controllers: [ProfilesController],
   providers: [ProfilesService, PrismaService],
 })

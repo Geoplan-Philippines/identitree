@@ -40,3 +40,4 @@ yarn-error.log*
 ./.github
 AGENTS.md
 .agents
+.env*.local

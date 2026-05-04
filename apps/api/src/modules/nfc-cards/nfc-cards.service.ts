@@ -1,9 +1,13 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { NfcCard } from '@prisma/client';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { NfcCard, Prisma } from '@prisma/client';
+
 
 import { PrismaService } from '../../shared/database/prisma.service';
 import { AuthContext } from '../../common/decorators/current-user.decorator';
 import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
+import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
+import { slugify } from './slugify';
+import { env } from '../../configs/env';
 
 type CreateNfcCardInput = {
   user: AuthContext;
@@ -14,7 +18,7 @@ type CreateNfcCardInput = {
 export class NfcCardsService {
   constructor(
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /**
    * Creates a new NFC card scoped to the user's organization.
@@ -33,12 +37,43 @@ export class NfcCardsService {
       );
     }
 
-    return this.prisma.nfcCard.create({
-      data: {
-        organizationId: organizationId,
-        ...payload,
-      },
+
+    // Fetch organization slug
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { slug: true },
     });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    // Generate slug and encodedUrl from name
+    const slug = slugify(payload.name);
+    const encodedUrl = `${env.frontendUrl}/${organization.slug}/${slug}`;
+
+    // Remove name from payload before saving
+    const { name, ...rest } = payload;
+
+    try {
+      return await this.prisma.nfcCard.create({
+        data: {
+          organizationId: organizationId,
+          ...rest,
+          encodedUrl,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // P2002 is the error code for unique constraint violation
+        if (error.code === 'P2002') {
+          throw new ConflictException(
+            'A card with this hardware ID already exists',
+          );
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -59,6 +94,7 @@ export class NfcCardsService {
 
     return this.prisma.nfcCard.findMany({
       where: { organizationId: organizationId },
+      include: { profile: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -69,12 +105,113 @@ export class NfcCardsService {
    * Throws NotFoundException if the card does not exist.
    */
   async getNfcCardById(id: string): Promise<NfcCard> {
-    const card = await this.prisma.nfcCard.findUnique({ where: { id } });
+    const card = await this.prisma.nfcCard.findUnique({
+      where: { id },
+      include: { profile: true },
+    });
 
     if (!card) {
       throw new NotFoundException(`NFC card with id "${id}" was not found`);
     }
 
     return card;
+  }
+
+  /**
+   * Updates an NFC card by its ID.
+   */
+  async updateNfcCard(id: string, data: UpdateNfcCardDTO): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findUnique({
+      where: { id },
+      include: { organization: true }
+    });
+
+    if (!card) {
+      throw new NotFoundException(`NFC card with id "${id}" was not found`);
+    }
+
+    const updateData: any = { ...data };
+
+    if (data.name) {
+      if (!card.organization) {
+        throw new NotFoundException('Organization not found for this card');
+      }
+      const slug = slugify(data.name);
+      updateData.encodedUrl = `${env.frontendUrl}/${card.organization.slug}/${slug}`;
+      delete updateData.name;
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id },
+      data: updateData,
+      include: { profile: true },
+    });
+  }
+
+  /**
+   * Links a hardware ID to an existing NFC card record found by its encoded URL.
+   * This is a public action.
+   */
+  async linkHardwareId(encodedUrl: string, hardwareId: string): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findFirst({
+      where: { encodedUrl },
+    });
+
+    if (!card) {
+      throw new NotFoundException(`NFC card with URL "${encodedUrl}" was not found`);
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id: card.id },
+      data: {
+        hardwareId,
+        status: 'ACTIVE',
+      },
+      include: { profile: true },
+    });
+  }
+
+  /**
+   * Checks the status of a card by its hardware ID.
+   * Publicly accessible for the /claim flow.
+   */
+  async checkCardStatus(hardwareId: string) {
+    const card = await this.prisma.nfcCard.findFirst({
+      where: { hardwareId },
+      include: { profile: true },
+    });
+
+    if (!card) {
+      return { exists: false, isAssigned: false };
+    }
+
+    return {
+      exists: true,
+      isAssigned: !!card.profileId && card.status === 'ACTIVE',
+      encodedUrl: card.encodedUrl,
+    };
+  }
+
+  /**
+   * Registers a customer-owned card.
+   * Links a hardware ID to an existing NFC card record found by its encoded URL.
+   */
+  async registerCustomerCard(encodedUrl: string, hardwareId: string): Promise<NfcCard> {
+    const card = await this.prisma.nfcCard.findUnique({
+      where: { encodedUrl },
+    });
+
+    if (!card) {
+      throw new NotFoundException(`This link was not found. Please copy the URL link from your profile page.`);
+    }
+
+    return this.prisma.nfcCard.update({
+      where: { id: card.id },
+      data: {
+        hardwareId,
+        status: 'ACTIVE',
+      },
+      include: { profile: true },
+    });
   }
 }

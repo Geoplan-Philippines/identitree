@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,13 +15,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { authService } from "@/lib/services/auth.service";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
-import { useAuth } from "@/providers/auth-provider";
 
 export function LoginForm() {
-  const router = useRouter();
-  const { setAuth } = useAuth();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -44,18 +39,30 @@ export function LoginForm() {
         throw new Error(error.message || "Login failed");
       }
 
-      const { data: orgs } = await authClient.organization.list();
-      const hasOrganization = orgs && orgs.length > 0;
-      const organizationSlug = (hasOrganization && orgs?.[0]) ? orgs[0].slug : null;
+      // Fetch organizations - handle case where user just signed up with no organizations
+      let organizationSlug: string | null = null;
+      try {
+        const { data: orgs, error: orgsError } =
+          await authClient.organization.list();
+
+        if (orgsError) {
+          console.warn("Failed to fetch organizations:", orgsError);
+        } else if (orgs && orgs.length > 0 && orgs[0]) {
+          organizationSlug = orgs[0].slug;
+        }
+      } catch (orgError) {
+        console.warn("Error fetching organizations:", orgError);
+      }
 
       toast.success("Login successful");
 
       if (organizationSlug) {
-        router.push(`/dashboard/${organizationSlug}`);
+        window.location.assign(`/dashboard/${organizationSlug}`);
         return;
       }
 
-      router.push(`/organization/setup?userId=${session?.user.id}`);
+      // User has no organization yet - redirect to setup
+      window.location.assign(`/organization/setup?userId=${session?.user.id}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Login failed. Please try again.";

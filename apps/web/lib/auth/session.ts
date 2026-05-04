@@ -77,13 +77,14 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
     }
 
     // Better Auth Organization Plugin provides /organization/list
+    // Treat null as empty array - user may not have organizations yet (new signup)
     const organizations = await requestAuthApi<BetterAuthOrganization[]>(
       "/auth/organization/list",
       cookieHeader,
-    );
+    ) || [];
 
     // Pick the first organization as the "active" one for legacy redirection compatibility
-    const activeOrganization = organizations?.[0] || null;
+    const activeOrganization = organizations[0] || null;
 
     return {
       user: {

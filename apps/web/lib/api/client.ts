@@ -26,14 +26,22 @@ class ApiClient {
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const { method = "GET", body, headers } = options;
+    
+    const isFormData = body instanceof FormData;
+    
+    const requestHeaders: HeadersInit = {
+      ...headers,
+    };
+
+    if (!isFormData) {
+      (requestHeaders as Record<string, string>)["Content-Type"] = "application/json";
+    }
+
     const response = await fetch(createApiUrl(path, this.baseUrl), {
       method,
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers: requestHeaders,
+      body: isFormData ? (body as FormData) : (body ? JSON.stringify(body) : undefined),
       cache: "no-store",
     });
 
@@ -46,11 +54,33 @@ class ApiClient {
       throw new ApiError(response.status, data, message);
     }
 
+    // If the response follows the standard ApiResponse envelope { statusCode, message, data }
+    // return only the data part to the caller.
+    if (data && typeof data === "object" && "data" in data && "statusCode" in data) {
+      return data.data as T;
+    }
+
     return data as T;
+  }
+
+  get<T>(path: string, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "GET", headers });
   }
 
   post<T>(path: string, body: unknown, headers?: HeadersInit) {
     return this.request<T>(path, { method: "POST", body, headers });
+  }
+
+  put<T>(path: string, body: unknown, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "PUT", body, headers });
+  }
+
+  patch<T>(path: string, body: unknown, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "PATCH", body, headers });
+  }
+
+  delete<T>(path: string, headers?: HeadersInit) {
+    return this.request<T>(path, { method: "DELETE", headers });
   }
 
   private async parseResponse(response: Response): Promise<unknown> {
