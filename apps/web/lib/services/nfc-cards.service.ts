@@ -22,6 +22,11 @@ export type Profile = {
   ownerUserId?: string | null;
   createdAt: string;
   updatedAt: string;
+  organization?: {
+    name: string;
+    logo?: string;
+    website?: string;
+  } | null;
 };
 
 export type NfcCard = {
@@ -37,8 +42,8 @@ export type NfcCard = {
   updatedAt: string;
 };
 
-export async function getNfcCards(): Promise<NfcCard[]> {
-  return apiClient.get<NfcCard[]>("/nfc-cards");
+export async function getNfcCards(headers?: HeadersInit): Promise<NfcCard[]> {
+  return apiClient.get<NfcCard[]>("/nfc-cards", headers);
 }
 
 export async function getNfcCard(id: string): Promise<NfcCard> {

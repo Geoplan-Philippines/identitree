@@ -10,8 +10,8 @@ export type Profile = {
 };
 
 class ProfileService {
-  async getProfiles() {
-    return apiClient.request<Profile[]>("/profiles");
+  async getProfiles(headers?: HeadersInit) {
+    return apiClient.get<Profile[]>("/profiles", headers);
   }
 }
 
