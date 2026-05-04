@@ -10,6 +10,7 @@ import { Smartphone, CheckCircle2, Loader2, CreditCard, AlertTriangle, ChevronDo
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
+import { checkNfcCardExists, registerCustomerCard } from "@/lib/services/nfc-cards.service";
 
 const faqs = [
   {
@@ -60,7 +61,12 @@ export function ActivateClient() {
   const [isScanning, setIsScanning] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
   const [hardwareId, setHardwareId] = useState<string | null>(null);
-  // Gate flag — only process one NFC read after user clicks the button
+  const [isCheckingUrl, setIsCheckingUrl] = useState(false);
+
+  // Pre-calculated URL to write (to ensure the fastest possible write)
+  const finalUrlRef = useRef<string>("");
+  const normalizedUrlRef = useRef<string>("");
+  const isUrlRegisteredRef = useRef<boolean>(false);
   const readyToProcess = useRef(false);
 
   const searchParams = useSearchParams();
@@ -81,18 +87,48 @@ export function ActivateClient() {
     }
 
     try {
+      setStep("input"); // Stay on input while checking
+      setIsCheckingUrl(true);
+      
+      // 1. NORMALIZE URL
+      let normalized = targetUrl;
+      try {
+        const urlObj = new URL(targetUrl.startsWith('http') ? targetUrl : `${window.location.origin}${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`);
+        normalized = urlObj.toString();
+      } catch (e) {
+        console.warn("URL normalization failed:", e);
+      }
+      normalizedUrlRef.current = normalized;
+
+      // 2. CHECK DATABASE & PREPARE FINAL URL
+      let finalUrl = normalized;
+      try {
+        const res = await checkNfcCardExists(normalized);
+        isUrlRegisteredRef.current = !!res.exists;
+        
+        if (res.exists) {
+          const urlObj = new URL(normalized);
+          urlObj.searchParams.set("ref", "nfc_tap");
+          finalUrl = urlObj.toString();
+        }
+      } catch (err) {
+        console.warn("Database check failed, assuming non-registered", err);
+        isUrlRegisteredRef.current = false;
+      }
+
+      finalUrlRef.current = finalUrl;
+      setIsCheckingUrl(false);
+
+      // 3. START NFC SESSION
       setStep("scanning");
       setIsScanning(true);
       const ndef = new (window as any).NDEFReader();
       await ndef.scan();
 
-      // Only start listening after scan is active
       readyToProcess.current = true;
 
       ndef.onreading = async (event: any) => {
-        // Ignore reads that happen before the user clicks the button
         if (!readyToProcess.current) return;
-        // Prevent multiple reads from firing
         readyToProcess.current = false;
 
         try {
@@ -102,33 +138,27 @@ export function ActivateClient() {
           setIsScanning(false);
           setIsWriting(true);
 
-          // Register the card
-          await apiClient.post("/nfc-cards/public-register-customer", {
-            encodedUrl: targetUrl,
-            hardwareId: serialNumber,
-          });
-
-          // Prepare the URL to write (always include ref=nfc_tap)
-          let finalUrl = targetUrl;
-          try {
-            const urlObj = new URL(targetUrl.startsWith('http') ? targetUrl : `${window.location.origin}${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`);
-            urlObj.searchParams.set("ref", "nfc_tap");
-            finalUrl = urlObj.toString();
-          } catch (e) {
-            console.error("Invalid URL format:", e);
-          }
-
-          // Write to the physical card
+          // 4. WRITE IMMEDIATELY (Pre-prepared URL)
           await ndef.write({
-            records: [{ recordType: "url", data: finalUrl }]
+            records: [{ recordType: "url", data: finalUrlRef.current }]
           });
+
+          // 5. Finalize registration in background
+          if (isUrlRegisteredRef.current) {
+            registerCustomerCard({
+              encodedUrl: normalizedUrlRef.current,
+              hardwareId: serialNumber,
+            }).catch(apiErr => {
+              console.warn("Background registration failed:", apiErr);
+            });
+          }
 
           setIsWriting(false);
           setStep("success");
-          toast.success("Card linked successfully!");
+          toast.success(isUrlRegisteredRef.current ? "Card linked successfully!" : "Card encoded successfully!");
         } catch (err: any) {
-          console.error(err);
-          toast.error(err.message || "Failed to complete process");
+          console.error("NFC Write Error:", err);
+          toast.error(`Write failed: ${err.message || "Unknown error"}`);
           setIsWriting(false);
           setIsScanning(false);
           setStep("input");
@@ -214,10 +244,17 @@ export function ActivateClient() {
                 </div>
                 <Button
                   onClick={handleStartLinking}
-                  disabled={!targetUrl}
+                  disabled={!targetUrl || isCheckingUrl}
                   className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-none font-bold uppercase tracking-widest text-[10px]"
                 >
-                  Link & Proceed to Tap
+                  {isCheckingUrl ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking URL...
+                    </>
+                  ) : (
+                    "Proceed to Write"
+                  )}
                 </Button>
               </div>
             )}
