@@ -15,6 +15,14 @@ import {
 import { format, parseISO, subDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DateRange } from "react-day-picker";
+import { parseSafeDate, getInclusiveDateRange } from "@/lib/utils/date";
 import {
   Select,
   SelectContent,
@@ -71,36 +79,37 @@ const channelConfig = {
 } satisfies ChartConfig;
 
 export function AnalyticsChart({ slug }: AnalyticsChartProps) {
-  const [filters, setFilters] = useState<AnalyticsFilters>({
-    from: format(subDays(new Date(), 30), "yyyy-MM-dd"),
-    to: format(new Date(), "yyyy-MM-dd"),
-  });
+  const [filters, setFilters] = useState<AnalyticsFilters>(getInclusiveDateRange(30));
 
   const { data: profiles } = useProfiles();
   const { data, isLoading, error, isFetching } = useAnalyticsStats(slug, filters);
 
   const handleRangeChange = (value: string) => {
-    const to = new Date();
-    let from = subDays(to, 30);
+    let range = getInclusiveDateRange(30);
 
-    if (value === "7d") from = subDays(to, 7);
-    if (value === "30d") from = subDays(to, 30);
-    if (value === "90d") from = subDays(to, 90);
-    if (value === "24h") from = subDays(to, 1);
+    if (value === "7d") range = getInclusiveDateRange(7);
+    if (value === "30d") range = getInclusiveDateRange(30);
+    if (value === "90d") range = getInclusiveDateRange(90);
+    if (value === "24h") {
+      const to = new Date();
+      const from = subDays(to, 1);
+      range = {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
 
     setFilters((prev) => ({
       ...prev,
-      from: format(from, "yyyy-MM-dd"),
-      to: format(to, "yyyy-MM-dd"),
+      ...range,
     }));
   };
 
   const clearFilters = () => {
-    setFilters({
-      from: format(subDays(new Date(), 30), "yyyy-MM-dd"),
-      to: format(new Date(), "yyyy-MM-dd"),
-    });
+    setFilters(getInclusiveDateRange(30));
   };
+
+
 
   const formattedData = data?.map((item) => ({
     ...item,
@@ -117,18 +126,74 @@ export function AnalyticsChart({ slug }: AnalyticsChartProps) {
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Time Period</p>
               {isFetching && <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground" />}
             </div>
-            <Select defaultValue="30d" onValueChange={handleRangeChange}>
-              <SelectTrigger className="w-[160px] h-9 text-xs font-bold uppercase tracking-wider">
-                <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                <SelectValue placeholder="Select range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="24h" className="text-xs font-bold uppercase">Last 24 Hours</SelectItem>
-                <SelectItem value="7d" className="text-xs font-bold uppercase">Last 7 Days</SelectItem>
-                <SelectItem value="30d" className="text-xs font-bold uppercase">Last 30 Days</SelectItem>
-                <SelectItem value="90d" className="text-xs font-bold uppercase">Last 90 Days</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[260px] h-9 justify-start text-left text-xs font-bold uppercase tracking-wider rounded-none border-foreground/10",
+                    !filters.from && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {filters.from ? (
+                    filters.to ? (
+                      <>
+                        {format(parseSafeDate(filters.from)!, "LLL dd, y")} -{" "}
+                        {format(parseSafeDate(filters.to)!, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(parseSafeDate(filters.from)!, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 rounded-none border-border shadow-2xl" align="start">
+                <div className="flex divide-x divide-border">
+                  <div className="flex flex-col gap-1 p-2 bg-muted/20 min-w-[140px]">
+                    {[
+                      { label: "Last 24 Hours", value: "24h" },
+                      { label: "Last 7 Days", value: "7d" },
+                      { label: "Last 30 Days", value: "30d" },
+                      { label: "Last 90 Days", value: "90d" },
+                    ].map((preset) => (
+                      <Button
+                        key={preset.value}
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start text-[10px] font-black uppercase tracking-widest h-8 rounded-none px-2"
+                        onClick={() => handleRangeChange(preset.value)}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={new Date()}
+                    selected={{
+                      from: parseSafeDate(filters.from),
+                      to: parseSafeDate(filters.to),
+                    }}
+                    onSelect={(range: DateRange | undefined) => {
+                      if (range?.from) {
+                        setFilters((prev) => ({
+                          ...prev,
+                          from: format(range.from!, "yyyy-MM-dd"),
+                          to: range.to ? format(range.to, "yyyy-MM-dd") : format(range.from!, "yyyy-MM-dd"),
+                        }));
+                      }
+                    }}
+                    numberOfMonths={2}
+                    showOutsideDays={false}
+                    className="rounded-none"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-1.5">
