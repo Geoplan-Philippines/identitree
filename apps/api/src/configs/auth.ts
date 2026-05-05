@@ -15,11 +15,27 @@ export const auth = betterAuth({
         if (body?.email) {
           const user = await prisma.user.findUnique({
             where: { email: body.email },
+            include: { accounts: true },
           });
           if (user) {
+            const hasGoogle = user.accounts.some(
+              (acc) => acc.providerId === 'google',
+            );
+            const hasCredential = user.accounts.some(
+              (acc) => acc.providerId === 'credential',
+            );
+
+            if (hasGoogle && !hasCredential) {
+              throw new APIError('BAD_REQUEST', {
+                code: 'SOCIAL_LOGIN_ONLY',
+                message:
+                  'This email is already registered via Google. Please log in using Google instead.',
+              });
+            }
+
             throw new APIError('BAD_REQUEST', {
               code: 'USER_ALREADY_EXISTS',
-              message: 'User already exists',
+              message: 'This email is already registered. Please log in instead.',
             });
           }
         }
@@ -68,6 +84,15 @@ export const auth = betterAuth({
           }
         }
       }
+      if (ctx.path === '/error' && ctx.method === 'GET') {
+        const error = ctx.query?.error || 'unknown_error';
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${env.frontendUrl}/login?error=${error}`,
+          },
+        });
+      }
     }),
   },
   database: prismaAdapter(prisma, {
@@ -93,6 +118,11 @@ export const auth = betterAuth({
           return { data: session };
         },
       },
+    },
+  },
+  account: {
+    accountLinking: {
+      enabled: false,
     },
   },
   basePath: '/api/v1/auth',
