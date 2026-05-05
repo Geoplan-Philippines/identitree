@@ -24,6 +24,50 @@ export const auth = betterAuth({
           }
         }
       }
+
+      if (ctx.path === '/request-password-reset' && ctx.method === 'POST') {
+        const body = ctx.body as any;
+        if (body?.email) {
+          const user = await prisma.user.findUnique({
+            where: { email: body.email },
+            include: { accounts: true },
+          });
+
+          if (!user) {
+            return new Response(
+              JSON.stringify({
+                message: 'This email is not registered in our database.',
+                code: 'USER_NOT_FOUND',
+              }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+          }
+
+          const hasPasswordAccount = user.accounts.some(
+            (acc) => acc.providerId === 'credential',
+          );
+          const hasGoogleAccount = user.accounts.some(
+            (acc) => acc.providerId === 'google',
+          );
+
+          if (!hasPasswordAccount && hasGoogleAccount) {
+            return new Response(
+              JSON.stringify({
+                message:
+                  'This account uses Google Sign-In. Please log in using Google instead.',
+                code: 'SOCIAL_LOGIN_ONLY',
+              }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+          }
+        }
+      }
     }),
   },
   database: prismaAdapter(prisma, {

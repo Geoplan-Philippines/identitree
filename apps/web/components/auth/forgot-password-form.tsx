@@ -30,26 +30,27 @@ export function ForgotPasswordForm() {
   });
 
   async function onSubmit(data: ForgotPasswordFormValues) {
-    try {
-      const { error } = await authClient.requestPasswordReset({
+    await authClient.requestPasswordReset(
+      {
         email: data.email,
         redirectTo: "/reset-password",
-      });
-
-      if (error) {
-        throw new Error(error.message || "Failed to send reset link.");
-      }
-
-      setIsSubmitted(true);
-      setEmailSent(data.email);
-      toast.success("Reset link sent!");
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to send reset link.";
-      toast.error("Error", {
-        description: message,
-      });
-    }
+      },
+      {
+        onRequest: () => {
+          // You can add a loading state here if needed
+        },
+        onSuccess: () => {
+          setIsSubmitted(true);
+          setEmailSent(data.email);
+          toast.success("Reset link sent!");
+        },
+        onError: (ctx) => {
+          toast.error("Error", {
+            description: ctx.error.message || "Failed to send reset link.",
+          });
+        },
+      },
+    );
   }
 
   if (isSubmitted) {
