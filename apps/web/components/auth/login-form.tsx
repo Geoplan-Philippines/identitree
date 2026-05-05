@@ -6,6 +6,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -17,8 +19,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
+import Link from "next/link";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const errorParam = searchParams.get("error");
+
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,6 +35,22 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if (errorParam === "account_not_linked" || errorParam === "ACCOUNT_NOT_LINKED") {
+      toast.error("Account linking blocked", {
+        description: "This email is already registered with a password. Please log in using your email and password instead.",
+      });
+    } else if (errorParam === "SOCIAL_LOGIN_ONLY") {
+      toast.error("Social login required", {
+        description: "This account uses Google Sign-In. Please log in using Google instead.",
+      });
+    } else if (errorParam) {
+      toast.error("Authentication error", {
+        description: errorParam.replace(/_/g, " "),
+      });
+    }
+  }, [errorParam]);
 
   async function onSubmit(data: LoginFormValues) {
     try {
@@ -122,7 +144,15 @@ export function LoginForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="login-password">Password</FieldLabel>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-4"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   {...field}
