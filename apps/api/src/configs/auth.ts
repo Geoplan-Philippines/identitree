@@ -76,12 +76,28 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, token }) => {
+      const resetLink = `${env.frontendUrl}/reset-password?token=${token}`;
+      const templateId = env.resendResetPwTemplateId.trim();
+
       await sendAuthEmail({
         to: user.email,
         subject: 'Reset your password',
-        text: `Reset your password using this link: ${url}`,
-        html: `<p>Reset your password using this link:</p><p><a href="${url}">${url}</a></p>`,
+        text: `Reset your password using this link: ${resetLink}`,
+        html: `<p>Reset your password using this link:</p><p><a href="${resetLink}">${resetLink}</a></p>`,
+        template: templateId
+          ? {
+            id: templateId,
+            variables: {
+              app_name: 'Identitree',
+              user_name_prefix: user.name ? ` ${user.name}` : '',
+              reset_url: resetLink,
+              expires_in: '1 hour',
+              support_email: 'support@geoplanph.com',
+              year: String(new Date().getFullYear()),
+            },
+          }
+          : undefined,
       });
     },
   },
@@ -108,7 +124,7 @@ export const auth = betterAuth({
               user_name_prefix: user.name ? ` ${user.name}` : '',
               verify_url: verificationLink,
               expires_in: '1 hour',
-              support_email: 'support@kukaass.app',
+              support_email: 'support@geoplanph.com',
               year: String(new Date().getFullYear()),
             },
           }

@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
+import Link from "next/link";
 
 export function LoginForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -122,7 +123,15 @@ export function LoginForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="login-password">Password</FieldLabel>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-4"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   {...field}
