@@ -29,9 +29,34 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const member = await prisma.member.findFirst({
+            where: { userId: session.userId },
+            orderBy: { createdAt: 'asc' },
+          });
+
+          if (member) {
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: member.organizationId,
+              } as any,
+            };
+          }
+          return { data: session };
+        },
+      },
+    },
+  },
   basePath: '/api/v1/auth',
   secret: env.authSecret,
   baseURL: getAuthBaseURL(env.authUrl),
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+  },
   advanced: env.authCookieDomain
     ? {
       crossSubDomainCookies: {
@@ -98,5 +123,39 @@ export const auth = betterAuth({
       prompt: 'select_account',
     },
   },
-  plugins: [organization()],
+  plugins: [
+    organization(),
+    {
+      id: 'auto-organization-fallback',
+      hooks: {
+        after: [
+          {
+            matcher: (ctx: any) => ctx.path === '/get-session' && ctx.method === 'GET',
+            handler: createAuthMiddleware(async (ctx: any) => {
+              const data = ctx.returned;
+              if (data?.session && data?.user && !data.session.activeOrganizationId) {
+                const member = await prisma.member.findFirst({
+                  where: { userId: data.user.id },
+                  orderBy: { createdAt: 'asc' },
+                });
+
+                if (member) {
+                  // Update the database so it's persisted
+                  await prisma.session.update({
+                    where: { id: data.session.id },
+                    data: { activeOrganizationId: member.organizationId } as any,
+                  }).catch(err => {
+                    console.error('Failed to auto-set active organization in session hook:', err);
+                  });
+
+                  // Update the response data so the client sees it immediately
+                  data.session.activeOrganizationId = member.organizationId;
+                }
+              }
+            }),
+          },
+        ],
+      },
+    },
+  ],
 });
