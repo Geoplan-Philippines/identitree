@@ -2,9 +2,14 @@ import Link from "next/link";
 import { Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { requireOrganization } from "@/lib/auth/redirects";
+import { redirect } from "next/navigation";
 
 export default async function DashboardIndexPage() {
-  await requireOrganization();
+  const session = await requireOrganization();
+
+  if (session.organizationSlug) {
+    redirect(`/dashboard/${session.organizationSlug}`);
+  }
 
   return (
     <section className="main-container flex flex-col items-center justify-center py-24 text-center">

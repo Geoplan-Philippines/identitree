@@ -51,6 +51,10 @@ export function LoginForm() {
           console.warn("Failed to fetch organizations:", orgsError);
         } else if (orgs && orgs.length > 0 && orgs[0]) {
           organizationSlug = orgs[0].slug;
+          // Explicitly set the active organization so hooks and sub-requests are consistent
+          await authClient.organization.setActive({
+            organizationId: orgs[0].id,
+          });
         }
       } catch (orgError) {
         console.warn("Error fetching organizations:", orgError);

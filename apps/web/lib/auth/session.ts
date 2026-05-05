@@ -94,7 +94,7 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
         image: session.user.image,
         emailVerified: session.user.emailVerified,
       },
-      organizationSlug: activeOrganization?.slug ?? null,
+      organizationSlug: (activeOrganization?.slug as string) || null,
     };
   } catch (error) {
     // If the error is a Next.js dynamic server usage error, we must re-throw it
