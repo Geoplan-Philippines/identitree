@@ -21,6 +21,7 @@ import { resetPasswordSchema, type ResetPasswordFormValues } from "@/lib/zod/aut
 
 export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -137,14 +138,24 @@ export function ResetPasswordForm() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="confirm-password">Confirm New Password</FieldLabel>
-              <Input
-                {...field}
-                id="confirm-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Confirm new password"
-                autoComplete="new-password"
-                aria-invalid={fieldState.invalid}
-              />
+              <div className="relative">
+                <Input
+                  {...field}
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  autoComplete="new-password"
+                  aria-invalid={fieldState.invalid}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
