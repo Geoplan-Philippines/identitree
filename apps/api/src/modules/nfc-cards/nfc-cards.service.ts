@@ -8,6 +8,7 @@ import { CreateNfcCardDTO } from './dto/create-nfc-card.dto';
 import { UpdateNfcCardDTO } from './dto/update-nfc-card.dto';
 import { slugify } from './slugify';
 import { env } from '../../configs/env';
+import { NotificationsService } from '../notifications/notifications.service';
 
 type CreateNfcCardInput = {
   user: AuthContext;
@@ -18,6 +19,7 @@ type CreateNfcCardInput = {
 export class NfcCardsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
   ) { }
 
   /**
@@ -141,11 +143,33 @@ export class NfcCardsService {
       delete updateData.name;
     }
 
-    return this.prisma.nfcCard.update({
+    const updatedCard = await this.prisma.nfcCard.update({
       where: { id },
       data: updateData,
-      include: { profile: true },
+      include: { 
+        profile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            ownerUserId: true,
+          }
+        } 
+      },
     });
+
+    // Notify user if a profile was newly assigned
+    if (data.profileId && updatedCard.profile?.ownerUserId) {
+      await this.notifications.create({
+        userId: updatedCard.profile.ownerUserId,
+        organizationId: updatedCard.organizationId,
+        type: 'INFO',
+        title: 'New Card Assigned',
+        message: `An NFC card has been assigned to your profile (${updatedCard.profile.firstName} ${updatedCard.profile.lastName}).`,
+      });
+    }
+
+    return updatedCard;
   }
 
   /**
@@ -161,14 +185,36 @@ export class NfcCardsService {
       throw new NotFoundException(`NFC card with URL "${encodedUrl}" was not found`);
     }
 
-    return this.prisma.nfcCard.update({
+    const updatedCard = await this.prisma.nfcCard.update({
       where: { id: card.id },
       data: {
         hardwareId,
         status: 'ACTIVE',
       },
-      include: { profile: true },
+      include: { 
+        profile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            ownerUserId: true,
+          }
+        } 
+      },
     });
+
+    // Notify user if card is linked to a profile
+    if (updatedCard.profile?.ownerUserId) {
+      await this.notifications.create({
+        userId: updatedCard.profile.ownerUserId,
+        organizationId: updatedCard.organizationId,
+        type: 'SUCCESS',
+        title: 'Card Activated!',
+        message: `Your NFC card for ${updatedCard.profile.firstName} ${updatedCard.profile.lastName} is now active.`,
+      });
+    }
+
+    return updatedCard;
   }
 
   /**
@@ -205,14 +251,35 @@ export class NfcCardsService {
       throw new NotFoundException(`This link was not found. Please copy the URL link from your profile page.`);
     }
 
-    return this.prisma.nfcCard.update({
+    const updatedCard = await this.prisma.nfcCard.update({
       where: { id: card.id },
       data: {
         hardwareId,
         status: 'ACTIVE',
       },
-      include: { profile: true },
+      include: { 
+        profile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            ownerUserId: true,
+          }
+        } 
+      },
     });
+
+    if (updatedCard.profile?.ownerUserId) {
+      await this.notifications.create({
+        userId: updatedCard.profile.ownerUserId,
+        organizationId: updatedCard.organizationId,
+        type: 'SUCCESS',
+        title: 'Card Registered!',
+        message: `Your customer-owned card for ${updatedCard.profile.firstName} ${updatedCard.profile.lastName} has been registered and is now active.`,
+      });
+    }
+
+    return updatedCard;
   }
 
   /**

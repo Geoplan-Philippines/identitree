@@ -223,6 +223,7 @@ export const auth = betterAuth({
             where: { organizationId: organization.id },
           });
 
+          let cardsUpdated = false;
           for (const card of cards) {
             // Reconstruct encodedUrl with the new organization slug
             const urlParts = card.encodedUrl.split('/');
@@ -233,6 +234,34 @@ export const auth = betterAuth({
               await prisma.nfcCard.update({
                 where: { id: card.id },
                 data: { encodedUrl: newEncodedUrl },
+              });
+              cardsUpdated = true;
+            }
+          }
+
+          // Notify members about the change ONLY if cards were actually affected
+          if (cardsUpdated) {
+            const members = await prisma.member.findMany({
+              where: { organizationId: organization.id },
+              select: { userId: true },
+            });
+
+            for (const member of members) {
+              const notification = await prisma.notification.create({
+                data: {
+                  userId: member.userId,
+                  organizationId: organization.id,
+                  type: 'WARNING',
+                  title: 'NFC Card URLs Updated',
+                  message: `The organization slug for "${organization.name}" has changed to "${organization.slug}". Physical NFC cards must be re-activated with the new URLs.`,
+                },
+              });
+
+              // Trigger real-time push via the event bridge
+              const { notificationEvents, NOTIFICATION_CREATED_EVENT } = require('../modules/notifications/notifications.events');
+              notificationEvents.emit(NOTIFICATION_CREATED_EVENT, {
+                userId: member.userId,
+                notification,
               });
             }
           }
