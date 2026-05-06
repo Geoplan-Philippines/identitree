@@ -92,7 +92,6 @@ function DashboardSidebar() {
   const growthLinks: DashboardLink[] = [
     { label: "Brand Kit", href: "#", icon: Palette },
     { label: "NFC Devices", href: "#", icon: Nfc },
-    { label: "Billing", href: "#", icon: CreditCard },
   ];
 
   return (
@@ -200,7 +199,7 @@ function DashboardSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Settings">
-              <Link href="#">
+              <Link href={`/dashboard/${slug}/settings`}>
                 <Settings aria-hidden="true" />
                 <span>Settings</span>
               </Link>
