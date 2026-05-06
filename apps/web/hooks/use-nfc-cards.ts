@@ -22,6 +22,9 @@ export function useCreateNfcCard() {
         if (!oldData) return [newCard];
         return [newCard, ...oldData];
       });
+      // New card creation might trigger a notification
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.refetchQueries({ queryKey: ["notifications"] });
     },
   });
 }
@@ -38,6 +41,9 @@ export function useUpdateNfcCard() {
         if (!oldData) return [updatedCard];
         return oldData.map(card => card.id === updatedCard.id ? updatedCard : card);
       });
+      // Card updates (like assignment) trigger notifications
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.refetchQueries({ queryKey: ["notifications"] });
     },
   });
 }

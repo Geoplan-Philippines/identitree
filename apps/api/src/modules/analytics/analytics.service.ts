@@ -2,23 +2,37 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { AnalyticsChannel } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { CreateAnalyticsEventDto } from './dto/create-analytics-event.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async createEvent(dto: CreateAnalyticsEventDto, clientIp?: string) {
     // 1. Resolve Profile to get organizationId
     const profile = await this.prisma.profile.findUnique({
       where: { id: dto.profileId },
-      select: { organizationId: true },
+      select: { 
+        organization: {
+          select: {
+            id: true,
+            slug: true,
+          }
+        },
+        ownerUserId: true,
+        firstName: true,
+        lastName: true,
+      },
     });
 
     if (!profile) {
       throw new NotFoundException('Profile not found');
     }
 
-    if (!profile.organizationId) {
+    if (!profile.organization?.id) {
       // If schema requires organizationId to be not null, we can't save without it.
       // Alternatively, we could throw an error, but analytics failing shouldn't crash the app.
       throw new Error('Profile does not belong to an organization, cannot track analytics event');
@@ -38,9 +52,9 @@ export class AnalyticsService {
     }
 
     // 3. Save the event
-    return this.prisma.analyticsEvent.create({
+    const event = await this.prisma.analyticsEvent.create({
       data: {
-        organizationId: profile.organizationId,
+        organizationId: profile.organization.id,
         profileId: dto.profileId,
         nfcCardId: dto.nfcCardId,
         eventType: dto.eventType,
@@ -50,6 +64,19 @@ export class AnalyticsService {
         city: city,
       },
     });
+
+    // 4. Trigger notifications
+    if (dto.eventType === 'SAVE_CONTACT' && profile.ownerUserId && profile.organization) {
+      await this.notifications.create({
+        userId: profile.ownerUserId,
+        organizationId: profile.organization.id,
+        type: 'SUCCESS',
+        title: 'New Lead!',
+        message: `Someone saved the contact details for ${profile.firstName} ${profile.lastName}.`,
+      });
+    }
+
+    return event;
   }
 
   async getStatsBySlug(

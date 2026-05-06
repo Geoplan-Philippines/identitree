@@ -25,6 +25,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
+import { NotificationsPopover } from "@/components/dashboard/notifications-popover";
 import {
   Sidebar,
   SidebarContent,
@@ -290,15 +291,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 rounded-none hover:bg-muted"
-                  aria-label="Notifications"
-                >
-                  <Bell className="size-4" aria-hidden="true" />
-                </Button>
+                <NotificationsPopover />
 
                 <NfcCardDialog
                   trigger={
