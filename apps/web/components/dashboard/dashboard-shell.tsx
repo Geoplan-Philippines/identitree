@@ -22,7 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import {
@@ -63,24 +63,39 @@ function DashboardSidebar() {
   const router = useRouter();
 
   const slug = params?.slug as string;
+  const { data: sessionData } = authClient.useSession();
+  const user = sessionData?.user;
 
-  const primaryLinks: DashboardLink[] = [
+  const getInitials = (name?: string | null) => {
+    if (!name) return "ID";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const workspaceLinks: DashboardLink[] = [
     { label: "Overview", href: `/dashboard/${slug}`, icon: LayoutDashboard },
     { label: "Cards", href: `/dashboard/${slug}/cards`, icon: IdCard },
-    { label: "Contacts", href: `/dashboard/${slug}/contacts`, icon: ContactRound },
-    { label: "Teams", href: `/dashboard/${slug}/teams`, icon: Users },
-    { label: "Templates", href: `/dashboard/${slug}/templates`, icon: LayoutTemplate },
+    { label: "Analytics", href: `/dashboard/${slug}/analytics`, icon: BarChart3 },
+    { label: "Tools", href: `/dashboard/${slug}/tools`, icon: Wrench },
+  ];
+
+  const comingSoonLinks: DashboardLink[] = [
+    { label: "Contacts", href: "#", icon: ContactRound },
+    { label: "Teams", href: "#", icon: Users },
+    { label: "Templates", href: "#", icon: LayoutTemplate },
   ];
 
   const growthLinks: DashboardLink[] = [
-    { label: "Analytics", href: `/dashboard/${slug}/analytics`, icon: BarChart3 },
-    { label: "Brand kit", href: "#", icon: Palette },
-    { label: "NFC devices", href: "#", icon: Nfc },
-    { label: "Billing", href: "#", icon: CreditCard },
+    { label: "Brand Kit", href: "#", icon: Palette },
+    { label: "NFC Devices", href: "#", icon: Nfc },
   ];
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border top-12 !h-[calc(100svh-48px)]">
+    <Sidebar collapsible="icon" className="border-r border-border h-svh">
       {/* Hand-rolled header to perfectly match the main header height (h-14) without extra gaps */}
       <div className="flex h-14 shrink-0 items-center border-b border-border px-3">
         <SidebarMenu>
@@ -107,7 +122,7 @@ function DashboardSidebar() {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {primaryLinks.map((item) => {
+              {workspaceLinks.map((item) => {
                 const isOverview = item.href === `/dashboard/${slug}`;
                 const isActive = isOverview
                   ? pathname === item.href
@@ -136,47 +151,45 @@ function DashboardSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Growth</SidebarGroupLabel>
+          <SidebarGroupLabel>Coming Soon</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {growthLinks.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-
-                return (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon aria-hidden="true" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {comingSoonLinks.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={`${item.label} (Coming Soon)`}
+                    disabled
+                  >
+                    <Link href={item.href} className="opacity-50 cursor-not-allowed">
+                      <item.icon aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Utilities</SidebarGroupLabel>
+          <SidebarGroupLabel>Growth (Coming Soon)</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={pathname === `/dashboard/${slug}/tools` || pathname.startsWith(`/dashboard/${slug}/tools/`)}
-                  tooltip="Tools"
-                >
-                  <Link href={`/dashboard/${slug}/tools`}>
-                    <Wrench aria-hidden="true" />
-                    <span>Tools</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {growthLinks.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={`${item.label} (Coming Soon)`}
+                    disabled
+                  >
+                    <Link href={item.href} className="opacity-50 cursor-not-allowed">
+                      <item.icon aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -186,14 +199,14 @@ function DashboardSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Settings">
-              <Link href="#">
+              <Link href={`/dashboard/${slug}/settings`}>
                 <Settings aria-hidden="true" />
                 <span>Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton 
+            <SidebarMenuButton
               tooltip="Log out"
               onClick={async () => {
                 await authClient.signOut();
@@ -206,14 +219,24 @@ function DashboardSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="Account">
-              <Link href="#">
+              <Link href={`/dashboard/${slug}/account`}>
                 <Avatar size="sm">
-                  <AvatarFallback className="text-xs font-medium">ID</AvatarFallback>
+                  {user?.image && (
+                    <AvatarImage
+                      src={user.image}
+                      alt={user.name || "User avatar"}
+                    />
+                  )}
+                  <AvatarFallback className="text-xs font-medium">
+                    {getInitials(user?.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <span className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate text-[13px] font-medium">Workspace admin</span>
+                  <span className="truncate text-[13px] font-medium">
+                    {user?.name || "User"}
+                  </span>
                   <span className="truncate text-[11px] text-muted-foreground">
-                    Pro plan
+                    {user?.email || "Pro plan"}
                   </span>
                 </span>
               </Link>
@@ -231,7 +254,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top promotional banner (fixed to top) */}
-      <div className="fixed inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-center gap-3 bg-[#131415] px-4 py-2.5 text-sm font-medium text-white">
+      {/* <div className="fixed inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-center gap-3 bg-[#131415] px-4 py-2.5 text-sm font-medium text-white">
         <span className="flex items-center gap-2">
           Try Pro for free — <span className="hidden opacity-80 sm:inline text-white/80">our most popular plan for content creators and businesses.</span>
         </span>
@@ -242,14 +265,14 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <Zap className="mr-1.5 size-[11px] fill-current" aria-hidden="true" />
           Upgrade
         </Link>
-      </div>
+      </div> */}
 
       <TooltipProvider>
         {/* Set SidebarProvider to not manage overall height since we have a fixed banner */}
-        <SidebarProvider className="flex-1 overflow-hidden" style={{ minHeight: "calc(100svh - 48px)" }}>
+        <SidebarProvider className="flex-1 overflow-hidden">
           <DashboardSidebar />
           {/* Add mt-12 so the inset starts below the banner */}
-          <SidebarInset className="flex flex-col overflow-hidden mt-12 bg-background h-[calc(100svh-48px)]">
+          <SidebarInset className="flex flex-col overflow-hidden bg-background h-svh">
             <header className="flex-none flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4 md:px-5">
               <div className="flex items-center gap-3">
                 <SidebarTrigger

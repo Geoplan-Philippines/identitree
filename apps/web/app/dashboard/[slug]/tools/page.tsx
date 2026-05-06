@@ -1,6 +1,7 @@
 import { requireOrganizationAccess } from "@/lib/auth/redirects";
 import Link from "next/link";
 import { Nfc } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-shell";
 
 type ToolsPageProps = {
   params: Promise<{ slug: string }>;
@@ -11,14 +12,13 @@ export default async function ToolsPage({ params }: ToolsPageProps) {
   await requireOrganizationAccess(slug);
 
   return (
-    <div className="flex flex-col gap-6 p-1">
-      <div className="flex flex-col gap-4 px-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-black tracking-tight uppercase">Tools</h1>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Tools"
+        description="Utility tools for card management."
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 px-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/activate"
           className="group flex flex-col gap-4 border border-border bg-background p-6 hover:bg-muted/40 transition-colors"
