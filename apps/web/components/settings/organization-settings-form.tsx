@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Upload } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,11 +31,12 @@ const organizationSchema = z.object({
 
 type OrganizationSettingsValues = z.infer<typeof organizationSchema>;
 
-export function OrganizationSettingsForm() {
+export function OrganizationSettingsForm({ slug }: { slug: string }) {
   const router = useRouter();
   const { setOrganizationSlug } = useAuth();
-  const { data: activeOrg, isPending: isLoadingOrg } = authClient.useActiveOrganization();
   
+  const [orgData, setOrgData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -53,14 +55,43 @@ export function OrganizationSettingsForm() {
   }, []);
 
   useEffect(() => {
-    if (activeOrg && mounted) {
-      form.reset({
-        name: activeOrg.name,
-        slug: activeOrg.slug,
-      });
-      setLogoPreview(activeOrg.logo || null);
+    async function fetchOrg() {
+      if (!mounted) return;
+      
+      try {
+        const { data, error } = await authClient.organization.getFullOrganization({
+          query: {
+            organizationSlug: slug,
+          },
+        });
+
+        if (error) {
+          toast.error("Failed to load organization details");
+          return;
+        }
+
+        if (data) {
+          setOrgData(data);
+          form.reset({
+            name: data.name,
+            slug: data.slug,
+          });
+          setLogoPreview(data.logo || null);
+          
+          // Sync active organization if it's different
+          await authClient.organization.setActive({
+            organizationSlug: data.slug
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching organization:", err);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [activeOrg, form]);
+
+    fetchOrg();
+  }, [slug, mounted, form]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -80,10 +111,10 @@ export function OrganizationSettingsForm() {
   };
 
   async function onSubmit(data: OrganizationSettingsValues) {
-    if (!activeOrg) return;
+    if (!orgData) return;
 
     try {
-      let logoUrl = activeOrg.logo || undefined;
+      let logoUrl = orgData.logo || undefined;
 
       if (logoFile) {
         setIsUploading(true);
@@ -111,7 +142,7 @@ export function OrganizationSettingsForm() {
 
       toast.success("Organization updated successfully");
 
-      if (updatedOrg && updatedOrg.slug !== activeOrg.slug) {
+      if (updatedOrg && updatedOrg.slug !== orgData.slug) {
         setOrganizationSlug(updatedOrg.slug);
         router.push(`/dashboard/${updatedOrg.slug}/settings`);
       }
@@ -124,10 +155,44 @@ export function OrganizationSettingsForm() {
     }
   }
 
-  if (!mounted || isLoadingOrg) {
+  if (!mounted || isLoading) {
     return (
-      <div className="flex h-32 items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      <div className="space-y-8 w-full max-w-2xl">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-16" />
+            <div className="flex gap-0">
+              <Skeleton className="h-9 w-40 rounded-r-none" />
+              <Skeleton className="h-9 flex-1 rounded-l-none" />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-32" />
+            <div className="flex items-center gap-6">
+              <Skeleton className="size-20 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-48" />
+                <Skeleton className="h-8 w-28 mt-2" />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-border">
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </div>
       </div>
     );
   }

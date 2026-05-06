@@ -104,7 +104,7 @@ export default async function SettingsPage({ params, searchParams }: SettingsPag
         {/* Settings Content Area */}
         <div className="flex-1 min-w-0">
           <div className="bg-background">
-            {tab === "organization" && <OrganizationSettingsForm />}
+            {tab === "organization" && <OrganizationSettingsForm slug={slug} />}
             {tab !== "organization" && (
               <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-muted rounded-xl">
                 <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">

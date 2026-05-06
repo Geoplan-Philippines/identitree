@@ -11,8 +11,16 @@ import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
 import { QrCodeTooltipContent } from "@/components/nfc/qr-code-tooltip-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
-import { Copy, MoveLeftIcon, QrCode, Nfc } from "lucide-react";
+import { Copy, MoveLeftIcon, QrCode, Nfc, IdCard, Plus } from "lucide-react";
 import Link from "next/link";
 import { downloadQrCode } from "@/lib/utils/qr-code";
 import { toast } from "sonner";
@@ -41,7 +49,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
   const updateMutation = useUpdateNfcCard();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -69,10 +77,6 @@ export function CardsClient({ initialData }: CardsClientProps) {
 
   const selectedCard = cards.find((c) => c.id === selectedCardId) || null;
 
-  if (cards.length === 0) {
-    return <p className="text-muted-foreground">No NFC cards found.</p>;
-  }
-
   return (
     <div className="flex h-full gap-6 overflow-hidden p-1">
       {/* Left Column: Card List */}
@@ -93,9 +97,44 @@ export function CardsClient({ initialData }: CardsClientProps) {
             "grid gap-5 pb-16",
             selectedCardId ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           )}>
-            {filteredCards.length === 0 ? (
-              <div className="col-span-full py-12 text-center border-2 border-dashed border-muted rounded-none">
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No matching cards</p>
+            {cards.length === 0 ? (
+              <div className="col-span-full py-20">
+                <Empty>
+                  <EmptyMedia variant="icon">
+                    <IdCard className="size-6" />
+                  </EmptyMedia>
+                  <EmptyHeader>
+                    <EmptyTitle>No NFC cards found</EmptyTitle>
+                    <EmptyDescription>
+                      Start by creating your first NFC card for your organization.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <NfcCardDialog
+                      onSuccess={refetch}
+                      trigger={
+                        <Button>
+                          <Plus className="size-3.5 mr-1.5" />
+                          New card
+                        </Button>
+                      }
+                    />
+                  </EmptyContent>
+                </Empty>
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div className="col-span-full py-12">
+                <Empty>
+                  <EmptyMedia variant="icon">
+                    <IdCard className="size-5" />
+                  </EmptyMedia>
+                  <EmptyHeader>
+                    <EmptyTitle>No matching cards</EmptyTitle>
+                    <EmptyDescription>
+                      We couldn't find any cards matching your current filters.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
               </div>
             ) : (
               filteredCards.map((card) => (
@@ -196,9 +235,9 @@ export function CardsClient({ initialData }: CardsClientProps) {
                   </div>
 
                     <div className="flex flex-col gap-2">
-                      <Button 
+                      <Button
                         size="sm"
-                        className="w-full rounded-none font-bold uppercase text-[10px]" 
+                        className="w-full rounded-none font-bold uppercase text-[10px]"
                         variant={card.profile ? "outline" : "default"}
                         onClick={() => setSelectedCardId(card.id)}
                       >
@@ -212,7 +251,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
                           variant="default"
                           className="w-full rounded-none font-bold uppercase text-[10px]"
                         >
-                          <Link 
+                          <Link
                             href={`/activate?url=${encodeURIComponent(card.encodedUrl)}`}
                             target="_blank"
                             rel="noopener noreferrer"
