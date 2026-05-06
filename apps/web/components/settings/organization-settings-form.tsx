@@ -6,12 +6,23 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, AlertCircle, Info } from "lucide-react";
+import { Loader2, AlertCircle, Info, Trash2, TriangleAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { PageHeader, Section, ActionArea } from "@/components/shared/page-shell";
 import { useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +59,9 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSavingGeneral, setIsSavingGeneral] = useState(false);
+  const [isUpdatingSlug, setIsUpdatingSlug] = useState(false);
+  const [showSlugConfirm, setShowSlugConfirm] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const form = useForm<OrganizationSettingsValues>({
@@ -79,8 +93,16 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
     return response.url;
   };
 
-  async function onSubmit(data: OrganizationSettingsValues) {
+  async function onSubmit(
+    data: OrganizationSettingsValues,
+    actionTypeOrEvent?: "general" | "slug" | React.BaseSyntheticEvent
+  ) {
     if (!orgData) return;
+
+    const actionType = typeof actionTypeOrEvent === "string" ? actionTypeOrEvent : "general";
+
+    if (actionType === "general") setIsSavingGeneral(true);
+    else setIsUpdatingSlug(true);
 
     try {
       let logoUrl = orgData.logo || undefined;
@@ -92,6 +114,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
         } catch {
           toast.error("Failed to upload logo");
           setIsUploading(false);
+          setIsSavingGeneral(false);
           return;
         }
         setIsUploading(false);
@@ -122,6 +145,9 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
       const message =
         error instanceof Error ? error.message : "Failed to update organization";
       toast.error("Error", { description: message });
+    } finally {
+      setIsSavingGeneral(false);
+      setIsUpdatingSlug(false);
     }
   }
 
@@ -175,7 +201,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
           <Info className="size-4 text-blue-600" />
           <AlertTitle className="text-blue-900 font-semibold">Important: Action Required</AlertTitle>
           <AlertDescription className="text-blue-800/80">
-            Since your organization URL has changed, your physical NFC cards will no longer work until you reactivate them. 
+            Since your organization URL has changed, your physical NFC cards will no longer work until you reactivate them.
             Please use the <span className="font-bold underline cursor-pointer" onClick={() => router.push(`/dashboard/${slug}/tools`)}>Activation Tool</span> to sync your physical cards with the new link.
           </AlertDescription>
         </Alert>
@@ -198,32 +224,6 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                 </Field>
               )}
             />
-
-            <Controller
-              name="slug"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="org-slug">Slug</FieldLabel>
-                  <div className="flex flex-col sm:flex-row sm:items-center">
-                    <span className="inline-flex h-8 items-center border sm:border-r-0 border-input bg-muted px-3 text-[11px] font-medium text-muted-foreground whitespace-nowrap rounded-t-lg sm:rounded-tr-none sm:rounded-l-lg">
-                      identitree.geoplanph.com/dashboard/
-                    </span>
-                    <Input
-                      {...field}
-                      id="org-slug"
-                      placeholder="acme-inc"
-                      className="sm:rounded-l-none"
-                    />
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1.5">
-                    Changing the slug will update your dashboard URL.
-                  </p>
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-
             <Field>
               <FieldLabel>Organization Logo</FieldLabel>
               <ImageUpload
@@ -240,15 +240,17 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
           <ActionArea>
             <Button
-              type="submit"
+              type="button"
+              onClick={() => form.handleSubmit((data) => onSubmit(data, "general"))()}
               className="w-full sm:w-auto px-10"
               disabled={
-                (!form.formState.isDirty && logoFile === null) ||
+                (!form.formState.dirtyFields.name && logoFile === null) ||
+                isSavingGeneral ||
                 form.formState.isSubmitting ||
                 isUploading
               }
             >
-              {form.formState.isSubmitting || isUploading ? (
+              {isSavingGeneral || isUploading ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Saving Changes...
@@ -259,7 +261,97 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
             </Button>
           </ActionArea>
         </Section>
+
+        <div className="pt-10 mt-10 border-t border-destructive/20">
+          <Section
+            title="Danger Zone"
+            description="Sensitive settings that can break existing links."
+          >
+            <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
+              <AlertCircle className="size-4" />
+              <AlertTitle className="font-bold">Caution: Changing the Slug</AlertTitle>
+              <AlertDescription className="text-destructive/90">
+                When changing the slug, all URLs of your profiles will be updated immediately.
+                We do not handle the automatic writing of physical NFC cards, so you will need to manually update them using the activation tool.
+              </AlertDescription>
+            </Alert>
+
+            <FieldGroup>
+              <Controller
+                name="slug"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="org-slug" className="text-destructive font-bold uppercase tracking-wider">Organization Slug</FieldLabel>
+                    <div className="flex flex-col sm:flex-row sm:items-stretch gap-2">
+                      <div className="flex flex-1 flex-col sm:flex-row sm:items-center min-w-0">
+                        <span className="inline-flex h-10 items-center border sm:border-r-0 border-input bg-muted px-3 text-[11px] font-medium text-muted-foreground whitespace-nowrap rounded-t-lg sm:rounded-tr-none sm:rounded-l-lg">
+                          identitree.geoplanph.com/dashboard/
+                        </span>
+                        <Input
+                          {...field}
+                          id="org-slug"
+                          placeholder="acme-inc"
+                          className="sm:rounded-l-none h-10"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        className="px-6 h-10"
+                        disabled={
+                          !form.formState.dirtyFields.slug ||
+                          isUpdatingSlug ||
+                          form.formState.isSubmitting ||
+                          isUploading
+                        }
+                        onClick={() => setShowSlugConfirm(true)}
+                      >
+                        {isUpdatingSlug ? (
+                          <>
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          "Update Slug"
+                        )}
+                      </Button>
+                    </div>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </Section>
+        </div>
       </form>
+
+      <AlertDialog open={showSlugConfirm} onOpenChange={setShowSlugConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia>
+              <TriangleAlert className="size-5 text-destructive" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Change Organization Slug?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will break all existing physical NFC cards and public profile links.
+              You will need to manually reactivate every physical card. Are you absolutely sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setShowSlugConfirm(false);
+                form.handleSubmit((data) => onSubmit(data, "slug"))();
+              }}
+            >
+              Yes, Update Slug
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
