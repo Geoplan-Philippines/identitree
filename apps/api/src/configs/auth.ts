@@ -214,7 +214,31 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    organization(),
+    organization({
+      organizationHooks: {
+        afterUpdateOrganization: async ({ organization }) => {
+          if (!organization) return;
+
+          const cards = await prisma.nfcCard.findMany({
+            where: { organizationId: organization.id },
+          });
+
+          for (const card of cards) {
+            // Reconstruct encodedUrl with the new organization slug
+            const urlParts = card.encodedUrl.split('/');
+            const cardSlug = urlParts.pop(); // Get the individual card identifier
+            const newEncodedUrl = `${env.frontendUrl}/${organization.slug}/${cardSlug}`;
+
+            if (newEncodedUrl !== card.encodedUrl) {
+              await prisma.nfcCard.update({
+                where: { id: card.id },
+                data: { encodedUrl: newEncodedUrl },
+              });
+            }
+          }
+        },
+      },
+    }),
     {
       id: 'auto-organization-fallback',
       hooks: {

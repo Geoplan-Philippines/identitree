@@ -1,16 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUpload } from "@/components/shared/image-upload";
 import { PageHeader, Section, ActionArea } from "@/components/shared/page-shell";
 import { useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,8 +38,11 @@ type OrganizationSettingsValues = z.infer<typeof organizationSchema>;
 
 export function OrganizationSettingsForm({ slug }: { slug: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { setOrganizationSlug } = useAuth();
+
+  const showSlugChangedAlert = searchParams.get("slugChanged") === "true";
 
   const { data: orgData, isPending: isLoading } = useOrganization(slug);
 
@@ -109,8 +113,8 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
       toast.success("Organization updated successfully");
 
       if (updatedOrg && updatedOrg.slug !== orgData.slug) {
-        setOrganizationSlug(updatedOrg.slug);
-        router.push(`/dashboard/${updatedOrg.slug}/settings`);
+        await setOrganizationSlug(updatedOrg.slug);
+        router.push(`/dashboard/${updatedOrg.slug}/settings?slugChanged=true`);
       }
     } catch (error) {
       const message =
@@ -163,6 +167,17 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
         title="Organization Settings"
         description="Update your organization details and branding."
       />
+
+      {showSlugChangedAlert && (
+        <Alert className="bg-blue-50/50 border-blue-200/50 text-blue-900 mb-6">
+          <Info className="size-4 text-blue-600" />
+          <AlertTitle className="text-blue-900 font-semibold">Important: Action Required</AlertTitle>
+          <AlertDescription className="text-blue-800/80">
+            Since your organization URL has changed, your physical NFC cards will no longer work until you reactivate them. 
+            Please use the <span className="font-bold underline cursor-pointer" onClick={() => router.push(`/dashboard/${slug}/tools`)}>Activation Tool</span> to sync your physical cards with the new link.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Section
