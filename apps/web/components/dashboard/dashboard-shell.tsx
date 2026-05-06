@@ -219,7 +219,7 @@ function DashboardSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="Account">
-              <Link href="#">
+              <Link href={`/dashboard/${slug}/account`}>
                 <Avatar size="sm">
                   {user?.image && (
                     <AvatarImage

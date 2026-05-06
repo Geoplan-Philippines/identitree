@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ImageUpload } from "@/components/shared/image-upload";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { apiClient } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
+import { useOrganization } from "@/hooks/use-organization";
 
 const organizationSchema = z.object({
   name: z.string().min(2, "Organization name is required."),
@@ -33,79 +36,40 @@ type OrganizationSettingsValues = z.infer<typeof organizationSchema>;
 
 export function OrganizationSettingsForm({ slug }: { slug: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { setOrganizationSlug } = useAuth();
-  
-  const [orgData, setOrgData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
+
+  const { data: orgData, isPending: isLoading } = useOrganization(slug);
+
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const form = useForm<OrganizationSettingsValues>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-    },
+    defaultValues: { name: "", slug: "" },
   });
 
+  // Populate form once data arrives
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (orgData) {
+      form.reset({ name: orgData.name, slug: orgData.slug });
+      setLogoPreview(orgData.logo ?? null);
 
-  useEffect(() => {
-    async function fetchOrg() {
-      if (!mounted) return;
-      
-      try {
-        const { data, error } = await authClient.organization.getFullOrganization({
-          query: {
-            organizationSlug: slug,
-          },
-        });
-
-        if (error) {
-          toast.error("Failed to load organization details");
-          return;
-        }
-
-        if (data) {
-          setOrgData(data);
-          form.reset({
-            name: data.name,
-            slug: data.slug,
-          });
-          setLogoPreview(data.logo || null);
-          
-          // Sync active organization if it's different
-          await authClient.organization.setActive({
-            organizationSlug: data.slug
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching organization:", err);
-      } finally {
-        setIsLoading(false);
-      }
+      // Sync active org
+      authClient.organization.setActive({ organizationSlug: orgData.slug });
     }
+  }, [orgData, form]);
 
-    fetchOrg();
-  }, [slug, mounted, form]);
-
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-    }
+  const handleLogoChange = (file: File) => {
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
   };
 
-  const uploadToCloudinary = async (file: File) => {
+  const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", "identitree/logo");
-
     const response = await apiClient.post<any>("/upload/image", formData);
     return response.url;
   };
@@ -120,7 +84,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
         setIsUploading(true);
         try {
           logoUrl = await uploadToCloudinary(logoFile);
-        } catch (error) {
+        } catch {
           toast.error("Failed to upload logo");
           setIsUploading(false);
           return;
@@ -133,12 +97,13 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
           name: data.name,
           slug: data.slug,
           ...(logoUrl ? { logo: logoUrl } : {}),
-        }
+        },
       });
 
-      if (error) {
-        throw new Error(error.message || "Failed to update organization");
-      }
+      if (error) throw new Error(error.message || "Failed to update organization");
+
+      // Invalidate so the query refetches with the new slug
+      queryClient.invalidateQueries({ queryKey: ["organization", slug] });
 
       toast.success("Organization updated successfully");
 
@@ -149,26 +114,22 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to update organization";
-      toast.error("Error", {
-        description: message,
-      });
+      toast.error("Error", { description: message });
     }
   }
 
-  if (!mounted || isLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-8 w-full max-w-2xl">
         <div className="space-y-2">
           <Skeleton className="h-7 w-48" />
           <Skeleton className="h-4 w-64" />
         </div>
-
         <div className="space-y-6">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-9 w-full" />
           </div>
-
           <div className="space-y-2">
             <Skeleton className="h-4 w-16" />
             <div className="flex gap-0">
@@ -176,7 +137,6 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
               <Skeleton className="h-9 flex-1 rounded-l-none" />
             </div>
           </div>
-
           <div className="space-y-3">
             <Skeleton className="h-4 w-32" />
             <div className="flex items-center gap-6">
@@ -188,7 +148,6 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
               </div>
             </div>
           </div>
-
           <div className="pt-6 border-t border-border">
             <Skeleton className="h-9 w-32" />
           </div>
@@ -214,11 +173,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="org-name">Organization Name</FieldLabel>
-                <Input
-                  {...field}
-                  id="org-name"
-                  placeholder="Acme Inc"
-                />
+                <Input {...field} id="org-name" placeholder="Acme Inc" />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
@@ -251,56 +206,26 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
           <Field>
             <FieldLabel>Organization Logo</FieldLabel>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-2">
-              <div className="relative group shrink-0">
-                <div className="size-20 overflow-hidden rounded-xl border border-border bg-muted flex items-center justify-center">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <Upload className="size-6 text-muted-foreground/40" />
-                  )}
-                </div>
-                <label
-                  htmlFor="logo-upload"
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[10px] font-bold uppercase text-white rounded-xl"
-                >
-                  Change
-                </label>
-                <input
-                  id="logo-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogoChange}
-                />
-              </div>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium">Update Logo</p>
-                <p className="text-xs text-muted-foreground">
-                  Recommend size: 512x512px. JPG, PNG or SVG.
-                </p>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => document.getElementById('logo-upload')?.click()}
-                >
-                  Upload Image
-                </Button>
-              </div>
-            </div>
+            <ImageUpload
+              value={logoPreview}
+              onChange={handleLogoChange}
+              label="Update Logo"
+              description="Recommended size: 512×512px. JPG, PNG or SVG."
+              inputId="org-logo-upload"
+              disabled={isUploading || form.formState.isSubmitting}
+              className="mt-2"
+            />
           </Field>
 
           <div className="pt-6 border-t border-border">
-            <Button 
-              type="submit" 
-              className="w-full sm:w-auto px-10" 
-              disabled={form.formState.isSubmitting || isUploading}
+            <Button
+              type="submit"
+              className="w-full sm:w-auto px-10"
+              disabled={
+                (!form.formState.isDirty && logoFile === null) ||
+                form.formState.isSubmitting ||
+                isUploading
+              }
             >
               {form.formState.isSubmitting || isUploading ? (
                 <>
