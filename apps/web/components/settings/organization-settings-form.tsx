@@ -114,6 +114,8 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
       if (updatedOrg && updatedOrg.slug !== orgData.slug) {
         await setOrganizationSlug(updatedOrg.slug);
+        // Invalidate NFC cards so they refetch with the new URLs
+        queryClient.invalidateQueries({ queryKey: ["nfc-cards"] });
         router.push(`/dashboard/${updatedOrg.slug}/settings?slugChanged=true`);
       }
     } catch (error) {
