@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { PageHeader, Section, ActionArea } from "@/components/shared/page-shell";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -120,7 +121,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
   if (isLoading) {
     return (
-      <div className="space-y-8 w-full max-w-2xl">
+      <div className="space-y-10 w-full max-w-2xl">
         <div className="space-y-2">
           <Skeleton className="h-7 w-48" />
           <Skeleton className="h-4 w-64" />
@@ -157,67 +158,70 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Organization Settings</h3>
-        <p className="text-sm text-muted-foreground">
-          Update your organization details and branding.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        title="Organization Settings"
+        description="Update your organization details and branding."
+      />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FieldGroup>
-          <Controller
-            name="name"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="org-name">Organization Name</FieldLabel>
-                <Input {...field} id="org-name" placeholder="Acme Inc" />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="slug"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="org-slug">Slug</FieldLabel>
-                <div className="flex flex-col sm:flex-row sm:items-center">
-                  <span className="inline-flex h-8 items-center border sm:border-r-0 border-input bg-muted px-3 text-[11px] font-medium text-muted-foreground whitespace-nowrap rounded-t-lg sm:rounded-tr-none sm:rounded-l-lg">
-                    identitree.geoplanph.com/dashboard/
-                  </span>
-                  <Input
-                    {...field}
-                    id="org-slug"
-                    placeholder="acme-inc"
-                    className="sm:rounded-l-none"
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1.5">
-                  Changing the slug will update your dashboard URL.
-                </p>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Field>
-            <FieldLabel>Organization Logo</FieldLabel>
-            <ImageUpload
-              value={logoPreview}
-              onChange={handleLogoChange}
-              label="Update Logo"
-              description="Recommended size: 512×512px. JPG, PNG or SVG."
-              inputId="org-logo-upload"
-              disabled={isUploading || form.formState.isSubmitting}
-              className="mt-2"
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Section
+          title="General Information"
+          description="Basic details about your organization."
+        >
+          <FieldGroup>
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="org-name">Organization Name</FieldLabel>
+                  <Input {...field} id="org-name" placeholder="Acme Inc" />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
             />
-          </Field>
 
-          <div className="pt-6 border-t border-border">
+            <Controller
+              name="slug"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="org-slug">Slug</FieldLabel>
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="inline-flex h-8 items-center border sm:border-r-0 border-input bg-muted px-3 text-[11px] font-medium text-muted-foreground whitespace-nowrap rounded-t-lg sm:rounded-tr-none sm:rounded-l-lg">
+                      identitree.geoplanph.com/dashboard/
+                    </span>
+                    <Input
+                      {...field}
+                      id="org-slug"
+                      placeholder="acme-inc"
+                      className="sm:rounded-l-none"
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    Changing the slug will update your dashboard URL.
+                  </p>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
+            <Field>
+              <FieldLabel>Organization Logo</FieldLabel>
+              <ImageUpload
+                value={logoPreview}
+                onChange={handleLogoChange}
+                label="Update Logo"
+                description="Recommended size: 512×512px. JPG, PNG or SVG."
+                inputId="org-logo-upload"
+                disabled={isUploading || form.formState.isSubmitting}
+                className="mt-2"
+              />
+            </Field>
+          </FieldGroup>
+
+          <ActionArea>
             <Button
               type="submit"
               className="w-full sm:w-auto px-10"
@@ -236,8 +240,8 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                 "Save Changes"
               )}
             </Button>
-          </div>
-        </FieldGroup>
+          </ActionArea>
+        </Section>
       </form>
     </div>
   );

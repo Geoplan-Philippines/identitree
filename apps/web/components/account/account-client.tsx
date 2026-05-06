@@ -7,6 +7,7 @@ import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { apiClient } from "@/lib/api/client";
 import { ImageUpload } from "@/components/shared/image-upload";
+import { PageHeader, Section, ActionArea } from "@/components/shared/page-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -98,112 +99,105 @@ export function AccountClient({ user: initialUser }: AccountClientProps) {
 
   if (isPending) {
     return (
-      <div className="max-w-2xl space-y-8">
+      <div className="max-w-2xl space-y-10">
         <div className="space-y-2">
           <Skeleton className="h-7 w-32" />
           <Skeleton className="h-4 w-64" />
         </div>
-        <div className="rounded-lg border border-border bg-card p-6 space-y-6">
-          <Skeleton className="h-4 w-24" />
-          <div className="flex items-center gap-6">
-            <Skeleton className="size-20 rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-3 w-48" />
-              <Skeleton className="h-8 w-28 mt-2" />
+        <div className="space-y-6 w-full max-w-2xl">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <div className="flex items-center gap-6">
+              <Skeleton className="size-20 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-3 w-48" />
+                <Skeleton className="h-8 w-28 mt-2" />
+              </div>
             </div>
           </div>
           <div className="space-y-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-9 w-full" />
           </div>
-          <Skeleton className="h-9 w-32" />
+          <div className="pt-6 border-t border-border">
+            <Skeleton className="h-9 w-32" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black tracking-tight uppercase">My Account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your personal profile and account settings.
-        </p>
-      </div>
+    <div className="max-w-2xl space-y-10">
+      <PageHeader
+        title="My Account"
+        description="Manage your personal profile and account settings."
+      />
 
-      {/* Profile */}
-      <div className="rounded-lg border border-border bg-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Profile
-        </h2>
-
-        <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
-          <FieldGroup>
-            <Field>
-              <FieldLabel>Profile Photo</FieldLabel>
-              <ImageUpload
-                value={displayImage}
-                onChange={handleAvatarChange}
-                label="Update Profile Photo"
-                description="JPG, PNG or GIF · Max 5MB"
-                inputId="avatar-upload"
-                disabled={isSaving}
-                className="mt-2"
-              />
-            </Field>
-
-            <Controller
-              name="name"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="account-name">Full Name</FieldLabel>
-                  <Input
-                    {...field}
-                    id="account-name"
-                    placeholder="Your name"
-                    disabled={isSaving}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
+      <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
+        <FieldGroup>
+          <Field>
+            <FieldLabel>Profile Photo</FieldLabel>
+            <ImageUpload
+              value={displayImage}
+              onChange={handleAvatarChange}
+              label="Update Profile Photo"
+              description="JPG, PNG or GIF · Max 5MB"
+              inputId="avatar-upload"
+              disabled={isSaving}
+              className="mt-2"
             />
-          </FieldGroup>
+          </Field>
 
-          <div className="pt-4 border-t border-border">
-            <Button
-              type="submit"
-              disabled={!isDirty || isSaving}
-              className="w-full sm:w-auto px-10"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="account-name">Full Name</FieldLabel>
+                <Input
+                  {...field}
+                  id="account-name"
+                  placeholder="Your name"
+                  disabled={isSaving}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </FieldGroup>
 
-      {/* Email — read-only */}
-      <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Email Address
-        </h2>
+        <ActionArea>
+          <Button
+            type="submit"
+            disabled={!isDirty || isSaving}
+            className="w-full sm:w-auto px-10"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
+        </ActionArea>
+      </form>
+
+      <Section
+        title="Email Address"
+        description="Email cannot be changed here."
+        className="pt-6 border-t border-border"
+      >
         <div className="flex items-center gap-3">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
             <Mail className="size-4 text-muted-foreground" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate">{user?.email}</p>
-            <p className="text-xs text-muted-foreground">Email cannot be changed here.</p>
           </div>
           {user?.emailVerified && (
             <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -211,7 +205,7 @@ export function AccountClient({ user: initialUser }: AccountClientProps) {
             </span>
           )}
         </div>
-      </div>
+      </Section>
     </div>
   );
 }

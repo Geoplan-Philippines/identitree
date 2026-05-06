@@ -11,6 +11,7 @@ import Link from "next/link";
 import { OrganizationSettingsForm } from "@/components/settings/organization-settings-form";
 import { cn } from "@/lib/utils";
 import { requireOrganizationAccess } from "@/lib/auth/redirects";
+import { PageHeader } from "@/components/shared/page-shell";
 
 const settingsOptions = [
   {
@@ -54,13 +55,11 @@ export default async function SettingsPage({ params, searchParams }: SettingsPag
   await requireOrganizationAccess(slug);
 
   return (
-    <div className="space-y-6 w-full min-h-full flex flex-col">
-      <div className="space-y-0.5 shrink-0">
-        <h1 className="text-xl font-semibold text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your organization and account preferences.
-        </p>
-      </div>
+    <div className="space-y-10 w-full min-h-full flex flex-col">
+      <PageHeader
+        title="Settings"
+        description="Manage your organization and account preferences."
+      />
 
       <div className="flex flex-col md:flex-row gap-10 flex-1">
         {/* Settings Navigation Menu */}
