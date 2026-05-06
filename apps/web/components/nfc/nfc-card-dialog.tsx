@@ -104,15 +104,15 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 pt-2 flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="font-medium">URL Name</Label>
-            <Input 
-              id="name" 
-              {...register("name")} 
-              placeholder="e.g. John Doe" 
+            <Input
+              id="name"
+              {...register("name")}
+              placeholder="e.g. John Doe"
             />
             <div className="bg-muted/50 p-2 rounded border border-dashed border-muted-foreground/20">
               <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">Public URL Preview</p>
               <p className="text-xs font-mono break-all text-blue-600 dark:text-blue-400">
-                identitree.com/{slug}/{name ? name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") : "..."}
+                identitree.geoplanph.com/{slug}/{name ? name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") : "..."}
               </p>
             </div>
             {errors.name && <p className="text-xs text-red-500 mt-0.5">{errors.name.message}</p>}
