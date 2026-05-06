@@ -2,7 +2,7 @@ name: "DEPLOY IDENTITREE"
 
 on:
   push:
-    branches: ["staging", "development"]
+    branches: ["main", "staging", "development"]
 
 jobs:
   deploy:
@@ -14,7 +14,11 @@ jobs:
 
       - name: Set environment variables
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/staging' ]]; then
+          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+            echo "TAG=prod" >> $GITHUB_ENV
+            echo "API_URL=https://identitree-api.geoplanph.com/api/v1" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=docker-apps/identitree/prod" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF == 'refs/heads/staging' ]]; then
             echo "TAG=stg" >> $GITHUB_ENV
             echo "API_URL=https://identitree-stg-api.geoplanph.com/api/v1" >> $GITHUB_ENV
             echo "DEPLOY_PATH=docker-apps/identitree/stg" >> $GITHUB_ENV
