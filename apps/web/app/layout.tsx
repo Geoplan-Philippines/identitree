@@ -17,9 +17,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://identitree.geoplanph.com"),
   title: {
-    default: "Identitree — NFC Digital Business Cards",
+    default: "Identitree — Premium NFC Digital Business Cards for Teams",
     template: "%s | Identitree",
   },
+
   description:
     "Manage digital business cards, contacts, teams, and analytics in one premium workspace.",
   keywords: ["NFC", "Digital Business Card", "Networking", "Identity", "Geoplan"],

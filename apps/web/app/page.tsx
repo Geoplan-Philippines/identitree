@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirects";
 
 export const metadata: Metadata = {
-  title: "Identitree — Identity & Organization Workspace",
+  title: "Identitree — Premium NFC Digital Business Cards for Teams",
+
 
   description: "Manage users, organizations, and secure NFC access in one place. The ultimate digital business card ecosystem for teams.",
   alternates: {
