@@ -5,7 +5,11 @@ import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirect
 export const metadata: Metadata = {
   title: "Identity & Organization Workspace",
   description: "Manage users, organizations, and secure NFC access in one place. The ultimate digital business card ecosystem for teams.",
+  alternates: {
+    canonical: "https://identitree.geoplanph.com",
+  },
 };
+
 
 export default async function RootPage() {
   await redirectAuthenticatedUserAwayFromGuestPages();

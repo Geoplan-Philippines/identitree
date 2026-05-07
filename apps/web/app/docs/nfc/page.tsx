@@ -4,7 +4,11 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "NFC Technology Guide",
   description: "Comprehensive guide to Identitree's NFC digital business card technology, compatibility, and best practices.",
+  alternates: {
+    canonical: "https://identitree.geoplanph.com/docs/nfc",
+  },
 };
+
 
 export default function NfcDocsPage() {
   return (

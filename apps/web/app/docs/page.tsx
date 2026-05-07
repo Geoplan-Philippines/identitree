@@ -4,7 +4,11 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Documentation",
   description: "Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Identitree's professional tools.",
+  alternates: {
+    canonical: "https://identitree.geoplanph.com/docs",
+  },
 };
+
 
 export default function DocsPage() {
   return (
