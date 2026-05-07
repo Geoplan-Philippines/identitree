@@ -33,4 +33,4 @@ COPY --from=builder /app ./
 EXPOSE 8000
 
 # Run migrations before starting the app
-CMD ["sh", "-c", "cd apps/api && npx prisma migrate deploy && cd /app && node apps/api/dist/src/main.js"]
+CMD ["sh", "-c", "cd apps/api && npx prisma migrate deploy && npx ts-node src/database/scripts/seed-templates.ts && cd /app && node apps/api/dist/src/main.js"]

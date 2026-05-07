@@ -17,6 +17,7 @@ export const createProfileSchema = z.object({
   viberNumber: z.string().optional()
     .refine(val => !val || val.replace(/\D/g, "").length === 10, "Viber number must be 10 digits")
     .refine(val => !val || val.replace(/\D/g, "").startsWith("9"), "Viber number must start with 9"),
+  templateId: z.string().optional(),
 });
 
 export type CreateProfileValues = z.infer<typeof createProfileSchema>;
