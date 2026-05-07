@@ -1,5 +1,10 @@
+import { Smartphone, Zap, Layers, RefreshCw } from "lucide-react";
+import { Metadata } from "next";
 
-import { Smartphone, Zap, ShieldCheck, RefreshCw, Layers } from "lucide-react";
+export const metadata: Metadata = {
+  title: "NFC Technology Guide",
+  description: "Comprehensive guide to Identitree's NFC digital business card technology, compatibility, and best practices.",
+};
 
 export default function NfcDocsPage() {
   return (

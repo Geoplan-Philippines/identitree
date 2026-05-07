@@ -1,5 +1,10 @@
-
 import { Zap, Shield, Smartphone, Terminal, Cpu } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Documentation",
+  description: "Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Identitree's professional tools.",
+};
 
 export default function DocsPage() {
   return (
