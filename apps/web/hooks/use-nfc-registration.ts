@@ -1,12 +1,13 @@
-
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function useNfcRegistration() {
   const [isScanning, setIsScanning] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
   const [hardwareId, setHardwareId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const registerAndWrite = useCallback(async (encodedUrl: string) => {
     if (!("NDEFReader" in window)) {
@@ -42,6 +43,11 @@ export function useNfcRegistration() {
             await ndef.write({
               records: [{ recordType: "url", data: urlWithRef.toString() }]
             });
+
+            // 3. Invalidate notifications and cards
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+            queryClient.refetchQueries({ queryKey: ["notifications"] });
+            queryClient.invalidateQueries({ queryKey: ["nfc-cards"] });
 
             toast.success("Card linked and written successfully!");
             setIsWriting(false);

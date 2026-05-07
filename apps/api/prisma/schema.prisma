@@ -26,6 +26,7 @@ model User {
   members                   Member[]
   ownedProfiles             Profile[]
   invitations               Invitation[]
+  notifications             Notification[]
 
   @@map("user")
 }
@@ -101,6 +102,7 @@ model Organization {
   profiles                  Profile[]
   nfcCards                  NfcCard[]
   invitations               Invitation[]
+  notifications             Notification[]
   analyticsEvents           AnalyticsEvent[]
 
   @@map("organization")
@@ -239,6 +241,29 @@ model AnalyticsEvent {
   @@map("analytics_event")
 }
 
+model Notification {
+  id                        String           @id @default(cuid())
+
+  title                     String
+  message                   String
+  type                      NotificationType @default(INFO)
+  link                      String?
+  isRead                    Boolean          @default(false) @map("is_read")
+
+  userId                    String           @map("user_id")
+  user                      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId            String?          @map("organization_id")
+  organization              Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  createdAt                 DateTime         @default(now()) @map("created_at")
+  updatedAt                 DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("notification")
+}
+
 enum NfcCardType {
   GEOPLAN_ISSUED
   CUSTOMER_OWNED
@@ -262,4 +287,14 @@ enum AnalyticsChannel {
 enum AnalyticsEventType {
   PROFILE_VIEW
   SAVE_CONTACT
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  BILLING
+  MEMBER_ACTIVITY
+  SYSTEM
 }

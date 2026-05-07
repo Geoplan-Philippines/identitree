@@ -14,6 +14,7 @@ export const env = {
   resendApiKey: process.env.RESEND_API_KEY || '',
   resendFromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
   resendVerifyTemplateId: process.env.RESEND_VERIFY_TEMPLATE_ID || '',
+  resendResetPwTemplateId: process.env.RESEND_FORGOT_PW_TEMPLATE_ID || '',
 
   // Cloudinary
   cloudName: process.env.CLOUD_NAME || '',

@@ -15,23 +15,122 @@ export const auth = betterAuth({
         if (body?.email) {
           const user = await prisma.user.findUnique({
             where: { email: body.email },
+            include: { accounts: true },
           });
           if (user) {
+            const hasGoogle = user.accounts.some(
+              (acc) => acc.providerId === 'google',
+            );
+            const hasCredential = user.accounts.some(
+              (acc) => acc.providerId === 'credential',
+            );
+
+            if (hasGoogle && !hasCredential) {
+              throw new APIError('BAD_REQUEST', {
+                code: 'SOCIAL_LOGIN_ONLY',
+                message:
+                  'This email is already registered via Google. Please log in using Google instead.',
+              });
+            }
+
             throw new APIError('BAD_REQUEST', {
               code: 'USER_ALREADY_EXISTS',
-              message: 'User already exists',
+              message: 'This email is already registered. Please log in instead.',
             });
           }
         }
+      }
+
+      if (ctx.path === '/request-password-reset' && ctx.method === 'POST') {
+        const body = ctx.body as any;
+        if (body?.email) {
+          const user = await prisma.user.findUnique({
+            where: { email: body.email },
+            include: { accounts: true },
+          });
+
+          if (!user) {
+            return new Response(
+              JSON.stringify({
+                message: 'This email is not registered in our database.',
+                code: 'USER_NOT_FOUND',
+              }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+          }
+
+          const hasPasswordAccount = user.accounts.some(
+            (acc) => acc.providerId === 'credential',
+          );
+          const hasGoogleAccount = user.accounts.some(
+            (acc) => acc.providerId === 'google',
+          );
+
+          if (!hasPasswordAccount && hasGoogleAccount) {
+            return new Response(
+              JSON.stringify({
+                message:
+                  'This account uses Google Sign-In. Please log in using Google instead.',
+                code: 'SOCIAL_LOGIN_ONLY',
+              }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
+          }
+        }
+      }
+      if (ctx.path === '/error' && ctx.method === 'GET') {
+        const error = ctx.query?.error || 'unknown_error';
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `${env.frontendUrl}/login?error=${error}`,
+          },
+        });
       }
     }),
   },
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const member = await prisma.member.findFirst({
+            where: { userId: session.userId },
+            orderBy: { createdAt: 'asc' },
+          });
+
+          if (member) {
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: member.organizationId,
+              } as any,
+            };
+          }
+          return { data: session };
+        },
+      },
+    },
+  },
+  account: {
+    accountLinking: {
+      enabled: false,
+    },
+  },
   basePath: '/api/v1/auth',
   secret: env.authSecret,
   baseURL: getAuthBaseURL(env.authUrl),
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+  },
   advanced: env.authCookieDomain
     ? {
       crossSubDomainCookies: {
@@ -51,12 +150,28 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, token }) => {
+      const resetLink = `${env.frontendUrl}/reset-password?token=${token}`;
+      const templateId = env.resendResetPwTemplateId.trim();
+
       await sendAuthEmail({
         to: user.email,
         subject: 'Reset your password',
-        text: `Reset your password using this link: ${url}`,
-        html: `<p>Reset your password using this link:</p><p><a href="${url}">${url}</a></p>`,
+        text: `Reset your password using this link: ${resetLink}`,
+        html: `<p>Reset your password using this link:</p><p><a href="${resetLink}">${resetLink}</a></p>`,
+        template: templateId
+          ? {
+            id: templateId,
+            variables: {
+              app_name: 'Identitree',
+              user_name_prefix: user.name ? ` ${user.name}` : '',
+              reset_url: resetLink,
+              expires_in: '1 hour',
+              support_email: 'support@geoplanph.com',
+              year: String(new Date().getFullYear()),
+            },
+          }
+          : undefined,
       });
     },
   },
@@ -83,7 +198,7 @@ export const auth = betterAuth({
               user_name_prefix: user.name ? ` ${user.name}` : '',
               verify_url: verificationLink,
               expires_in: '1 hour',
-              support_email: 'support@kukaass.app',
+              support_email: 'support@geoplanph.com',
               year: String(new Date().getFullYear()),
             },
           }
@@ -98,5 +213,92 @@ export const auth = betterAuth({
       prompt: 'select_account',
     },
   },
-  plugins: [organization()],
+  plugins: [
+    organization({
+      organizationHooks: {
+        afterUpdateOrganization: async ({ organization }) => {
+          if (!organization) return;
+
+          const cards = await prisma.nfcCard.findMany({
+            where: { organizationId: organization.id },
+          });
+
+          let cardsUpdated = false;
+          for (const card of cards) {
+            // Reconstruct encodedUrl with the new organization slug
+            const urlParts = card.encodedUrl.split('/');
+            const cardSlug = urlParts.pop(); // Get the individual card identifier
+            const newEncodedUrl = `${env.frontendUrl}/${organization.slug}/${cardSlug}`;
+
+            if (newEncodedUrl !== card.encodedUrl) {
+              await prisma.nfcCard.update({
+                where: { id: card.id },
+                data: { encodedUrl: newEncodedUrl },
+              });
+              cardsUpdated = true;
+            }
+          }
+
+          // Notify members about the change ONLY if cards were actually affected
+          if (cardsUpdated) {
+            const members = await prisma.member.findMany({
+              where: { organizationId: organization.id },
+              select: { userId: true },
+            });
+
+            for (const member of members) {
+              const notification = await prisma.notification.create({
+                data: {
+                  userId: member.userId,
+                  organizationId: organization.id,
+                  type: 'WARNING',
+                  title: 'NFC Card URLs Updated',
+                  message: `The organization slug for "${organization.name}" has changed to "${organization.slug}". Physical NFC cards must be re-activated with the new URLs.`,
+                },
+              });
+
+              // Trigger real-time push via the event bridge
+              const { notificationEvents, NOTIFICATION_CREATED_EVENT } = require('../modules/notifications/notifications.events');
+              notificationEvents.emit(NOTIFICATION_CREATED_EVENT, {
+                userId: member.userId,
+                notification,
+              });
+            }
+          }
+        },
+      },
+    }),
+    {
+      id: 'auto-organization-fallback',
+      hooks: {
+        after: [
+          {
+            matcher: (ctx: any) => ctx.path === '/get-session' && ctx.method === 'GET',
+            handler: createAuthMiddleware(async (ctx: any) => {
+              const data = ctx.returned;
+              if (data?.session && data?.user && !data.session.activeOrganizationId) {
+                const member = await prisma.member.findFirst({
+                  where: { userId: data.user.id },
+                  orderBy: { createdAt: 'asc' },
+                });
+
+                if (member) {
+                  // Update the database so it's persisted
+                  await prisma.session.update({
+                    where: { id: data.session.id },
+                    data: { activeOrganizationId: member.organizationId } as any,
+                  }).catch(err => {
+                    console.error('Failed to auto-set active organization in session hook:', err);
+                  });
+
+                  // Update the response data so the client sees it immediately
+                  data.session.activeOrganizationId = member.organizationId;
+                }
+              }
+            }),
+          },
+        ],
+      },
+    },
+  ],
 });

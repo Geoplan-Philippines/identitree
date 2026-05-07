@@ -7,6 +7,7 @@ import type { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 
 import { auth } from '../../configs/auth';
+import { prisma } from '../../shared/database/prisma';
 
 export type AuthContext = {
   userId: string;
@@ -35,9 +36,33 @@ export const CurrentUser = createParamDecorator(
       );
     }
 
+    let organizationId = session.session.activeOrganizationId || null;
+
+    // Fallback: If no active organization is set in the session,
+    // automatically pick the first one the user belongs to.
+    if (!organizationId) {
+      const member = await prisma.member.findFirst({
+        where: { userId: session.user.id },
+        select: { organizationId: true },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      if (member) {
+        organizationId = member.organizationId;
+
+        // Persist this choice to the session record so subsequent calls are faster
+        await prisma.session.update({
+          where: { id: session.session.id },
+          data: { activeOrganizationId: organizationId },
+        }).catch(err => {
+          console.error('Failed to auto-set active organization in session:', err);
+        });
+      }
+    }
+
     return {
       userId: session.user.id,
-      organizationId: session.session.activeOrganizationId || null,
+      organizationId,
     };
   },
 );

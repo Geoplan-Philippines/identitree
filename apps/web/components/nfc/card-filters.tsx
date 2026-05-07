@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-shell";
 
 interface CardFiltersProps {
   searchQuery: string;
@@ -21,9 +22,10 @@ export function CardFilters({
 }: CardFiltersProps) {
   return (
     <div className="flex flex-col gap-4 px-2">
-      <div className="flex items-center gap-2">
-        <h2 className="text-2xl font-black tracking-tight uppercase">NFC Cards</h2>
-        <div className="rounded-none px-2 py-0.5 text-[10px] font-bold bg-secondary text-secondary-foreground">
+      <div className="flex items-center gap-3">
+        <PageHeader title="NFC Cards"
+          description="Manage your NFC cards." />
+        <div className="rounded-none px-2 py-0.5 text-[10px] font-bold bg-secondary text-secondary-foreground mt-1.5">
           {count}
         </div>
       </div>
