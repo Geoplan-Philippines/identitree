@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirects";
+
+export const metadata: Metadata = {
+  title: "Identity & Organization Workspace",
+  description: "Manage users, organizations, and secure NFC access in one place. The ultimate digital business card ecosystem for teams.",
+};
 
 export default async function RootPage() {
   await redirectAuthenticatedUserAwayFromGuestPages();

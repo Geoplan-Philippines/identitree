@@ -21,20 +21,30 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
     return {
       title,
       description,
+      alternates: {
+        canonical: `https://identitree.geoplanph.com/${slug}/${profileSlug}`,
+      },
       openGraph: {
         title,
         description,
         type: "profile",
         firstName: profile.firstName,
         lastName: profile.lastName,
-        images: profile.avatarUrl ? [{ url: profile.avatarUrl }] : [],
+        images: profile.avatarUrl 
+          ? [{ url: profile.avatarUrl }] 
+          : [{ url: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png" }],
       },
+
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: profile.avatarUrl ? [profile.avatarUrl] : [],
+        images: profile.avatarUrl 
+          ? [profile.avatarUrl] 
+          : ["https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png"],
+        creator: "@geoplanph",
       }
+
     };
   } catch (error) {
     return {
@@ -89,8 +99,56 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
   return (
     <main className="relative isolate min-h-svh overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f8fbfa_44%,#eef6f2_100%)] text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: `${profile.firstName} ${profile.lastName}`,
+            jobTitle: profile.positionTitle,
+            worksFor: {
+              "@type": "Organization",
+              name: profile.organization?.name || "Independent",
+            },
+            url: `https://identitree.geoplanph.com/${slug}/${profileSlug}`,
+            image: profile.avatarUrl,
+            description: `${profile.positionTitle}${profile.organization?.name ? ` at ${profile.organization.name}` : ""}`,
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://identitree.geoplanph.com",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: profile.organization?.name || "Profiles",
+                item: `https://identitree.geoplanph.com/${slug}`,
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: `${profile.firstName} ${profile.lastName}`,
+                item: `https://identitree.geoplanph.com/${slug}/${profileSlug}`,
+              },
+            ],
+          }),
+        }}
+      />
       <div
         aria-hidden="true"
+
         className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-size-[48px_48px] mask-[linear-gradient(to_bottom,black,transparent_74%)]"
       />
       <PublicProfileClient profile={profile} />
