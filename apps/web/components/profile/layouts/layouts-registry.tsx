@@ -14,9 +14,9 @@ export const CARD_REGISTRY: CardRegistry = {
 };
 
 export function renderProfileCard(profile: Profile, isFlipped: boolean, forcedLayoutKey?: string) {
-  const layoutKey = forcedLayoutKey || profile.template?.layoutKey || "default";
-  const CardComponent = (CARD_REGISTRY[layoutKey] || CARD_REGISTRY.default) as ComponentType<CardProps>;
   const config = profile.template?.config as TemplateConfig | undefined;
+  const layoutKey = forcedLayoutKey || config?.cardLayoutKey || profile.template?.layoutKey || "default";
+  const CardComponent = (CARD_REGISTRY[layoutKey] || CARD_REGISTRY.default) as ComponentType<CardProps>;
 
   return <CardComponent profile={profile} config={config} isFlipped={isFlipped} />;
 }
