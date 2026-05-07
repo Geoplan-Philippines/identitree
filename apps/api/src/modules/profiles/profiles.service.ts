@@ -116,6 +116,7 @@ export class ProfilesService {
       },
       include: {
         organization: true,
+        template: true,
       },
     });
 

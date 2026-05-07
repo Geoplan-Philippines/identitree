@@ -27,6 +27,72 @@ export type Profile = {
     logo?: string;
     website?: string;
   } | null;
+  templateId?: string | null;
+  template?: Template | null;
+};
+
+export type Template = {
+  id: string;
+  name: string;
+  category?: string | null;
+  layoutKey: string;
+  config?: TemplateConfig | null;
+  availability: "GLOBAL" | "ORG_ONLY";
+  organizationId?: string | null;
+};
+
+export type TemplateConfig = {
+  primaryColor?: string;
+  secondaryColor?: string;
+  backgroundColor?: string;
+  backgroundType?: "solid" | "gradient" | "image";
+  backgroundGradient?: string;
+  accentColor?: string;
+  textColor?: string;
+  cardStyle?: string;
+  buttonStyle?: "sharp" | "rounded" | "pill";
+  avatarStyle?: "square" | "circle" | "rounded";
+  glassmorphism?: boolean;
+  shadowIntensity?: "none" | "low" | "medium" | "high";
+  sectionsOrder?: string[];
+  avatarAlignment?: "left" | "center" | "right";
+  infoAlignment?: "left" | "center" | "right";
+  socialsLayout?: "grid" | "list";
+  socialsAlignment?: "left" | "center" | "right";
+  actionsAlignment?: "left" | "center" | "right";
+  primaryButtonColor?: string;
+  primaryButtonTextColor?: string;
+  secondaryButtonColor?: string;
+  secondaryButtonTextColor?: string;
+  primaryButtonLabel?: string;
+  secondaryButtonLabel?: string;
+  bioAlignment?: "left" | "center" | "right";
+  cardPrimaryColor?: string;
+  cardSecondaryColor?: string;
+  cardTextColor?: string;
+  cardLayoutKey?: string;
+  cardPattern?: "none" | "dots" | "grid" | "diagonal" | "waves";
+  cardBackgroundImage?: string;
+  pagePattern?: "none" | "dots" | "grid" | "diagonal" | "waves";
+  cardLogoAlignment?: "left" | "right" | "center";
+  cardNameAlignment?: "left" | "right" | "center";
+  cardShowPattern?: boolean;
+  headerStyle?: "minimal" | "standard" | "grand";
+  showAvatar?: boolean;
+  showHeader?: boolean;
+  showBio?: boolean;
+  showSocials?: boolean;
+  showActions?: boolean;
+  showFooter?: boolean;
+  bioText?: string;
+  headerImage?: string;
+  contentSpacing?: "compact" | "relaxed" | "loose";
+  showQrCode?: boolean;
+  showSocialLinks?: boolean;
+  showVCard?: boolean;
+  showVerifyBadge?: boolean;
+  fontFamily?: string;
+  backgroundImage?: string;
 };
 
 export type NfcCard = {
@@ -68,6 +134,14 @@ export async function checkNfcCardExists(url: string): Promise<{ exists: boolean
 
 export async function registerCustomerCard(payload: { encodedUrl: string; hardwareId: string }): Promise<NfcCard> {
   return apiClient.post<NfcCard>("/nfc-cards/public-register-customer", payload);
+}
+
+export async function getTemplates(headers?: HeadersInit): Promise<Template[]> {
+  return apiClient.get<Template[]>("/templates", headers);
+}
+
+export async function getTemplate(id: string, headers?: HeadersInit): Promise<Template> {
+  return apiClient.get<Template>(`/templates/${id}`, headers);
 }
 
 export async function getPublicSitemapData(): Promise<{ orgSlug: string; profileSlug: string; updatedAt: string }[]> {
