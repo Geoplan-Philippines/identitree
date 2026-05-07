@@ -1,9 +1,13 @@
 import { MetadataRoute } from "next";
+import { getPublicSitemapData } from "@/lib/services/nfc-cards.service";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+
   const baseUrl = "https://identitree.geoplanph.com";
 
-  // Define static routes
+  // 1. Define static routes
   const staticRoutes = [
     "",
     "/login",
@@ -18,5 +22,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === "" ? 1 : 0.8,
   }));
 
-  return [...staticRoutes];
+  // 2. Fetch and add dynamic profile routes
+  let dynamicRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const profiles = await getPublicSitemapData();
+    dynamicRoutes = profiles.map((p) => ({
+      url: `${baseUrl}/${p.orgSlug}/${p.profileSlug}`,
+      lastModified: new Date(p.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch dynamic sitemap data:", error);
+  }
+
+  return [...staticRoutes, ...dynamicRoutes];
 }
+

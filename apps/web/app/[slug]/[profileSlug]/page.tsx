@@ -21,7 +21,20 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
     return {
       title,
       description,
+      keywords: [
+        fullName,
+        profile.firstName,
+        profile.lastName,
+        profile.organization?.name || "",
+        "NFC Digital Business Card",
+        "Identitree",
+        "Identitree Profile",
+        `${profile.firstName} Identitree`,
+        `${profile.firstName} NFC`,
+      ].filter(Boolean),
+
       alternates: {
+
         canonical: `https://identitree.geoplanph.com/${slug}/${profileSlug}`,
       },
       openGraph: {
@@ -110,7 +123,9 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             worksFor: {
               "@type": "Organization",
               name: profile.organization?.name || "Independent",
+              url: profile.organization?.website || undefined,
             },
+
             url: `https://identitree.geoplanph.com/${slug}/${profileSlug}`,
             image: profile.avatarUrl,
             description: `${profile.positionTitle}${profile.organization?.name ? ` at ${profile.organization.name}` : ""}`,

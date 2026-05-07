@@ -63,6 +63,15 @@ export class ProfilesController {
   }
 
   /**
+   * Retrieves all public slugs for sitemap generation.
+   */
+  @RateLimit(10, 60000)
+  @Get('public-sitemap')
+  async getPublicSitemap() {
+    return this.profilesService.getPublicSitemapData();
+  }
+
+  /**
    * Retrieves a public profile by organization and profile slug.
    */
   @RateLimit(50, 60000)
@@ -74,3 +83,4 @@ export class ProfilesController {
     return this.profilesService.getProfileBySlug(orgSlug, profileSlug);
   }
 }
+
