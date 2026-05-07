@@ -21,6 +21,8 @@ RUN npm ci
 FROM installer AS builder
 # Set API base URL for build
 ENV NEXT_PUBLIC_API_BASE_URL=https://identitree-dev-api.geoplanph.com/api/v1
+# ARG NEXT_PUBLIC_API_BASE_URL
+# ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 COPY --from=pruner /app/out/full/ .
 RUN npm run build -- --filter=web
