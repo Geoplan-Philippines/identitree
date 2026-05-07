@@ -11,6 +11,7 @@ import { RateLimitModule } from './common/decorators/rate-limit.decorator';
 import { UploadModule } from './modules/upload/upload.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { TemplatesModule } from './modules/templates/templates.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     UploadModule,
     AnalyticsModule,
     NotificationsModule,
+    TemplatesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -80,6 +80,7 @@ function DashboardSidebar() {
   const workspaceLinks: DashboardLink[] = [
     { label: "Overview", href: `/dashboard/${slug}`, icon: LayoutDashboard },
     { label: "Cards", href: `/dashboard/${slug}/cards`, icon: IdCard },
+    { label: "Templates", href: `/dashboard/${slug}/templates`, icon: LayoutTemplate },
     { label: "Analytics", href: `/dashboard/${slug}/analytics`, icon: BarChart3 },
     { label: "Tools", href: `/dashboard/${slug}/tools`, icon: Wrench },
   ];
@@ -87,7 +88,6 @@ function DashboardSidebar() {
   const comingSoonLinks: DashboardLink[] = [
     { label: "Contacts", href: "#", icon: ContactRound },
     { label: "Teams", href: "#", icon: Users },
-    { label: "Templates", href: "#", icon: LayoutTemplate },
   ];
 
   const growthLinks: DashboardLink[] = [

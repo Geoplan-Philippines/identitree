@@ -36,4 +36,12 @@ export class CreateProfileDTO {
   @IsOptional()
   @IsString()
   viberNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  templateId?: string;
+
+  @IsOptional()
+  @IsString()
+  templateKey?: string;
 }

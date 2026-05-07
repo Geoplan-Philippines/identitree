@@ -10,7 +10,8 @@ import { Smartphone, CheckCircle2, Loader2, CreditCard, AlertTriangle, ChevronDo
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
-import { checkNfcCardExists, registerCustomerCard } from "@/lib/services/nfc-cards.service";
+import { checkNfcCardExists, registerCustomerCard, getPublicProfile, type Profile } from "@/lib/services/nfc-cards.service";
+import { renderProfileCard } from "@/components/profile/layouts/layouts-registry";
 
 const faqs = [
   {
@@ -62,6 +63,8 @@ export function ActivateClient() {
   const [isWriting, setIsWriting] = useState(false);
   const [hardwareId, setHardwareId] = useState<string | null>(null);
   const [isCheckingUrl, setIsCheckingUrl] = useState(false);
+  const [previewProfile, setPreviewProfile] = useState<Profile | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   // Pre-calculated URL to write (to ensure the fastest possible write)
   const finalUrlRef = useRef<string>("");
@@ -108,6 +111,22 @@ export function ActivateClient() {
         
         if (res.exists) {
           const urlObj = new URL(normalized);
+          // Extract slugs: /orgSlug/profileSlug
+          const paths = urlObj.pathname.split('/').filter(Boolean);
+          if (paths[0] && paths[1]) {
+            try {
+              const profile = await getPublicProfile(paths[0], paths[1]);
+              setPreviewProfile(profile);
+              
+              // If the profile has a template/layout, bake it into the URL
+              if (profile.template?.layoutKey) {
+                urlObj.searchParams.set("layout", profile.template.layoutKey);
+              }
+            } catch (pErr) {
+              console.warn("Could not fetch preview profile:", pErr);
+            }
+          }
+
           urlObj.searchParams.set("ref", "nfc_tap");
           finalUrl = urlObj.toString();
         }
@@ -182,6 +201,7 @@ export function ActivateClient() {
     setTargetUrl("");
     setStep("input");
     setHardwareId(null);
+    setPreviewProfile(null);
   };
 
   return (
@@ -260,13 +280,34 @@ export function ActivateClient() {
             )}
 
             {step === "scanning" && (
-              <div className="flex flex-col items-center justify-center py-6 space-y-6 animate-in zoom-in-95 duration-300">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-foreground/5 animate-ping rounded-full" />
-                  <div className="relative bg-muted border border-border p-8 rounded-none">
-                    <Smartphone className={cn("size-10 transition-transform", isScanning && "animate-bounce")} />
+              <div className="flex flex-col items-center justify-center py-2 space-y-6 animate-in zoom-in-95 duration-300">
+                {previewProfile && (
+                  <div className="w-full max-w-[340px] mb-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 text-center">
+                      Card Preview
+                    </div>
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => setIsFlipped(!isFlipped)}
+                      style={{ perspective: 1000 }}
+                    >
+                      {renderProfileCard(previewProfile, isFlipped)}
+                    </div>
+                    <p className="mt-3 text-[10px] text-center text-muted-foreground animate-pulse">
+                      Tap preview to flip • Ready to scan
+                    </p>
                   </div>
-                </div>
+                )}
+                
+                {!previewProfile && (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-foreground/5 animate-ping rounded-full" />
+                    <div className="relative bg-muted border border-border p-8 rounded-none">
+                      <Smartphone className={cn("size-10 transition-transform", isScanning && "animate-bounce")} />
+                    </div>
+                  </div>
+                )}
+
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-bold text-foreground tracking-tight">
                     {isWriting ? "Writing to Card" : "Ready to Tap"}
@@ -285,18 +326,36 @@ export function ActivateClient() {
             )}
 
             {step === "success" && (
-              <div className="flex flex-col items-center justify-center py-4 space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                <div className="bg-foreground text-background p-5 rounded-none border border-foreground">
-                  <CheckCircle2 className="size-10" />
-                </div>
+              <div className="flex flex-col items-center justify-center py-2 space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                {previewProfile ? (
+                  <div className="w-full max-w-[340px]">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-green-600 mb-3 text-center">
+                      Successfully Activated
+                    </div>
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => setIsFlipped(!isFlipped)}
+                      style={{ perspective: 1000 }}
+                    >
+                      {renderProfileCard(previewProfile, isFlipped)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-foreground text-background p-5 rounded-none border border-foreground">
+                    <CheckCircle2 className="size-10" />
+                  </div>
+                )}
+
                 <div className="text-center space-y-2">
-                  <h3 className="text-xl font-bold text-foreground tracking-tight">Activated Successfully</h3>
+                  <h3 className="text-xl font-bold text-foreground tracking-tight">
+                    {previewProfile ? "Identity Linked" : "Activated Successfully"}
+                  </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Your physical card is now linked and fully encoded.
                   </p>
                   {hardwareId && (
                     <div className="mt-4 p-3 bg-muted border border-border text-left">
-                      <p className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-1">ID</p>
+                      <p className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Hardware ID</p>
                       <code className="text-[10px] font-mono text-foreground break-all">{hardwareId}</code>
                     </div>
                   )}
