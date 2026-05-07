@@ -93,6 +93,7 @@ model Organization {
   name                      String
   slug                      String          @unique
   logo                      String?
+  website                   String?
   metadata                  String?
 
   createdAt                 DateTime        @default(now()) @map("created_at")

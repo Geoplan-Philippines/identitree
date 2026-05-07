@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
+import { organizationSchema, type OrganizationValues as OrganizationSettingsValues } from "@/lib/zod/organizations";
 import { Loader2, AlertCircle, Info, Trash2, TriangleAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -37,15 +37,7 @@ import { apiClient } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
 import { useOrganization } from "@/hooks/use-organization";
 
-const organizationSchema = z.object({
-  name: z.string().min(2, "Organization name is required."),
-  slug: z
-    .string()
-    .min(2, "Slug is required.")
-    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and dashes only."),
-});
 
-type OrganizationSettingsValues = z.infer<typeof organizationSchema>;
 
 export function OrganizationSettingsForm({ slug }: { slug: string }) {
   const router = useRouter();
@@ -66,13 +58,13 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
 
   const form = useForm<OrganizationSettingsValues>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: { name: "", slug: "" },
+    defaultValues: { name: "", slug: "", website: "" },
   });
 
   // Populate form once data arrives
   useEffect(() => {
     if (orgData) {
-      form.reset({ name: orgData.name, slug: orgData.slug });
+      form.reset({ name: orgData.name, slug: orgData.slug, website: orgData.website ?? "" });
       setLogoPreview(orgData.logo ?? null);
 
       // Sync active org
@@ -124,6 +116,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
         data: {
           name: data.name,
           slug: data.slug,
+          ...(data.website ? { website: data.website } : {}),
           ...(logoUrl ? { logo: logoUrl } : {}),
         },
       });
@@ -224,6 +217,17 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                 </Field>
               )}
             />
+            <Controller
+              name="website"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="org-website">Company Website (Optional)</FieldLabel>
+                  <Input {...field} id="org-website" type="url" placeholder="https://acme-inc.com" />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
             <Field>
               <FieldLabel>Organization Logo</FieldLabel>
               <ImageUpload
@@ -243,8 +247,8 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
               type="button"
               onClick={() => form.handleSubmit((data) => onSubmit(data, "general"))()}
               className="w-full sm:w-auto px-10"
-              disabled={
-                (!form.formState.dirtyFields.name && logoFile === null) ||
+                disabled={
+                  (!form.formState.dirtyFields.name && !form.formState.dirtyFields.website && logoFile === null) ||
                 isSavingGeneral ||
                 form.formState.isSubmitting ||
                 isUploading
