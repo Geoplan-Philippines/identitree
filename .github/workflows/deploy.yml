@@ -2,7 +2,7 @@ name: "DEPLOY IDENTITREE"
 
 on:
   push:
-    branches: ["main", "staging", "development"]
+    branches: ["main", "staging"]
 
 jobs:
   deploy:
@@ -56,18 +56,18 @@ jobs:
           script: |
             cd /home/${{ secrets.VPS_USERNAME }}/${{ env.DEPLOY_PATH }}
             echo "[MESSAGE] Preparing images for ${{ env.TAG }}...."
-            
+
             # These variables can be used inside your docker-compose.yml on the VPS
             export API_IMAGE="geoplanoperation/identitree-api:${{ env.TAG }}"
             export WEB_IMAGE="geoplanoperation/identitree-web:${{ env.TAG }}"
-            
+
             echo "[MESSAGE] Pulling latest images..."
             docker compose pull
-            
+
             echo "[MESSAGE] Deploying services..."
             docker compose up -d --force-recreate api web
-            
+
             echo "[MESSAGE] Cleaning up old images..."
             docker image prune -f
-            
+
             echo "[MESSAGE] Deployment completed!"

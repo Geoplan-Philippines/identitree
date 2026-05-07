@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,16 +17,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/providers/auth-provider";
 import { authClient } from "@/lib/auth-client";
 import { apiClient } from "@/lib/api/client";
-
-const organizationSchema = z.object({
-  name: z.string().min(2, "Organization name is required."),
-  slug: z
-    .string()
-    .min(2, "Slug is required.")
-    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and dashes only."),
-});
-
-type OrganizationSetupValues = z.infer<typeof organizationSchema>;
+import { organizationSchema, type OrganizationValues as OrganizationSetupValues } from "@/lib/zod/organizations";
+import { Loader2, Nfc } from "lucide-react";
 
 type OrganizationSetupFormProps = {
   userId?: string;
@@ -46,6 +37,7 @@ export function OrganizationSetupForm({
     defaultValues: {
       name: "",
       slug: "",
+      website: "",
     },
   });
 
@@ -93,6 +85,7 @@ export function OrganizationSetupForm({
       const { data: organization, error } = await authClient.organization.create({
         name: data.name,
         slug: data.slug,
+        ...(data.website ? { website: data.website } : {}),
         ...(logoUrl ? { logo: logoUrl } : {}),
       });
 
@@ -148,6 +141,24 @@ export function OrganizationSetupForm({
                 id="organization-slug"
                 type="text"
                 placeholder="acme-inc"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="website"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="organization-website">Company Website (Optional)</FieldLabel>
+              <Input
+                {...field}
+                id="organization-website"
+                type="url"
+                placeholder="https://acme-inc.com"
                 aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

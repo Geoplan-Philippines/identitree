@@ -1,9 +1,22 @@
 import { createAuthClient } from "better-auth/react";
-import { organizationClient } from "better-auth/client/plugins";
+import { organizationClient, inferOrgAdditionalFields } from "better-auth/client/plugins";
 
 import { getAuthApiBaseUrl } from "@/lib/api/config";
 
 export const authClient = createAuthClient({
   baseURL: getAuthApiBaseUrl(),
-  plugins: [organizationClient()],
+  plugins: [
+    organizationClient({
+      schema: inferOrgAdditionalFields({
+        organization: {
+          additionalFields: {
+            website: {
+              type: "string",
+              required: false,
+            },
+          },
+        },
+      }),
+    }),
+  ],
 });

@@ -215,6 +215,17 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            website: {
+              type: 'string',
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
       organizationHooks: {
         afterUpdateOrganization: async ({ organization }) => {
           if (!organization) return;
