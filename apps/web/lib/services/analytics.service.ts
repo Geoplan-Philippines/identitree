@@ -35,7 +35,7 @@ class AnalyticsService {
     });
   }
 
-  async getStats(slug: string, filters: { from?: string; to?: string; profileId?: string; channel?: AnalyticsChannel } = {}) {
+  async getStats(slug: string, filters: { from?: string; to?: string; profileId?: string; channel?: AnalyticsChannel } = {}, headers?: HeadersInit) {
     const params = new URLSearchParams();
     if (filters.from) params.append("from", filters.from);
     if (filters.to) params.append("to", filters.to);
@@ -52,7 +52,7 @@ class AnalyticsService {
       nfc: number;
       qr: number;
       direct: number;
-    }[]>(url);
+    }[]>(url, { headers });
   }
 }
 
