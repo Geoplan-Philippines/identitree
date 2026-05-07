@@ -23,9 +23,14 @@ export const metadata: Metadata = {
   description:
     "Manage digital business cards, contacts, teams, and analytics in one premium workspace.",
   keywords: ["NFC", "Digital Business Card", "Networking", "Identity", "Geoplan"],
-  authors: [{ name: "Geoplan Philippines" }],
-  creator: "Geoplan Philippines",
-  publisher: "Geoplan Philippines",
+  authors: [
+    { name: "Geoplan Philippines Inc." },
+    { name: "Chester Luke Maligaso" },
+    { name: "Ace Pasiliao" },
+  ],
+  creator: "Identitree",
+  publisher: "Identitree",
+
   formatDetection: {
     email: false,
     address: false,

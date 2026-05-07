@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirects";
 
 export const metadata: Metadata = {
-  title: "Identity & Organization Workspace",
+  title: "Identitree — Identity & Organization Workspace",
+
   description: "Manage users, organizations, and secure NFC access in one place. The ultimate digital business card ecosystem for teams.",
   alternates: {
     canonical: "https://identitree.geoplanph.com",
@@ -16,6 +17,30 @@ export default async function RootPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col items-center justify-center gap-6 px-6 text-center">
+      {/* Site Name Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Identitree",
+              alternateName: ["Identitree Geoplan", "Identitree PH"],
+              url: "https://identitree.geoplanph.com",
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Identitree",
+              url: "https://identitree.geoplanph.com",
+              logo: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
+            },
+          ]),
+        }}
+      />
+
+
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
         Identitree
       </p>
