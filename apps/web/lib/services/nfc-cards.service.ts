@@ -70,3 +70,6 @@ export async function registerCustomerCard(payload: { encodedUrl: string; hardwa
   return apiClient.post<NfcCard>("/nfc-cards/public-register-customer", payload);
 }
 
+export async function getPublicSitemapData(): Promise<{ orgSlug: string; profileSlug: string; updatedAt: string }[]> {
+  return apiClient.get<{ orgSlug: string; profileSlug: string; updatedAt: string }[]>("/profiles/public-sitemap");
+}

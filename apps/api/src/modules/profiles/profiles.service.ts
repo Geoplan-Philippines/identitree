@@ -139,4 +139,34 @@ export class ProfilesService {
       },
     });
   }
+
+  /**
+
+   * Retrieves all active profiles and their organization slugs for sitemap generation.
+   */
+  async getPublicSitemapData() {
+    const cards = await this.prisma.nfcCard.findMany({
+      where: {
+        status: 'ACTIVE',
+        profileId: { not: null },
+      },
+      include: {
+        profile: true,
+        organization: true,
+      },
+    });
+
+    return cards.map((card) => {
+      // Extract profileSlug from encodedUrl (e.g., https://.../org/slug)
+      const urlParts = card.encodedUrl.split('/');
+      const profileSlug = urlParts[urlParts.length - 1];
+      
+      return {
+        orgSlug: card.organization?.slug,
+        profileSlug: profileSlug,
+        updatedAt: card.updatedAt,
+      };
+    }).filter(p => p.orgSlug && p.profileSlug);
+  }
 }
+
