@@ -86,15 +86,19 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
             </p>
           </div>
 
-          <div className={cn("grid gap-1.5 text-[0.65rem] font-medium", getAlignClass(nameAlign))}>
-            <span className="inline-flex items-center gap-2" style={{ color: textColor, opacity: 0.75 }}>
-              <Phone className="size-3" />
-              {profile.contactNumber}
-            </span>
-            <span className="inline-flex items-center gap-2" style={{ color: textColor, opacity: 0.75 }}>
-              <Mail className="size-3" />
-              {profile.email}
-            </span>
+          <div className={cn("grid gap-1.5 text-[0.65rem] font-medium", getAlignClass(config?.cardDetailsAlignment || nameAlign))}>
+            {config?.cardShowPhone !== false && (
+              <span className="inline-flex items-center gap-2" style={{ color: textColor, opacity: 0.75 }}>
+                <Phone className="size-3" />
+                {profile.contactNumber}
+              </span>
+            )}
+            {config?.cardShowEmail !== false && (
+              <span className="inline-flex items-center gap-2" style={{ color: textColor, opacity: 0.75 }}>
+                <Mail className="size-3" />
+                {profile.email}
+              </span>
+            )}
           </div>
         </div>
       </div>

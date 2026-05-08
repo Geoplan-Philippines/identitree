@@ -13,7 +13,21 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { TemplateFormValues } from "./builder-types";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Check, Type } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
+const GOOGLE_FONTS = [
+  { value: "Inter", label: "Inter (Modern)" },
+  { value: "Outfit", label: "Outfit (Premium)" },
+  { value: "Sora", label: "Sora (Bold)" },
+  { value: "Syne", label: "Syne (Brutalist)" },
+  { value: "Montserrat", label: "Montserrat (Classic)" },
+  { value: "Roboto", label: "Roboto (Standard)" },
+  { value: "Playfair Display", label: "Playfair (Elegant)" },
+  { value: "Poppins", label: "Poppins (Friendly)" },
+  { value: "Lexend", label: "Lexend (Readable)" },
+  { value: "Space Grotesk", label: "Space Grotesk (Tech)" },
+];
 
 interface BrandingTabProps {
   form: UseFormReturn<TemplateFormValues>;
@@ -124,12 +138,12 @@ function GradientBuilder({ value, onChange }: { value?: string; onChange: (val: 
               type="color"
               value={color}
               onChange={(e) => updateStop(i, e.target.value)}
-              className="w-8 h-8 p-0.5 rounded-none border-border shrink-0"
+              className="w-8 h-8 p-1 rounded-none border-border shrink-0"
             />
             <Input
               value={color}
               onChange={(e) => updateStop(i, e.target.value)}
-              className="flex-1 rounded-none font-mono text-xs h-8 border-border"
+              className="flex-1 rounded-none font-mono text-[10px] h-8 border-border"
             />
             {stops.length > 2 && (
               <button
@@ -173,7 +187,16 @@ export function BrandingTab({ form }: BrandingTabProps) {
               render={({ field }) => (
                 <Field>
                   <FieldLabel>Type</FieldLabel>
-                  <Select onValueChange={field.onChange} value={field.value ?? "solid"}>
+                  <Select 
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      if (val === "gradient" && !form.getValues("config.backgroundGradient")) {
+                        // Apply a beautiful professional default gradient if none exists
+                        form.setValue("config.backgroundGradient", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)");
+                      }
+                    }} 
+                    value={field.value ?? "solid"}
+                  >
                     <SelectTrigger className="rounded-none h-10 border-border">
                       <SelectValue />
                     </SelectTrigger>
@@ -217,10 +240,10 @@ export function BrandingTab({ form }: BrandingTabProps) {
               control={form.control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Color</FieldLabel>
+                  <FieldLabel>Background color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-10 h-10 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-none font-mono text-sm border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-none border-border" />
+                    <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
@@ -270,8 +293,8 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Accent color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#000000"} className="w-10 h-10 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none font-mono text-sm border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
+                    <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
@@ -283,24 +306,104 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Text color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-10 h-10 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-none font-mono text-sm border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-none border-border" />
+                    <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
             />
           </div>
 
-          <Controller
-            name="config.fontFamily"
-            control={form.control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel>Google Font</FieldLabel>
-                <Input {...field} value={field.value ?? ""} placeholder="Inter, Outfit, Roboto..." className="rounded-none border-border" />
-              </Field>
-            )}
-          />
+            <Controller
+              name="config.fontFamily"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Typography</FieldLabel>
+                  <Select onValueChange={field.onChange} value={field.value ?? "Inter"}>
+                    <SelectTrigger className="rounded-none h-10 border-border">
+                      <div className="flex items-center gap-2">
+                        <Type className="size-3.5 text-muted-foreground" />
+                        <SelectValue placeholder="Select font" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none">
+                      {GOOGLE_FONTS.map(font => (
+                        <SelectItem key={font.value} value={font.value} className="rounded-none">
+                          <span style={{ fontFamily: font.value }}>{font.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+        </FieldGroup>
+      </div>
+
+      {/* Badges & Trust */}
+      <div className="space-y-4 pb-10">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b pb-2">Badges & Trust Indicators</p>
+        <FieldGroup>
+          <div className="space-y-6">
+            {/* Top Badge */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <FieldLabel className="mb-0">Top Badge (Status)</FieldLabel>
+                <Controller
+                  name="config.showTopBadge"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Switch 
+                      checked={field.value !== false} 
+                      onCheckedChange={field.onChange} 
+                    />
+                  )}
+                />
+              </div>
+              <Controller
+                name="config.topBadgeText"
+                control={form.control}
+                render={({ field }) => (
+                  <Input 
+                    {...field} 
+                    placeholder="e.g. Digital Business Card" 
+                    className="rounded-none border-border text-sm"
+                    disabled={form.watch("config.showTopBadge") === false}
+                  />
+                )}
+              />
+            </div>
+
+            {/* Verification Badge */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <FieldLabel className="mb-0">Verification Badge</FieldLabel>
+                <Controller
+                  name="config.showVerifyBadge"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Switch 
+                      checked={field.value !== false} 
+                      onCheckedChange={field.onChange} 
+                    />
+                  )}
+                />
+              </div>
+              <Controller
+                name="config.verifyBadgeText"
+                control={form.control}
+                render={({ field }) => (
+                  <Input 
+                    {...field} 
+                    placeholder="e.g. Identity Verified" 
+                    className="rounded-none border-border text-sm"
+                    disabled={form.watch("config.showVerifyBadge") === false}
+                  />
+                )}
+              />
+            </div>
+          </div>
         </FieldGroup>
       </div>
     </div>
