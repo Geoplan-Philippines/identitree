@@ -4,17 +4,27 @@ import { motion } from "motion/react";
 import { Building2, Mail, Phone } from "lucide-react";
 import { CardProps } from "./types";
 import { getCardPattern } from "./card-patterns";
+import { cn } from "@/lib/utils";
 
 export function ModernDarkLayout({ profile, config, isFlipped }: CardProps) {
   const qrCells = new Set([0, 1, 2, 4, 5, 7, 9, 10, 12, 13, 15, 17, 19, 20, 21, 23, 24]);
 
-  const primaryColor = config?.cardPrimaryColor || config?.primaryColor || "#3b82f6";
+  const primaryColor = config?.cardPrimaryColor || config?.primaryColor || "#09090b";
   const secondaryColor = config?.cardSecondaryColor || "#18181b";
   const textColor = config?.cardTextColor || "#ffffff";
   const pattern = getCardPattern(config?.cardPattern);
   const bgImage = config?.cardBackgroundImage;
 
   const ts = { color: textColor };
+
+  const logoAlign = config?.cardLogoAlignment || "right";
+  const nameAlign = config?.cardNameAlignment || "left";
+
+  const getAlignClass = (align: string) => {
+    if (align === "left") return "justify-start text-left items-start";
+    if (align === "right") return "justify-end text-right items-end";
+    return "justify-center text-center items-center";
+  };
 
   return (
     <motion.div
@@ -36,29 +46,47 @@ export function ModernDarkLayout({ profile, config, isFlipped }: CardProps) {
         <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/30 to-transparent" />
         {pattern && <div className="absolute inset-0 pointer-events-none" style={pattern} />}
 
-        <div className="absolute right-6 top-6 flex items-center gap-2 text-xs font-semibold relative z-10" style={{ color: textColor, opacity: 0.6 }}>
-          <span>{profile.organization?.name || "Identitree"}</span>
+        {/* Logo / Org */}
+        <div className={cn(
+          "absolute inset-x-6 top-5 flex items-center gap-2 text-xs font-semibold z-10 min-w-0",
+          logoAlign === "right" ? "justify-end" : logoAlign === "left" ? "justify-start" : "justify-center"
+        )} style={{ color: textColor }}>
+          {logoAlign === "left" && profile.organization?.logo && (
+            <span className="flex size-7 shrink-0 items-center justify-center">
+              <img src={profile.organization.logo} alt="" className="max-h-full max-w-full opacity-80" />
+            </span>
+          )}
+          <span className="truncate max-w-[180px] opacity-60 font-bold tracking-tight uppercase text-[9px]">{profile.organization?.name || "Identitree"}</span>
+          {logoAlign !== "left" && profile.organization?.logo && (
+            <span className="flex size-7 shrink-0 items-center justify-center">
+              <img src={profile.organization.logo} alt="" className="max-h-full max-w-full opacity-80" />
+            </span>
+          )}
         </div>
 
-        <div className="relative flex h-full flex-col justify-between z-10">
-          <div className="pr-24 sm:pr-32 mt-8">
-            <p className="text-lg font-semibold leading-none tracking-tight" style={ts}>
+        <div className={cn("relative flex h-full flex-col z-10 pt-8", nameAlign === "center" ? "justify-center" : "justify-between")}>
+          <div className={cn("flex flex-col", getAlignClass(nameAlign))}>
+            <p className="text-xl font-bold leading-tight tracking-tight" style={ts}>
               {profile.firstName} {profile.lastName}
             </p>
-            <p className="mt-2 text-xs font-medium" style={{ color: textColor, opacity: 0.55 }}>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: textColor, opacity: 0.4 }}>
               {profile.positionTitle}
             </p>
           </div>
 
-          <div className="grid gap-2 text-[0.72rem] font-medium" style={{ color: textColor, opacity: 0.7 }}>
-            <span className="inline-flex items-center gap-2">
-              <Phone className="size-3.5" style={{ color: textColor, opacity: 0.9 }} />
-              {profile.contactNumber}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Mail className="size-3.5" style={{ color: textColor, opacity: 0.9 }} />
-              {profile.email}
-            </span>
+          <div className={cn("grid gap-1.5 text-[0.65rem] font-medium", getAlignClass(config?.cardDetailsAlignment || nameAlign))} style={{ color: textColor, opacity: 0.7 }}>
+            {config?.cardShowPhone !== false && (
+              <span className="inline-flex items-center gap-2">
+                <Phone className="size-3" style={{ color: textColor, opacity: 0.9 }} />
+                {profile.contactNumber}
+              </span>
+            )}
+            {config?.cardShowEmail !== false && (
+              <span className="inline-flex items-center gap-2">
+                <Mail className="size-3" style={{ color: textColor, opacity: 0.9 }} />
+                {profile.email}
+              </span>
+            )}
           </div>
         </div>
       </div>

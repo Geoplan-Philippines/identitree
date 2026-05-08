@@ -91,15 +91,19 @@ export function DefaultLayout({ profile, config, isFlipped }: CardProps) {
             </p>
           </div>
 
-          <div className={cn("grid gap-1.5 text-[0.65rem] font-medium opacity-70", getAlignClass(nameAlign))}>
-            <span className="inline-flex items-center gap-1.5" style={textStyle}>
-              <Phone className="size-3" aria-hidden="true" />
-              {profile.contactNumber}
-            </span>
-            <span className="inline-flex items-center gap-1.5" style={textStyle}>
-              <Mail className="size-3" aria-hidden="true" />
-              {profile.email}
-            </span>
+          <div className={cn("grid gap-1.5 text-[0.65rem] font-medium opacity-70", getAlignClass(config?.cardDetailsAlignment || nameAlign))}>
+            {config?.cardShowPhone !== false && (
+              <span className="inline-flex items-center gap-1.5" style={textStyle}>
+                <Phone className="size-3" aria-hidden="true" />
+                {profile.contactNumber}
+              </span>
+            )}
+            {config?.cardShowEmail !== false && (
+              <span className="inline-flex items-center gap-1.5" style={textStyle}>
+                <Mail className="size-3" aria-hidden="true" />
+                {profile.email}
+              </span>
+            )}
           </div>
         </div>
       </div>

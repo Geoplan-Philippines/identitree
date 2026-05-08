@@ -40,6 +40,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface LayersTabProps {
   form: UseFormReturn<TemplateFormValues>;
@@ -58,78 +69,32 @@ const sectionLabels: Record<string, { label: string; icon: any }> = {
 
 export function LayersTab({ form, expandedSection, setExpandedSection }: LayersTabProps) {
   const sectionsOrder = form.watch("config.sectionsOrder") || [];
+  const [pendingPreset, setPendingPreset] = useState<string | null>(null);
 
   const handleReorder = (newOrder: string[]) => {
     form.setValue("config.sectionsOrder", newOrder);
   };
 
   const applyCardPreset = (preset: "classic" | "midnight" | "frosted" | "gold" | "ocean" | "carbon" | "rose") => {
-    // Clear image for all presets
+    const presets = {
+      classic: { layout: "default", primary: "#ffffff", secondary: "#101312", text: "#0f172a" },
+      midnight: { layout: "modern-dark", primary: "#09090b", secondary: "#18181b", text: "#ffffff" },
+      frosted: { layout: "glass", primary: "#334155", secondary: "#1e293b", text: "#f1f5f9" },
+      gold: { layout: "default", primary: "#92400e", secondary: "#78350f", text: "#fef3c7" },
+      ocean: { layout: "default", primary: "#0c4a6e", secondary: "#0e7490", text: "#e0f2fe" },
+      carbon: { layout: "modern-dark", primary: "#1c1917", secondary: "#292524", text: "#d6d3d1" },
+      rose: { layout: "default", primary: "#4c0519", secondary: "#881337", text: "#fce7f3" },
+    };
+
+    const data = presets[preset];
+    if (!data) return;
+
+    form.setValue("config.cardPrimaryColor", data.primary);
+    form.setValue("config.cardSecondaryColor", data.secondary);
+    form.setValue("config.cardTextColor", data.text);
+    form.setValue("config.cardLayoutKey", data.layout as any);
     form.setValue("config.cardBackgroundImage", "");
-    if (preset === "classic") {
-      form.setValue("config.cardLayoutKey", "default");
-      form.setValue("config.cardPrimaryColor", "#ffffff");
-      form.setValue("config.cardSecondaryColor", "#101312");
-      form.setValue("config.cardTextColor", "#0f172a");
-      form.setValue("config.cardLogoAlignment", "right");
-      form.setValue("config.cardNameAlignment", "left");
-      form.setValue("config.cardPattern", "none");
-      form.setValue("config.cardShowPattern", true);
-    } else if (preset === "midnight") {
-      form.setValue("config.cardLayoutKey", "modern-dark");
-      form.setValue("config.cardPrimaryColor", "#09090b");
-      form.setValue("config.cardSecondaryColor", "#18181b");
-      form.setValue("config.cardTextColor", "#ffffff");
-      form.setValue("config.cardLogoAlignment", "center");
-      form.setValue("config.cardNameAlignment", "center");
-      form.setValue("config.cardPattern", "dots");
-      form.setValue("config.cardShowPattern", false);
-    } else if (preset === "frosted") {
-      form.setValue("config.cardLayoutKey", "glass");
-      form.setValue("config.cardPrimaryColor", "#334155");
-      form.setValue("config.cardSecondaryColor", "#1e293b");
-      form.setValue("config.cardTextColor", "#f1f5f9");
-      form.setValue("config.cardLogoAlignment", "right");
-      form.setValue("config.cardNameAlignment", "left");
-      form.setValue("config.cardPattern", "grid");
-      form.setValue("config.cardShowPattern", true);
-    } else if (preset === "gold") {
-      form.setValue("config.cardLayoutKey", "default");
-      form.setValue("config.cardPrimaryColor", "#92400e");
-      form.setValue("config.cardSecondaryColor", "#78350f");
-      form.setValue("config.cardTextColor", "#fef3c7");
-      form.setValue("config.cardLogoAlignment", "right");
-      form.setValue("config.cardNameAlignment", "left");
-      form.setValue("config.cardPattern", "diagonal");
-      form.setValue("config.cardShowPattern", false);
-    } else if (preset === "ocean") {
-      form.setValue("config.cardLayoutKey", "default");
-      form.setValue("config.cardPrimaryColor", "#0c4a6e");
-      form.setValue("config.cardSecondaryColor", "#0e7490");
-      form.setValue("config.cardTextColor", "#e0f2fe");
-      form.setValue("config.cardLogoAlignment", "right");
-      form.setValue("config.cardNameAlignment", "left");
-      form.setValue("config.cardPattern", "waves");
-      form.setValue("config.cardShowPattern", false);
-    } else if (preset === "carbon") {
-      form.setValue("config.cardLayoutKey", "modern-dark");
-      form.setValue("config.cardPrimaryColor", "#1c1917");
-      form.setValue("config.cardSecondaryColor", "#292524");
-      form.setValue("config.cardTextColor", "#d6d3d1");
-      form.setValue("config.cardLogoAlignment", "right");
-      form.setValue("config.cardNameAlignment", "left");
-      form.setValue("config.cardPattern", "grid");
-      form.setValue("config.cardShowPattern", false);
-    } else if (preset === "rose") {
-      form.setValue("config.cardLayoutKey", "default");
-      form.setValue("config.cardPrimaryColor", "#4c0519");
-      form.setValue("config.cardSecondaryColor", "#881337");
-      form.setValue("config.cardTextColor", "#fce7f3");
-      form.setValue("config.cardLogoAlignment", "center");
-      form.setValue("config.cardNameAlignment", "center");
-      form.setValue("config.cardPattern", "diagonal");
-      form.setValue("config.cardShowPattern", false);
-    }
+    // Note: We deliberately DO NOT reset alignments or patterns here to retain user customizations
   };
 
   const AlignmentToggle = ({ name }: { name: any }) => (
@@ -229,15 +194,77 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                     >
                       <div className="p-4 space-y-4">
                         {sectionId === "avatar" && (
-                          <div className="grid grid-cols-2 gap-4">
-                            <Field>
-                              <FieldLabel>Avatar alignment</FieldLabel>
-                              <AlignmentToggle name="config.avatarAlignment" />
-                            </Field>
-                            <Field>
-                              <FieldLabel>Name & info</FieldLabel>
-                              <AlignmentToggle name="config.infoAlignment" />
-                            </Field>
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                              <Field>
+                                <FieldLabel>Avatar alignment</FieldLabel>
+                                <AlignmentToggle name="config.avatarAlignment" />
+                              </Field>
+                              <Field>
+                                <FieldLabel>Name & info</FieldLabel>
+                                <AlignmentToggle name="config.infoAlignment" />
+                              </Field>
+                            </div>
+
+                            <div className="space-y-4 border-t border-border pt-4">
+                              <p className="text-[9px] font-black uppercase text-muted-foreground">Identity Badges</p>
+                              
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold uppercase tracking-tight">Status Badge (Top)</span>
+                                  <Controller
+                                    name="config.showTopBadge"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                      <Switch 
+                                        checked={field.value !== false} 
+                                        onCheckedChange={field.onChange} 
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <Controller
+                                  name="config.topBadgeText"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Input 
+                                      {...field} 
+                                      placeholder="e.g. Digital Business Card" 
+                                      className="h-8 rounded-none border-border text-[10px]"
+                                      disabled={form.watch("config.showTopBadge") === false}
+                                    />
+                                  )}
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold uppercase tracking-tight">Verification Badge</span>
+                                  <Controller
+                                    name="config.showVerifyBadge"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                      <Switch 
+                                        checked={field.value !== false} 
+                                        onCheckedChange={field.onChange} 
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <Controller
+                                  name="config.verifyBadgeText"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Input 
+                                      {...field} 
+                                      placeholder="e.g. Identity Verified" 
+                                      className="h-8 rounded-none border-border text-[10px]"
+                                      disabled={form.watch("config.showVerifyBadge") === false}
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
                           </div>
                         )}
                         {sectionId === "header" && (
@@ -275,7 +302,13 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                               render={({ field }) => (
                                 <Field>
                                   <FieldLabel>Base card theme</FieldLabel>
-                                  <Select onValueChange={field.onChange} value={field.value ?? "default"}>
+                                  <Select 
+                                    onValueChange={(val) => {
+                                      field.onChange(val);
+                                      form.setValue("layoutKey", val);
+                                    }} 
+                                    value={field.value ?? "default"}
+                                  >
                                     <SelectTrigger className="rounded-none h-9 border-border">
                                       <SelectValue />
                                     </SelectTrigger>
@@ -298,6 +331,44 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                 <FieldLabel>Name position</FieldLabel>
                                 <AlignmentToggle name="config.cardNameAlignment" />
                               </Field>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                              <Field>
+                                <div className="flex items-center justify-between">
+                                  <FieldLabel>Contact Details Alignment</FieldLabel>
+                                  <AlignmentToggle name="config.cardDetailsAlignment" />
+                                </div>
+                              </Field>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 border-t border-border/50 pt-4 mt-2">
+                              <Controller
+                                name="config.cardShowPhone"
+                                control={form.control}
+                                render={({ field }) => (
+                                  <div className="flex items-center justify-between">
+                                    <FieldLabel className="mb-0">Show Number</FieldLabel>
+                                    <Switch
+                                      checked={field.value !== false}
+                                      onCheckedChange={field.onChange}
+                                      className="scale-75"
+                                    />
+                                  </div>
+                                )}
+                              />
+                              <Controller
+                                name="config.cardShowEmail"
+                                control={form.control}
+                                render={({ field }) => (
+                                  <div className="flex items-center justify-between">
+                                    <FieldLabel className="mb-0">Show Email</FieldLabel>
+                                    <Switch
+                                      checked={field.value !== false}
+                                      onCheckedChange={field.onChange}
+                                      className="scale-75"
+                                    />
+                                  </div>
+                                )}
+                              />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <Controller
@@ -430,6 +501,63 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                               <FieldLabel>Alignment</FieldLabel>
                               <AlignmentToggle name="config.socialsAlignment" />
                             </Field>
+                            <div className="col-span-2 space-y-4 pt-2">
+                              <div className="grid grid-cols-2 gap-4 border-t border-border/50 pt-4">
+                                <Controller
+                                  name="config.socialsButtonColor"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Field>
+                                      <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Button Color</FieldLabel>
+                                      <div className="flex gap-2">
+                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
+                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      </div>
+                                    </Field>
+                                  )}
+                                />
+                                <Controller
+                                  name="config.socialsIconColor"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Field>
+                                      <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Icon Color</FieldLabel>
+                                      <div className="flex gap-2">
+                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
+                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      </div>
+                                    </Field>
+                                  )}
+                                />
+                                <Controller
+                                  name="config.socialsFillColor"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Field className="col-span-2">
+                                      <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Background Fill</FieldLabel>
+                                      <div className="flex gap-2">
+                                        <Input type="color" {...field} value={field.value ?? "transparent"} className="w-8 h-8 p-1 rounded-none border-border" />
+                                        <Input {...field} value={field.value ?? "transparent"} placeholder="transparent or #hex" className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      </div>
+                                    </Field>
+                                  )}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between border-t border-border/50 pt-4">
+                                <FieldLabel className="mb-0 text-[10px] font-bold uppercase">Show Link Labels</FieldLabel>
+                                <Controller
+                                  name="config.showSocialLabels"
+                                  control={form.control}
+                                  render={({ field }) => (
+                                    <Switch
+                                      checked={field.value !== false}
+                                      onCheckedChange={field.onChange}
+                                      className="scale-75"
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
                           </div>
                         )}
                         {sectionId === "actions" && (

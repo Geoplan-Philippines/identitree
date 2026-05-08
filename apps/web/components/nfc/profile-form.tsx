@@ -12,12 +12,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Loader2, RotateCcw } from "lucide-react";
+import { useParams } from "next/navigation";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import { useUpdateNfcCard } from "@/hooks/use-nfc-cards";
 import { Profile, getTemplates, Template } from "@/lib/services/nfc-cards.service";
 import { useState, useEffect } from "react";
 import { renderProfileCard } from "../profile/layouts/layouts-registry";
+import { useOrganization } from "@/hooks/use-organization";
 import { cn } from "@/lib/utils";
 
 type ProfileFormProps = {
@@ -55,6 +57,10 @@ const stripPrefix = (num: string | undefined | null) => {
 };
 
 export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: ProfileFormProps) {
+  const params = useParams();
+  const slug = params?.slug as string;
+  const { data: organization } = useOrganization(slug);
+
   const updateMutation = useUpdateNfcCard();
   const isEditing = !!initialData;
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -109,6 +115,8 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
 
   const formValues = useWatch({ control });
 
+  const selectedTemplate = templates.find(t => t.id === formValues.templateId);
+
   const previewProfile: Profile = {
     id: initialData?.id || "preview",
     firstName: formValues.firstName || "First",
@@ -117,12 +125,16 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
     positionTitle: formValues.positionTitle || "Position Title",
     contactNumber: formValues.contactNumber || "0912 345 6789",
     avatarUrl: imageFile ? URL.createObjectURL(imageFile) : (formValues.avatarUrl || null),
-    organization: initialData?.organization || { name: "Identitree" },
+    organization: organization ? {
+      name: organization.name,
+      logo: organization.logo ?? undefined,
+      website: (organization as any).website ?? undefined,
+    } : (initialData?.organization || { name: "Identitree" }),
     linkedinUsername: formValues.linkedinUsername,
     whatsappNumber: formValues.whatsappNumber,
     viberNumber: formValues.viberNumber,
     templateId: formValues.templateId,
-    template: templates.find(t => t.id === formValues.templateId),
+    template: selectedTemplate,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

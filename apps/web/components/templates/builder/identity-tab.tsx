@@ -55,7 +55,13 @@ export function IdentityTab({ form }: IdentityTabProps) {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Base Theme</FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? "default"}>
+                <Select 
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    form.setValue("config.cardLayoutKey", val);
+                  }} 
+                  value={field.value ?? "default"}
+                >
                   <SelectTrigger className="rounded-none h-10 border-border">
                     <SelectValue />
                   </SelectTrigger>
