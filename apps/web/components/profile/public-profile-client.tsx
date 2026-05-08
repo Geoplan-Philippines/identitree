@@ -44,15 +44,8 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
   const config = profile.template?.config as TemplateConfig | undefined;
-  const hasConfig = !!config;
-
-  const [activeLayout, setActiveLayout] = useState(profile.template?.layoutKey || "default");
-  useEffect(() => {
-    const layoutOverride = new URLSearchParams(window.location.search).get("layout");
-    if (layoutOverride && layoutOverride !== activeLayout) setActiveLayout(layoutOverride);
-  }, [activeLayout]);
-
-  const layoutKey = config?.cardLayoutKey || activeLayout;
+  const layoutKey = config?.cardLayoutKey || profile.template?.layoutKey || "default";
+  const hasConfig = !!profile.template; // If it has a template, it has a "config" even if empty
 
   const [isNfcTap, setIsNfcTap] = useState(false);
   useEffect(() => {
@@ -134,13 +127,13 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   }
 
   // ─── Config-derived values (only used when hasConfig) ───
-  const primaryColor = config?.primaryColor || "#0f172a";
+  const primaryColor = config?.primaryColor || (layoutKey === "default" ? "#0f172a" : "#ffffff");
   const accentColor = config?.accentColor || primaryColor;
-  const textColor = config?.textColor || "#0f172a";
+  const textColor = config?.textColor || (layoutKey === "default" ? "#0f172a" : "#ffffff");
 
   const buttonRadius = { sharp: "rounded-none", rounded: "rounded-2xl", pill: "rounded-full" }[config?.buttonStyle || "sharp"];
   const avatarRadius = { square: "rounded-none", circle: "rounded-full", rounded: "rounded-2xl" }[config?.avatarStyle || "circle"];
-  const glassStyle = config?.glassmorphism ? "backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl" : "";
+  const glassStyle = config?.glassmorphism || layoutKey === "glass" ? "backdrop-blur-xl bg-white/5 border-white/10 shadow-2xl" : "";
   const spacingClass = { compact: "py-4 sm:py-6 gap-4", relaxed: "py-8 sm:py-12 gap-8", loose: "py-12 sm:py-20 gap-12" }[config?.contentSpacing || "relaxed"];
 
   const primaryBtnBg = config?.primaryButtonColor || primaryColor;
@@ -164,8 +157,8 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
   const themes = {
     default: { bg: "bg-[#f8fafc]", text: "text-foreground", subtext: "text-muted-foreground", badge: "border-foreground/10 bg-background/70 text-muted-foreground", avatar: "border-white/80 shadow-[0_18px_45px_rgba(15,23,42,0.14)] ring-foreground/10", button: "shadow-[0_16px_35px_rgba(15,23,42,0.14)]", secondaryButton: "border-foreground/80 bg-transparent text-foreground", footer: "text-muted-foreground" },
-    "modern-dark": { bg: "bg-[#09090b]", text: "text-white", subtext: "text-zinc-400", badge: "border-white/10 bg-white/5 text-blue-400", avatar: "border-white/10 p-1 ring-blue-500/20 shadow-[0_0_50px_rgba(59,130,246,0.15)]", button: "shadow-[0_10px_30px_rgba(59,130,246,0.3)]", secondaryButton: "border-white/10 bg-white/5 text-white", footer: "text-zinc-600" },
-    glass: { bg: "bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]", text: "text-white", subtext: "text-slate-400", badge: "border-white/10 bg-white/5 text-blue-400 backdrop-blur-md", avatar: "border-white/10 ring-white/5 shadow-2xl", button: "shadow-xl", secondaryButton: "bg-white/5 border-white/10 text-white", footer: "text-slate-600" },
+    "modern-dark": { bg: "bg-[#0c0c0e]", text: "text-white", subtext: "text-zinc-500", badge: "border-white/10 bg-white/5 text-blue-400", avatar: "border-white/10 p-1 ring-white/5 shadow-2xl", button: "shadow-xl", secondaryButton: "border-white/10 bg-white/5 text-white", footer: "text-zinc-700" },
+    glass: { bg: "bg-[#020617] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]", text: "text-white", subtext: "text-slate-500", badge: "border-white/10 bg-white/5 text-blue-400 backdrop-blur-md", avatar: "border-white/10 ring-white/5 shadow-2xl", button: "shadow-xl", secondaryButton: "bg-white/5 border-white/10 text-white", footer: "text-slate-700" },
   };
   const theme = themes[layoutKey as keyof typeof themes] || themes.default;
 
@@ -200,15 +193,13 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
             <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{profile.firstName} {profile.lastName}</h1>
             <p className="mt-3 text-sm font-medium text-muted-foreground sm:text-base">{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
-              <span className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
-                isNfcTap
-                  ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                  : "border-border/70 bg-background/70 text-muted-foreground"
-              )}>
-                {isNfcTap ? <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" /> : <Nfc className="size-3.5" aria-hidden="true" />}
-                {isNfcTap ? "Identity Verified" : "Digital Profile"}
-              </span>
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
+                  "border-border/70 bg-background/70 text-muted-foreground"
+                )}>
+                  <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" />
+                  Verified Identity
+                </span>
             </div>
           </div>
 
@@ -274,19 +265,18 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
               </Avatar>
             </motion.div>
             <div className={cn("mt-6 w-full flex flex-col", getAlignmentClass(config?.infoAlignment))}>
-              <h1 className={cn("text-4xl font-semibold leading-tight sm:text-5xl transition-colors duration-500", theme.text)} style={{ color: textColor }}>{profile.firstName} {profile.lastName}</h1>
-              <p className={cn("mt-3 text-sm font-medium sm:text-base transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.75 }}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
+              <h1 className={cn("text-3xl font-black uppercase tracking-tight leading-tight sm:text-4xl transition-colors duration-500", theme.text)} style={{ color: textColor }}>{profile.firstName} {profile.lastName}</h1>
+              <p className={cn("mt-2 text-xs font-bold uppercase tracking-widest transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.6 }}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
               {config?.showVerifyBadge !== false && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
                     buttonRadius, glassStyle,
-                    isNfcTap
-                      ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                      : theme.badge
+                    theme.badge,
+                    "text-emerald-500 dark:text-emerald-400 border-emerald-500/20"
                   )}>
-                    {isNfcTap ? <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" /> : <Nfc className="size-3.5" style={{ color: accentColor }} aria-hidden="true" />}
-                    {isNfcTap ? (config?.verifyBadgeText || "Identity Verified") : "Digital Profile"}
+                    <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" />
+                    {config?.verifyBadgeText || "Verified Identity"}
                   </span>
                 </div>
               )}
@@ -323,31 +313,31 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
               <a key={action.label} href={action.href} target={action.external ? "_blank" : undefined} rel={action.external ? "noreferrer" : undefined} aria-label={action.label} className={cn("group outline-none focus-visible:ring-2 focus-visible:ring-ring/40", config?.socialsLayout === "list" ? cn("flex items-center gap-3 w-full p-2 border border-border/50 rounded-lg hover:bg-muted/30 transition-all", theme.subtext) : "flex flex-col items-center gap-2 text-center")}>
                 {config?.socialsLayout === "list" ? (
                   <>
-                    <action.icon 
-                      className="size-4 shrink-0" 
-                      style={{ color: config?.socialsIconColor || accentColor }} 
-                      aria-hidden="true" 
+                    <action.icon
+                      className="size-4 shrink-0"
+                      style={{ color: config?.socialsIconColor || accentColor }}
+                      aria-hidden="true"
                     />
                     {config?.showSocialLabels !== false && <span className="text-sm font-medium">{action.label}</span>}
                   </>
                 ) : (
                   <>
-                    <span 
+                    <span
                       className={cn(
-                        "flex size-11 items-center justify-center rounded-none border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md", 
-                        !config?.socialsButtonColor && !config?.secondaryButtonColor && theme.secondaryButton, 
-                        buttonRadius, 
+                        "flex size-10 items-center justify-center rounded-none border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md",
+                        !config?.socialsButtonColor && !config?.secondaryButtonColor && (layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-white/5 border-white/20" : theme.secondaryButton),
+                        buttonRadius,
                         glassStyle
-                      )} 
-                      style={{ 
+                      )}
+                      style={{
                         borderColor: config?.socialsButtonColor || config?.secondaryButtonColor || primaryColor,
                         backgroundColor: config?.socialsFillColor || (config?.socialsButtonColor ? `${config.socialsButtonColor}10` : undefined)
                       }}
                     >
-                      <action.icon 
-                        className="size-4.5" 
-                        style={{ color: config?.socialsIconColor || accentColor }} 
-                        aria-hidden="true" 
+                      <action.icon
+                        className="size-4.5"
+                        style={{ color: config?.socialsIconColor || accentColor }}
+                        aria-hidden="true"
                       />
                     </span>
                     {config?.showSocialLabels !== false && (
@@ -364,14 +354,14 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
         return (
           <div key="actions" className={cn("w-full max-w-[430px] space-y-3 flex flex-col", getAlignmentClass(config?.actionsAlignment))}>
             {config?.showVCard !== false && (
-              <Button asChild size="lg" className={cn("h-12 w-full transition-all duration-500", buttonRadius, theme.button)} style={{ backgroundColor: primaryBtnBg, color: primaryBtnText }}>
+              <Button asChild size="lg" className={cn("h-12 w-full transition-all duration-500", buttonRadius, layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-white text-slate-950 hover:bg-white/90" : theme.button)} style={layoutKey === "glass" || layoutKey === "modern-dark" ? {} : { backgroundColor: primaryBtnBg, color: primaryBtnText }}>
                 <a href={vCardHref} download={`${profile.firstName}-${profile.lastName}.vcf`} onClick={() => { analyticsService.trackEvent({ profileId: profile.id, eventType: "SAVE_CONTACT", channel: getAnalyticsChannel() }).catch(console.error); }}>
                   <Download className="size-4" aria-hidden="true" />
                   {primaryBtnLabel}
                 </a>
               </Button>
             )}
-            <a href={profile.organization?.website || "#"} target="_blank" rel="noreferrer" className={cn("flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium shadow-sm transition-all duration-500 bg-transparent", buttonRadius)} style={{ borderColor: secondaryBtnColor, color: secondaryBtnText }}>
+            <a href={profile.organization?.website || "#"} target="_blank" rel="noreferrer" className={cn("flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium shadow-sm transition-all duration-500 bg-transparent", buttonRadius, layoutKey === "glass" ? "bg-white/5 border-white/10 text-white backdrop-blur-md hover:bg-white/10" : "")} style={layoutKey === "glass" ? {} : { borderColor: secondaryBtnColor, color: secondaryBtnText }}>
               {secondaryBtnLabel}
               <ArrowUpRight className="size-4" aria-hidden="true" />
             </a>

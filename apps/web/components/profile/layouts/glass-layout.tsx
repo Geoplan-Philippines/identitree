@@ -25,8 +25,8 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
   const ts = { color: textColor };
 
   // Default frosted look: rich slate gradient
-  const frontBg = config?.cardPrimaryColor || "#334155";
-  const backBg = config?.cardSecondaryColor || "#1e293b";
+  const frontBg = config?.cardPrimaryColor || "rgba(255, 255, 255, 0.08)";
+  const backBg = config?.cardSecondaryColor || "rgba(255, 255, 255, 0.05)";
 
   return (
     <motion.div
@@ -37,7 +37,7 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
     >
       {/* Front Side */}
       <div
-        className="absolute inset-0 overflow-hidden rounded-xl border border-white/20 p-6"
+        className="absolute inset-0 overflow-hidden rounded-xl border border-white/20 p-6 backdrop-blur-xl shadow-2xl"
         style={{
           backfaceVisibility: "hidden",
           background: frontBg,
@@ -105,7 +105,7 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
 
       {/* Back Side */}
       <div
-        className="absolute inset-0 overflow-hidden rounded-xl border border-white/20 p-6"
+        className="absolute inset-0 overflow-hidden rounded-xl border border-white/20 p-6 backdrop-blur-xl shadow-2xl"
         style={{
           backfaceVisibility: "hidden",
           transform: "rotateY(180deg)",
