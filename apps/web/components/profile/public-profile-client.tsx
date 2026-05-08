@@ -54,6 +54,31 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
   const layoutKey = config?.cardLayoutKey || activeLayout;
 
+  const [isNfcTap, setIsNfcTap] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsNfcTap(params.get("ref") === "nfc_tap" || profile.id.startsWith("tpl_preview_"));
+  }, [profile.id]);
+
+  useEffect(() => {
+    const font = config?.fontFamily;
+    if (!font || font === "inherit") return;
+    const id = `font-${font.replace(/\s+/g, "-").toLowerCase()}`;
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, "+")}:wght@400;500;600;700;800;900&display=swap`;
+    document.head.appendChild(link);
+  }, [config?.fontFamily]);
+
+  const StatusDot = () => (
+    <div className="mr-1.5 flex size-1.5 items-center justify-center">
+      <div className="absolute size-1.5 animate-ping rounded-full bg-emerald-400 opacity-75" />
+      <div className="relative size-1.5 rounded-full bg-emerald-500" />
+    </div>
+  );
+
   // ─── Contact actions (shared) ───
   const contactActions = [
     {
@@ -110,18 +135,18 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
   // ─── Config-derived values (only used when hasConfig) ───
   const primaryColor = config?.primaryColor || "#0f172a";
-  const accentColor = config?.accentColor || "#3b82f6";
+  const accentColor = config?.accentColor || primaryColor;
   const textColor = config?.textColor || "#0f172a";
 
-  const buttonRadius = { sharp: "rounded-none", rounded: "rounded-lg", pill: "rounded-full" }[config?.buttonStyle || "rounded"];
+  const buttonRadius = { sharp: "rounded-none", rounded: "rounded-2xl", pill: "rounded-full" }[config?.buttonStyle || "sharp"];
   const avatarRadius = { square: "rounded-none", circle: "rounded-full", rounded: "rounded-2xl" }[config?.avatarStyle || "circle"];
   const glassStyle = config?.glassmorphism ? "backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl" : "";
   const spacingClass = { compact: "py-4 sm:py-6 gap-4", relaxed: "py-8 sm:py-12 gap-8", loose: "py-12 sm:py-20 gap-12" }[config?.contentSpacing || "relaxed"];
 
   const primaryBtnBg = config?.primaryButtonColor || primaryColor;
   const primaryBtnText = config?.primaryButtonTextColor || "#ffffff";
-  const secondaryBtnColor = config?.secondaryButtonColor || "#0f172a";
-  const secondaryBtnText = config?.secondaryButtonTextColor || "#0f172a";
+  const secondaryBtnColor = config?.secondaryButtonColor || primaryColor;
+  const secondaryBtnText = config?.secondaryButtonTextColor || primaryColor;
   const primaryBtnLabel = config?.primaryButtonLabel || "Save Contact";
   const secondaryBtnLabel = config?.secondaryButtonLabel || "Visit company";
 
@@ -145,6 +170,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   const theme = themes[layoutKey as keyof typeof themes] || themes.default;
 
   const getAlignmentClass = (a?: string) => a === "left" ? "items-start text-left" : a === "right" ? "items-end text-right" : "items-center text-center";
+  const getJustifyClass = (a?: string) => a === "left" ? "justify-start" : a === "right" ? "justify-end" : "justify-center";
 
   // ════════════════════════════════════════════════════════════
   // DEFAULT VIEW — no template config
@@ -158,9 +184,9 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
         className="mx-auto flex min-h-svh w-full max-w-[560px] flex-col items-center px-5 py-8 sm:px-6 sm:py-12"
       >
         <div className="flex w-full flex-1 flex-col items-center justify-center">
-          <Badge variant="outline" className="mb-5 h-7 rounded-md border-foreground/10 bg-background/70 px-3 text-muted-foreground shadow-sm backdrop-blur">
-            <Nfc className="size-3.5" aria-hidden="true" />
-            NFC profile
+          <Badge variant="outline" className="mb-5 h-7 rounded-full border-foreground/10 bg-background/70 px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm backdrop-blur">
+            <StatusDot />
+            Digital Business Card
           </Badge>
 
           <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08, duration: 0.48, ease: [0.22, 1, 0.36, 1] }}>
@@ -174,9 +200,14 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
             <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{profile.firstName} {profile.lastName}</h1>
             <p className="mt-3 text-sm font-medium text-muted-foreground sm:text-base">{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 py-1.5 shadow-sm">
-                <ShieldCheck className="size-3.5" aria-hidden="true" />
-                Verified handoff
+              <span className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
+                isNfcTap
+                  ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                  : "border-border/70 bg-background/70 text-muted-foreground"
+              )}>
+                {isNfcTap ? <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" /> : <Nfc className="size-3.5" aria-hidden="true" />}
+                {isNfcTap ? "Identity Verified" : "Digital Profile"}
               </span>
             </div>
           </div>
@@ -244,12 +275,18 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
             </motion.div>
             <div className={cn("mt-6 w-full flex flex-col", getAlignmentClass(config?.infoAlignment))}>
               <h1 className={cn("text-4xl font-semibold leading-tight sm:text-5xl transition-colors duration-500", theme.text)} style={{ color: textColor }}>{profile.firstName} {profile.lastName}</h1>
-              <p className={cn("mt-3 text-sm font-medium sm:text-base transition-colors duration-500", theme.subtext)}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
+              <p className={cn("mt-3 text-sm font-medium sm:text-base transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.75 }}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
               {config?.showVerifyBadge !== false && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-                  <span className={cn("inline-flex items-center gap-1.5 border px-2.5 py-1.5 shadow-sm transition-all duration-500", theme.badge, buttonRadius, glassStyle)}>
-                    <ShieldCheck className="size-3.5" style={{ color: accentColor }} aria-hidden="true" />
-                    Verified handoff
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
+                    buttonRadius, glassStyle,
+                    isNfcTap
+                      ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                      : theme.badge
+                  )}>
+                    {isNfcTap ? <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" /> : <Nfc className="size-3.5" style={{ color: accentColor }} aria-hidden="true" />}
+                    {isNfcTap ? (config?.verifyBadgeText || "Identity Verified") : "Digital Profile"}
                   </span>
                 </div>
               )}
@@ -281,17 +318,41 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
       case "socials":
         return (
-          <motion.nav key="socials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.42, ease: [0.22, 1, 0.36, 1] }} aria-label="Contact actions" className={cn("w-full max-w-[430px]", config?.socialsLayout === "list" ? "flex flex-col gap-3" : "flex flex-wrap justify-center gap-6")}>
+          <motion.nav key="socials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.42, ease: [0.22, 1, 0.36, 1] }} aria-label="Contact actions" className={cn("w-full max-w-[430px]", config?.socialsLayout === "list" ? "flex flex-col gap-3" : cn("flex flex-wrap gap-6", getJustifyClass(config?.socialsAlignment)))}>
             {contactActions.map((action) => (
               <a key={action.label} href={action.href} target={action.external ? "_blank" : undefined} rel={action.external ? "noreferrer" : undefined} aria-label={action.label} className={cn("group outline-none focus-visible:ring-2 focus-visible:ring-ring/40", config?.socialsLayout === "list" ? cn("flex items-center gap-3 w-full p-2 border border-border/50 rounded-lg hover:bg-muted/30 transition-all", theme.subtext) : "flex flex-col items-center gap-2 text-center")}>
                 {config?.socialsLayout === "list" ? (
-                  <><action.icon className="size-4 shrink-0" aria-hidden="true" /><span className="text-sm font-medium">{action.label}</span></>
+                  <>
+                    <action.icon 
+                      className="size-4 shrink-0" 
+                      style={{ color: config?.socialsIconColor || accentColor }} 
+                      aria-hidden="true" 
+                    />
+                    {config?.showSocialLabels !== false && <span className="text-sm font-medium">{action.label}</span>}
+                  </>
                 ) : (
                   <>
-                    <span className={cn("flex size-11 items-center justify-center rounded-full border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md", !config?.secondaryButtonColor && theme.secondaryButton, buttonRadius, glassStyle)} style={config?.secondaryButtonColor ? { borderColor: config.secondaryButtonColor } : {}}>
-                      <action.icon className="size-4.5" style={{ color: accentColor }} aria-hidden="true" />
+                    <span 
+                      className={cn(
+                        "flex size-11 items-center justify-center rounded-none border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md", 
+                        !config?.socialsButtonColor && !config?.secondaryButtonColor && theme.secondaryButton, 
+                        buttonRadius, 
+                        glassStyle
+                      )} 
+                      style={{ 
+                        borderColor: config?.socialsButtonColor || config?.secondaryButtonColor || primaryColor,
+                        backgroundColor: config?.socialsFillColor || (config?.socialsButtonColor ? `${config.socialsButtonColor}10` : undefined)
+                      }}
+                    >
+                      <action.icon 
+                        className="size-4.5" 
+                        style={{ color: config?.socialsIconColor || accentColor }} 
+                        aria-hidden="true" 
+                      />
                     </span>
-                    <span className={cn("text-[10px] font-bold uppercase", theme.subtext)}>{action.label}</span>
+                    {config?.showSocialLabels !== false && (
+                      <span className={cn("text-[10px] font-bold uppercase", theme.subtext)} style={{ color: textColor, opacity: 0.8 }}>{action.label}</span>
+                    )}
                   </>
                 )}
               </a>
@@ -332,10 +393,12 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
     <div className={cn("min-h-svh w-full transition-all duration-500 relative", useThemeBg ? theme.bg : "")} style={{ ...backgroundStyle, fontFamily: config?.fontFamily || "inherit" }}>
       {pagePattern && <div className="absolute inset-0 pointer-events-none z-0" style={pagePattern} />}
       <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className={cn("relative z-10 mx-auto flex w-full max-w-[560px] flex-col items-center px-5 sm:px-6", spacingClass)}>
-        <Badge variant="outline" className={cn("h-6 px-2 text-[9px] uppercase font-black transition-all duration-500 mb-2", theme.badge, buttonRadius, glassStyle)}>
-          <Nfc className="size-3 mb-0.5" aria-hidden="true" />
-          NFC Profile
-        </Badge>
+        {config?.showTopBadge !== false && (
+          <Badge variant="outline" className={cn("h-6 px-2 text-[9px] uppercase font-black transition-all duration-500 mb-2 rounded-full", theme.badge, glassStyle)}>
+            <StatusDot />
+            {config?.topBadgeText || "Digital Business Card"}
+          </Badge>
+        )}
         {sectionsOrder.map(sectionId => {
           const content = renderSection(sectionId);
           if (!content) return null;

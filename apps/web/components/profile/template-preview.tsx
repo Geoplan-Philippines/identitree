@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Profile, TemplateConfig } from "@/lib/services/nfc-cards.service";
 import { renderProfileCard } from "./layouts/layouts-registry";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { getPagePattern } from "./layouts/card-patterns";
 
@@ -30,9 +30,28 @@ interface TemplatePreviewProps {
   setIsFlipped?: (flipped: boolean) => void;
 }
 
+const StatusDot = () => (
+  <div className="mr-1.5 flex size-1.5 items-center justify-center">
+    <div className="absolute size-1.5 animate-ping rounded-full bg-emerald-400 opacity-75" />
+    <div className="relative size-1.5 rounded-full bg-emerald-500" />
+  </div>
+);
+
 export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped = false, setIsFlipped }: TemplatePreviewProps) {
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
   const config = profile.template?.config as TemplateConfig | undefined;
+
+  useEffect(() => {
+    const font = config?.fontFamily;
+    if (!font || font === "inherit") return;
+    const id = `font-${font.replace(/\s+/g, "-").toLowerCase()}`;
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, "+")}:wght@400;500;600;700;800;900&display=swap`;
+    document.head.appendChild(link);
+  }, [config?.fontFamily]);
 
   const themes = {
     default: {
@@ -69,7 +88,7 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
 
   const theme = themes[layoutKey as keyof typeof themes] || themes.default;
   const primaryColor = config?.primaryColor || (layoutKey === "modern-dark" ? "#3b82f6" : "#0f172a");
-  const accentColor = config?.accentColor || "#3b82f6";
+  const accentColor = config?.accentColor || primaryColor;
   const textColor = config?.textColor || (layoutKey === "default" ? "#0f172a" : "#ffffff");
 
   let backgroundStyle: any = {};
@@ -83,9 +102,9 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
 
   const buttonRadius = {
     sharp: "rounded-none",
-    rounded: "rounded-lg",
+    rounded: "rounded-2xl",
     pill: "rounded-full"
-  }[config?.buttonStyle || "rounded"];
+  }[config?.buttonStyle || "sharp"];
 
   const avatarRadius = {
     square: "rounded-none",
@@ -105,31 +124,31 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
     ? getPagePattern(config?.pagePattern)
     : null;
 
-  const getAlignmentClass = (alignment?: string) => {
-    if (alignment === "left") return "items-start text-left";
-    if (alignment === "right") return "items-end text-right";
-    return "items-center text-center";
-  };
+  const getAlignmentClass = (a?: string) =>
+    a === "left" ? "items-start text-left" : a === "right" ? "items-end text-right" : "items-center text-center";
+
+  const getJustifyClass = (a?: string) =>
+    a === "left" ? "justify-start" : a === "right" ? "justify-end" : "justify-center";
+
+  const Wrapper = ({ children, id, className }: { children: React.ReactNode, id: string, className?: string }) => (
+    <div
+      className={cn(
+        "group/section relative w-full flex flex-col transition-all duration-300",
+        className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelectSection?.(id);
+      }}
+    >
+      <div className="absolute -inset-x-2 -inset-y-1 border border-transparent group-hover/section:border-foreground/10 rounded-none transition-all" />
+      {children}
+    </div>
+  );
 
   const renderSection = (sectionId: string) => {
     const isVisible = config?.[`show${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}` as keyof TemplateConfig] !== false;
     if (!isVisible) return null;
-
-    const Wrapper = ({ children, id, className }: { children: React.ReactNode, id: string, className?: string }) => (
-      <div
-        className={cn(
-          "group/section relative w-full flex flex-col transition-all duration-300",
-          className
-        )}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelectSection?.(id);
-        }}
-      >
-        <div className="absolute -inset-x-2 -inset-y-1 border border-transparent group-hover/section:border-foreground/10 rounded-lg transition-all" />
-        {children}
-      </div>
-    );
 
     switch (sectionId) {
       case "avatar":
@@ -152,20 +171,19 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
               >
                 {profile.firstName} {profile.lastName}
               </h1>
-              <p className={cn("mt-3 text-sm font-medium sm:text-base transition-colors duration-500", theme.subtext)}>
+              <p className={cn("mt-3 text-sm font-medium sm:text-base transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.75 }}>
                 {profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}
               </p>
 
               {config?.showVerifyBadge !== false && (
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 border px-2.5 py-1.5 shadow-sm transition-all duration-500",
-                    theme.badge,
+                    "inline-flex items-center gap-1.5 border px-2.5 py-1.5 shadow-sm transition-all duration-500 border-emerald-500/20 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
                     buttonRadius,
                     glassStyle
                   )}>
-                    <ShieldCheck className="size-3.5" style={{ color: accentColor }} aria-hidden="true" />
-                    Verified handoff
+                    <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" />
+                    {config?.verifyBadgeText || "Identity Verified"}
                   </span>
                 </div>
               )}
@@ -218,10 +236,7 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
           <Wrapper id="socials" key="socials" className={getAlignmentClass(config?.socialsAlignment)}>
             <div className={cn(
               "w-full max-w-[430px]",
-              config?.socialsLayout === "list" ? "flex flex-col gap-3" : "flex flex-wrap justify-center gap-6",
-              config?.socialsLayout === "list" && config?.socialsAlignment === "center" ? "items-center" : "",
-              config?.socialsLayout === "list" && config?.socialsAlignment === "left" ? "items-start" : "",
-              config?.socialsLayout === "list" && config?.socialsAlignment === "right" ? "items-end" : ""
+              config?.socialsLayout === "list" ? "flex flex-col gap-3" : cn("flex flex-wrap gap-6", getJustifyClass(config?.socialsAlignment))
             )}>
               {[
                 { label: "WhatsApp", icon: MessageCircle },
@@ -235,18 +250,26 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
                 )}>
                   <span
                     className={cn(
-                      "flex items-center justify-center rounded-full border shadow-sm transition group-hover:-translate-y-0.5",
-                      config?.socialsLayout === "list" ? "size-9" : "size-11",
-                      theme.secondaryButton,
+                      "flex size-11 items-center justify-center rounded-none border shadow-sm transition",
+                      !config?.socialsButtonColor && !config?.secondaryButtonColor && theme.secondaryButton,
                       buttonRadius,
                       glassStyle
                     )}
+                    style={{ 
+                      borderColor: config?.socialsButtonColor || config?.secondaryButtonColor || primaryColor,
+                      backgroundColor: config?.socialsFillColor || (config?.socialsButtonColor ? `${config.socialsButtonColor}10` : undefined)
+                    }}
                   >
-                    <action.icon className={config?.socialsLayout === "list" ? "size-4" : "size-4.5"} style={{ color: accentColor }} />
+                    <action.icon 
+                      className={config?.socialsLayout === "list" ? "size-4" : "size-4.5"} 
+                      style={{ color: config?.socialsIconColor || accentColor }} 
+                    />
                   </span>
-                  <span className={cn("text-[10px] font-bold uppercase", theme.subtext)}>
-                    {action.label}
-                  </span>
+                  {config?.showSocialLabels !== false && (
+                    <span className={cn("text-[10px] font-bold uppercase", theme.subtext)} style={{ color: textColor, opacity: 0.8 }}>
+                      {action.label}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -277,8 +300,8 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
                   buttonRadius,
                 )}
                 style={{
-                  borderColor: config?.secondaryButtonColor || "#0f172a",
-                  color: config?.secondaryButtonTextColor || "#0f172a",
+                  borderColor: config?.secondaryButtonColor || primaryColor,
+                  color: config?.secondaryButtonTextColor || primaryColor,
                 }}
               >
                 {config?.secondaryButtonLabel || "Visit company"}
@@ -322,18 +345,19 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
       )}
       <div className={cn("mx-auto flex w-full max-w-[560px] flex-col items-center px-8 relative z-10", spacingClass)}>
 
-        <Badge
-          variant="outline"
-          className={cn(
-            "h-6 px-2 text-[9px] uppercase font-black transition-all duration-500 mb-2",
-            theme.badge,
-            buttonRadius,
-            glassStyle
-          )}
-        >
-          <Nfc className="size-3 mb-0.5" aria-hidden="true" />
-          NFC Profile
-        </Badge>
+        {config?.showTopBadge !== false && (
+          <Badge
+            variant="outline"
+            className={cn(
+              "h-6 px-2 text-[9px] uppercase font-black transition-all duration-500 mb-2 rounded-full",
+              theme.badge,
+              glassStyle
+            )}
+          >
+            <StatusDot />
+            {config?.topBadgeText || "Digital Business Card"}
+          </Badge>
+        )}
 
         {sectionsOrder.map(sectionId => {
           const content = renderSection(sectionId);

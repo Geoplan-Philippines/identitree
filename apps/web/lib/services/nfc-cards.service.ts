@@ -77,6 +77,13 @@ export type TemplateConfig = {
   cardLogoAlignment?: "left" | "right" | "center";
   cardNameAlignment?: "left" | "right" | "center";
   cardShowPattern?: boolean;
+  cardShowEmail?: boolean;
+  cardShowPhone?: boolean;
+  cardDetailsAlignment?: "left" | "right" | "center";
+  showSocialLabels?: boolean;
+  socialsIconColor?: string;
+  socialsButtonColor?: string;
+  socialsFillColor?: string;
   headerStyle?: "minimal" | "standard" | "grand";
   showAvatar?: boolean;
   showHeader?: boolean;
@@ -93,6 +100,9 @@ export type TemplateConfig = {
   showVerifyBadge?: boolean;
   fontFamily?: string;
   backgroundImage?: string;
+  topBadgeText?: string;
+  verifyBadgeText?: string;
+  showTopBadge?: boolean;
 };
 
 export type NfcCard = {

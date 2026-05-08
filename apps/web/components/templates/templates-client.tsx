@@ -15,7 +15,7 @@ import {
   EmptyMedia,
 } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
-import { LayoutTemplate, Plus, Trash, ArrowLeft, ExternalLink, Info } from "lucide-react";
+import { LayoutTemplate, Plus, Trash, ArrowLeft, ExternalLink, Info, MoveLeftIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -30,6 +30,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useOrganization } from "@/hooks/use-organization";
+import { PageHeader } from "@/components/shared/page-shell";
 
 interface TemplatesClientProps {
   initialData: Template[];
@@ -38,10 +42,12 @@ interface TemplatesClientProps {
 export function TemplatesClient({ initialData }: TemplatesClientProps) {
   const params = useParams();
   const slug = params?.slug as string;
-  
+  const { data: organization } = useOrganization(slug);
+
   const { data, refetch } = useTemplates(initialData);
   const deleteMutation = useDeleteTemplate();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const templates = data || [];
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId) || null;
@@ -51,19 +57,17 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
       {/* Left Column: Template List */}
       <div className={cn(
         "transition-all duration-300 flex flex-col gap-4",
-        selectedTemplateId ? "w-80" : "w-full"
+        selectedTemplateId && !isMobile ? "w-80" : "w-full"
       )}>
         <div className="flex items-center justify-between px-2">
-          <div className="flex flex-col">
-            <h2 className="text-xl font-black uppercase tracking-tight">Templates</h2>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Manage Organization Layouts
-            </p>
-          </div>
-          <Button 
-            size="sm" 
+          <PageHeader
+            title="Templates"
+            description="Manage Organization Layouts"
+          />
+          <Button
+            size="sm"
             asChild
-            className="rounded-none font-bold uppercase text-[10px]"
+            className="rounded-none"
           >
             <Link href={`/dashboard/${slug}/templates/new`}>
               <Plus className="size-3.5 mr-1.5" />
@@ -126,7 +130,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
 
                   <div className="flex flex-col gap-1 relative z-10">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Template Name</span>
-                    <span className="font-extrabold text-lg tracking-tight uppercase truncate">
+                    <span className="font-extrabold text-base tracking-tight uppercase truncate">
                       {template.name}
                     </span>
                   </div>
@@ -145,49 +149,39 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
       </div>
 
       {/* Right Detail Panel */}
-      {selectedTemplateId && selectedTemplate && (
-        <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-none">
-          <div className="p-5 border-b flex items-center justify-between gap-4 bg-background sticky top-0 z-20 rounded-none">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedTemplateId(null)}
-                className="rounded-none hover:bg-muted shrink-0"
-              >
-                <ArrowLeft size={20} />
-              </Button>
-              <div className="space-y-0.5 min-w-0">
-                <h3 className="font-black text-lg tracking-tight uppercase truncate">{selectedTemplate.name}</h3>
-                <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded-none border border-border">
-                  {selectedTemplate.id}
-                </span>
+      {selectedTemplateId && selectedTemplate && (() => {
+        const detailContent = (
+          <>
+            <div className="px-5 py-4 border-b flex items-center justify-between gap-4 bg-background sticky top-0 z-20 rounded-none">
+              <div className="flex items-center gap-3 min-w-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedTemplateId(null)}
+                  className="rounded-none hover:bg-muted shrink-0 h-9 w-9"
+                >
+                  <MoveLeftIcon size={18} />
+                </Button>
+                <div className="flex flex-col min-w-0">
+                  <h3 className="font-black text-base tracking-tight uppercase truncate leading-tight">{selectedTemplate.name}</h3>
+                  <div className="flex items-center">
+                    <span className="text-[9px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded-none border border-border/50 truncate max-w-[140px] sm:max-w-none">
+                      {selectedTemplate.id}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              {selectedTemplate.availability !== "GLOBAL" && (
-                <>
-                  <Button 
-                    asChild
-                    variant="outline" 
-                    size="sm" 
-                    className="rounded-none uppercase font-bold text-[10px]"
-                  >
-                    <Link href={`/dashboard/${slug}/templates/${selectedTemplate.id}`}>
-                      <ExternalLink className="size-3.5 mr-1.5" />
-                      Open Designer
-                    </Link>
-                  </Button>
-                  
+              <div className="flex items-center gap-2">
+                {selectedTemplate.availability !== "GLOBAL" && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
+                      <Button
+                        variant="destructive"
+                        size="sm"
                         className="rounded-none uppercase font-bold text-[10px]"
                       >
-                        <Trash className="size-3.5 mr-1.5" />
-                        Delete
+                        <Trash className="size-3.5 sm:mr-1.5" />
+                        <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="rounded-none">
@@ -213,93 +207,120 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </>
-              )}
-            </div>
-          </div>
-
-          <ScrollArea className="flex-1 w-full min-h-0">
-            <div className="p-8">
-              <div className="max-w-4xl mx-auto space-y-8">
-                {/* System Message */}
-                {selectedTemplate.availability === "GLOBAL" && (
-                  <div className="bg-blue-50/50 border border-blue-200/50 p-6 flex items-start gap-4">
-                    <Info className="size-5 text-blue-600 mt-0.5" />
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-blue-900 uppercase tracking-wide">System Template</h4>
-                      <p className="text-sm text-blue-800/80 leading-relaxed font-medium">
-                        This is a core system design and cannot be modified. You can use it as a standard for your profiles or create a new custom design from the templates list.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Basic Details Section */}
-                  <div className="space-y-6 border border-border bg-background p-6">
-                    <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
-                      <LayoutTemplate className="size-4 text-muted-foreground" />
-                      <span className="text-xs font-black uppercase tracking-widest">Template Overview</span>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Category</span>
-                        <span className="font-bold text-sm uppercase">{selectedTemplate.category || "General"}</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Availability</span>
-                        <Badge className="w-fit rounded-none font-bold uppercase text-[9px] h-4">
-                          {selectedTemplate.availability}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Layout Configuration Section */}
-                  <div className="space-y-6 border border-border bg-background p-6">
-                    <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
-                      <LayoutTemplate className="size-4 text-muted-foreground" />
-                      <span className="text-xs font-black uppercase tracking-widest">Layout Engine</span>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Base Layout Key</span>
-                        <code className="text-xs font-bold bg-muted px-2 py-1 w-fit border border-border uppercase">
-                          {selectedTemplate.layoutKey}
-                        </code>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Aesthetic</span>
-                        <span className="font-bold text-sm uppercase">{selectedTemplate.config?.cardStyle || "Default"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Call to Action for non-global */}
-                {selectedTemplate.availability !== "GLOBAL" && (
-                  <div className="p-10 border border-border bg-background flex flex-col items-center justify-center space-y-6 text-center">
-                    <div className="space-y-2">
-                      <h4 className="font-black uppercase text-lg tracking-tight">Full-Page Designer</h4>
-                      <p className="text-sm text-muted-foreground max-w-sm">
-                        Launch the immersive design studio to customize every visual detail of this template.
-                      </p>
-                    </div>
-                    <Button asChild size="lg" className="rounded-none font-bold uppercase px-10">
-                      <Link href={`/dashboard/${slug}/templates/${selectedTemplate.id}`}>
-                        <ExternalLink className="mr-2 size-4" />
-                        Launch Design Studio
-                      </Link>
-                    </Button>
-                  </div>
                 )}
               </div>
             </div>
-          </ScrollArea>
-        </div>
-      )}
+
+            <ScrollArea className="flex-1 w-full min-h-0">
+              <div className="p-3 sm:p-8 pb-16">
+                <div className="max-w-full sm:max-w-4xl mx-auto space-y-8">
+                  {/* System Message */}
+                  {selectedTemplate.availability === "GLOBAL" && (
+                    <div className="bg-blue-50/50 border border-blue-200/50 p-6 flex items-start gap-4">
+                      <Info className="size-5 text-blue-600 mt-0.5" />
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-blue-900 uppercase tracking-wide">System Template</h4>
+                        <p className="text-sm text-blue-800/80 leading-relaxed font-medium">
+                          This is a core system design and cannot be modified. You can use it as a standard for your profiles or create a new custom design from the templates list.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Basic Details Section */}
+                    <div className="space-y-6 border border-border bg-background p-4 sm:p-6">
+                      <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
+                        <LayoutTemplate className="size-4 text-muted-foreground" />
+                        <span className="text-xs font-black uppercase tracking-widest">Template Overview</span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Category</span>
+                          <span className="font-bold text-sm uppercase truncate">{selectedTemplate.category || "General"}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Availability</span>
+                          <div className="flex items-center gap-2">
+                            <Badge className="w-fit rounded-none font-bold uppercase text-[9px] h-4">
+                              {selectedTemplate.availability}
+                            </Badge>
+                            {selectedTemplate.availability === "ORG_ONLY" && (
+                              <span className="text-[10px] font-bold text-muted-foreground truncate">
+                                ({organization?.name || "This Organization"})
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Layout Configuration Section */}
+                    <div className="space-y-6 border border-border bg-background p-4 sm:p-6">
+                      <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
+                        <LayoutTemplate className="size-4 text-muted-foreground" />
+                        <span className="text-xs font-black uppercase tracking-widest">Layout Engine</span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Base Layout Key</span>
+                          <code className="text-[10px] sm:text-xs font-bold bg-muted px-2 py-1 w-fit border border-border uppercase truncate max-w-full">
+                            {selectedTemplate.layoutKey}
+                          </code>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Aesthetic</span>
+                          <span className="font-bold text-sm uppercase">{selectedTemplate.config?.cardStyle || "Default"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Call to Action for non-global */}
+                  {selectedTemplate.availability !== "GLOBAL" && (
+                    <div className="p-6 sm:p-10 border border-border bg-background flex flex-col items-center justify-center space-y-6 text-center overflow-hidden">
+                      <div className="space-y-2 w-full">
+                        <h4 className="font-black uppercase text-base tracking-tight">Full-Page Designer</h4>
+                        <p className="text-sm text-muted-foreground max-w-full sm:max-w-sm mx-auto leading-relaxed">
+                          Launch the immersive design studio to customize every visual detail of this template.
+                        </p>
+                      </div>
+                      <Button asChild className="rounded-none font-bold px-6 sm:px-10 w-full sm:w-auto">
+                        <Link href={`/dashboard/${slug}/templates/${selectedTemplate.id}`}>
+                          <ExternalLink className="mr-2 size-4" />
+                          Launch Design Studio
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
+          </>
+        );
+
+        if (isMobile) {
+          return (
+            <Sheet open={true} onOpenChange={(open) => !open && setSelectedTemplateId(null)}>
+              <SheetContent className="w-[95vw] p-0 flex flex-col h-full sm:max-w-md [&>button]:hidden border-l" side="right">
+                <SheetTitle className="sr-only">Template Details</SheetTitle>
+                <SheetDescription className="sr-only">Visual overview and configuration details for this template.</SheetDescription>
+                <div className="flex-1 bg-muted/5 flex flex-col h-full overflow-hidden relative">
+                  {detailContent}
+                </div>
+              </SheetContent>
+            </Sheet>
+          );
+        }
+
+        return (
+          <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-none">
+            {detailContent}
+          </div>
+        );
+      })()}
     </div>
   );
 }
