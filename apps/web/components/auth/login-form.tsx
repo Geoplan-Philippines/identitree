@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginFormValues } from "@/lib/zod/auth";
 import Link from "next/link";
+import posthog from "posthog-js";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -83,6 +84,10 @@ export function LoginForm() {
       }
 
       toast.success("Login successful");
+      posthog.capture("user_signed_in", {
+        method: "email",
+        $set: { login_method: "email" },
+      });
 
       if (organizationSlug) {
         window.location.assign(`/dashboard/${organizationSlug}`);
@@ -106,6 +111,10 @@ export function LoginForm() {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `${window.location.origin}/dashboard`,
+      });
+      posthog.capture("user_signed_in", {
+        method: "google",
+        $set: { login_method: "google" },
       });
     } catch (error) {
       const message =
