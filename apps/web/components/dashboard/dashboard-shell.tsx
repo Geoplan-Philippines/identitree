@@ -21,6 +21,8 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
+import posthog from "posthog-js";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -158,14 +160,20 @@ function DashboardSidebar() {
               {comingSoonLinks.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                    asChild
                     tooltip={`${item.label} (Coming Soon)`}
-                    disabled
+                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    onClick={() => {
+                      posthog.capture("coming_soon_clicked", {
+                        feature: item.label,
+                        category: "Coming Soon",
+                      });
+                      toast.info(`${item.label} is coming soon!`, {
+                        description: "We're working hard to bring this feature to you.",
+                      });
+                    }}
                   >
-                    <Link href={item.href} className="opacity-50 cursor-not-allowed">
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
+                    <item.icon aria-hidden="true" />
+                    <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -180,14 +188,20 @@ function DashboardSidebar() {
               {growthLinks.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                    asChild
                     tooltip={`${item.label} (Coming Soon)`}
-                    disabled
+                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    onClick={() => {
+                      posthog.capture("coming_soon_clicked", {
+                        feature: item.label,
+                        category: "Growth",
+                      });
+                      toast.info(`${item.label} is coming soon!`, {
+                        description: "We're working hard to bring this feature to you.",
+                      });
+                    }}
                   >
-                    <Link href={item.href} className="opacity-50 cursor-not-allowed">
-                      <item.icon aria-hidden="true" />
-                      <span>{item.label}</span>
-                    </Link>
+                    <item.icon aria-hidden="true" />
+                    <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -211,6 +225,7 @@ function DashboardSidebar() {
               tooltip="Log out"
               onClick={async () => {
                 await authClient.signOut();
+                posthog.reset();
                 router.push("/login");
               }}
             >
