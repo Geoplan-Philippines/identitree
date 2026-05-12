@@ -5,6 +5,9 @@ import { Header } from "@/components/shared/header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/providers/auth-provider";
 import { TanstackQueryProvider } from "@/providers/tanstack-query-provider";
+import { PostHogProvider } from "@/providers/posthog-provider";
+import { PostHogPageView } from "@/components/posthog-pageview";
+import { Suspense } from "react";
 
 
 const inter = Inter({
@@ -96,11 +99,16 @@ export default function RootLayout({
 
 
       <body className="antialiased bg-background text-foreground overflow-x-hidden">
-        <TanstackQueryProvider>
-          <Header />
-          <Toaster position="top-right" closeButton richColors />
-          {children}
-        </TanstackQueryProvider>
+        <PostHogProvider>
+          <TanstackQueryProvider>
+            <Suspense>
+              <PostHogPageView />
+            </Suspense>
+            <Header />
+            <Toaster position="top-right" closeButton richColors />
+            {children}
+          </TanstackQueryProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

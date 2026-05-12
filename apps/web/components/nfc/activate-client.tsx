@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import { checkNfcCardExists, registerCustomerCard } from "@/lib/services/nfc-cards.service";
+import posthog from "posthog-js";
 
 const faqs = [
   {
@@ -161,6 +162,12 @@ export function ActivateClient() {
           setIsWriting(false);
           setStep("success");
           toast.success(isUrlRegisteredRef.current ? "Card linked successfully!" : "Card encoded successfully!");
+          
+          posthog.capture("nfc_card_activated", {
+            hardwareId: serialNumber,
+            isUrlRegistered: isUrlRegisteredRef.current,
+            targetUrl: normalizedUrlRef.current,
+          });
         } catch (err: any) {
           console.error("NFC Write Error:", err);
           toast.error(`Write failed: ${err.message || "Unknown error"}`);

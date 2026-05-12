@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import {
   ArrowUpRight,
@@ -22,6 +23,7 @@ import { getAnalyticsChannel } from "@/lib/utils/analytics-utils";
 import { renderProfileCard } from "./layouts/layouts-registry";
 import { getPagePattern } from "./layouts/card-patterns";
 import { cn } from "@/lib/utils";
+import posthog from "posthog-js";
 
 interface PublicProfileClientProps {
   profile: Profile;
@@ -30,17 +32,32 @@ interface PublicProfileClientProps {
 export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const hasTrackedView = useRef(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (profile?.id && !hasTrackedView.current) {
       hasTrackedView.current = true;
+      
+      // Get source from URL params
+      const ref = searchParams.get("ref");
+      const source = ref === "nfc_tap" ? "nfc_tap" : ref === "qr" ? "qr_code" : "direct";
+
+      // Existing internal analytics
       analyticsService.trackEvent({
         profileId: profile.id,
         eventType: "PROFILE_VIEW",
         channel: getAnalyticsChannel(),
       }).catch(console.error);
+
+      // PostHog Tracking
+      posthog.capture("profile_viewed", {
+        profileId: profile.id,
+        profileName: `${profile.firstName} ${profile.lastName}`,
+        organization: profile.organization?.name,
+        source: source,
+      });
     }
-  }, [profile?.id]);
+  }, [profile?.id, profile.firstName, profile.lastName, profile.organization?.name, searchParams]);
 
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
   const config = profile.template?.config as TemplateConfig | undefined;
@@ -49,9 +66,8 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
   const [isNfcTap, setIsNfcTap] = useState(false);
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setIsNfcTap(params.get("ref") === "nfc_tap" || profile.id.startsWith("tpl_preview_"));
-  }, [profile.id]);
+    setIsNfcTap(searchParams.get("ref") === "nfc_tap" || profile.id.startsWith("tpl_preview_"));
+  }, [profile.id, searchParams]);
 
   useEffect(() => {
     const font = config?.fontFamily;
@@ -226,7 +242,17 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
 
           <div className="mt-7 w-full max-w-[430px] space-y-3">
             <Button asChild size="lg" className="h-12 w-full rounded-md shadow-[0_16px_35px_rgba(15,23,42,0.14)]">
-              <a href={vCardHref} download={`${profile.firstName}-${profile.lastName}.vcf`} onClick={() => { analyticsService.trackEvent({ profileId: profile.id, eventType: "SAVE_CONTACT", channel: getAnalyticsChannel() }).catch(console.error); }}>
+              <a 
+                href={vCardHref} 
+                download={`${profile.firstName}-${profile.lastName}.vcf`} 
+                onClick={() => { 
+                  analyticsService.trackEvent({ profileId: profile.id, eventType: "SAVE_CONTACT", channel: getAnalyticsChannel() }).catch(console.error); 
+                  posthog.capture("contact_saved", {
+                    profileId: profile.id,
+                    profileName: `${profile.firstName} ${profile.lastName}`,
+                  });
+                }}
+              >
                 <Download className="size-4" aria-hidden="true" />
                 Save Contact
               </a>
@@ -310,7 +336,22 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
         return (
           <motion.nav key="socials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.42, ease: [0.22, 1, 0.36, 1] }} aria-label="Contact actions" className={cn("w-full max-w-[430px]", config?.socialsLayout === "list" ? "flex flex-col gap-3" : cn("flex flex-wrap gap-6", getJustifyClass(config?.socialsAlignment)))}>
             {contactActions.map((action) => (
-              <a key={action.label} href={action.href} target={action.external ? "_blank" : undefined} rel={action.external ? "noreferrer" : undefined} aria-label={action.label} className={cn("group outline-none focus-visible:ring-2 focus-visible:ring-ring/40", config?.socialsLayout === "list" ? cn("flex items-center gap-3 w-full p-2 border border-border/50 rounded-lg hover:bg-muted/30 transition-all", theme.subtext) : "flex flex-col items-center gap-2 text-center")}>
+              <a 
+                key={action.label} 
+                href={action.href} 
+                target={action.external ? "_blank" : undefined} 
+                rel={action.external ? "noreferrer" : undefined} 
+                aria-label={action.label} 
+                className={cn("group outline-none focus-visible:ring-2 focus-visible:ring-ring/40", config?.socialsLayout === "list" ? cn("flex items-center gap-3 w-full p-2 border border-border/50 rounded-lg hover:bg-muted/30 transition-all", theme.subtext) : "flex flex-col items-center gap-2 text-center")}
+                onClick={() => {
+                  posthog.capture("social_link_clicked", {
+                    profileId: profile.id,
+                    profileName: `${profile.firstName} ${profile.lastName}`,
+                    socialPlatform: action.label,
+                    url: action.href,
+                  });
+                }}
+              >
                 {config?.socialsLayout === "list" ? (
                   <>
                     <action.icon
@@ -355,7 +396,17 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
           <div key="actions" className={cn("w-full max-w-[430px] space-y-3 flex flex-col", getAlignmentClass(config?.actionsAlignment))}>
             {config?.showVCard !== false && (
               <Button asChild size="lg" className={cn("h-12 w-full transition-all duration-500", buttonRadius, layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-white text-slate-950 hover:bg-white/90" : theme.button)} style={layoutKey === "glass" || layoutKey === "modern-dark" ? {} : { backgroundColor: primaryBtnBg, color: primaryBtnText }}>
-                <a href={vCardHref} download={`${profile.firstName}-${profile.lastName}.vcf`} onClick={() => { analyticsService.trackEvent({ profileId: profile.id, eventType: "SAVE_CONTACT", channel: getAnalyticsChannel() }).catch(console.error); }}>
+                <a 
+                  href={vCardHref} 
+                  download={`${profile.firstName}-${profile.lastName}.vcf`} 
+                  onClick={() => { 
+                    analyticsService.trackEvent({ profileId: profile.id, eventType: "SAVE_CONTACT", channel: getAnalyticsChannel() }).catch(console.error); 
+                    posthog.capture("contact_saved", {
+                      profileId: profile.id,
+                      profileName: `${profile.firstName} ${profile.lastName}`,
+                    });
+                  }}
+                >
                   <Download className="size-4" aria-hidden="true" />
                   {primaryBtnLabel}
                 </a>

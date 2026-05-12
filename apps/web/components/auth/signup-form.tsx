@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { signupSchema, type SignupFormValues } from "@/lib/zod/auth";
+import posthog from "posthog-js";
 
 export function SignupForm() {
   const router = useRouter();
@@ -75,6 +76,10 @@ export function SignupForm() {
       }
 
       toast.success("Account created");
+      posthog.capture("user_signed_up", {
+        method: "email",
+        $set: { signup_method: "email", login_method: "email" },
+      });
 
       // Email/password users must verify their email first
       router.push(`/verify-email?sent=1&email=${encodeURIComponent(data.email)}`);
@@ -103,6 +108,14 @@ export function SignupForm() {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `${window.location.origin}/organization/setup`,
+      });
+      posthog.capture("user_signed_up", {
+        method: "google",
+        $set: { signup_method: "google", login_method: "google" },
+      });
+      posthog.capture("user_signed_in", {
+        method: "google",
+        $set: { login_method: "google" },
       });
     } catch (error) {
       const message =
