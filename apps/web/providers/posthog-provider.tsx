@@ -9,12 +9,24 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      ui_host: "https://us.posthog.com",
-      capture_pageview: false,
-      capture_pageleave: true,
-    });
+    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+        ui_host: "https://us.posthog.com",
+        capture_pageview: false,
+        capture_pageleave: true,
+      });
+
+      // Automatically detect and tag the environment
+      const hostname = window.location.hostname;
+      const env = hostname.includes("stg") 
+        ? "staging" 
+        : hostname === "identitree.geoplanph.com" 
+          ? "production" 
+          : "development";
+
+      posthog.register({ environment: env });
+    }
   }, []);
 
   useEffect(() => {
