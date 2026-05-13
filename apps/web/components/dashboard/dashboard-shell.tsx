@@ -46,6 +46,7 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { useParams, usePathname, useRouter } from "next/navigation";
+import React from "react";
 
 type DashboardShellProps = {
   children: ReactNode;
@@ -68,6 +69,12 @@ function DashboardSidebar() {
   const slug = params?.slug as string;
   const { data: sessionData } = authClient.useSession();
   const user = sessionData?.user;
+
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const getInitials = (name?: string | null) => {
     if (!name) return "ID";
@@ -244,15 +251,15 @@ function DashboardSidebar() {
                     />
                   )}
                   <AvatarFallback className="text-xs font-medium">
-                    {getInitials(user?.name)}
+                    {isMounted ? getInitials(user?.name) : "ID"}
                   </AvatarFallback>
                 </Avatar>
                 <span className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate text-[13px] font-medium">
-                    {user?.name || "User"}
+                    {isMounted ? (user?.name || "User") : "User"}
                   </span>
                   <span className="truncate text-[11px] text-muted-foreground">
-                    {user?.email || "Pro plan"}
+                    {isMounted ? (user?.email || "Pro plan") : "Pro plan"}
                   </span>
                 </span>
               </Link>
