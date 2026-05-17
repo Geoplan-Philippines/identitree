@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   authors: [
     { name: "Geoplan Philippines Inc." },
     { name: "Chester Luke Maligaso" },
-    { name: "Ace Pasiliao" },
+    { name: "Ace Gabriel P. Pasiliao" },
   ],
   creator: "Identitree",
   publisher: "Identitree",
