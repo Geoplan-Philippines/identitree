@@ -2,12 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  CheckCircle2,
+  MailOpen,
+  AlertCircle,
+  AlertTriangle,
+  Loader2,
+  Inbox,
+  RefreshCw,
+} from "lucide-react";
+import Link from "next/link";
 
-import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { getAuthApiBaseUrl } from "@/lib/api/config";
 import { authClient } from "@/lib/auth-client";
-import { authService } from "@/lib/services/auth.service";
 
 type VerificationStatus =
   | "loading"
@@ -128,152 +136,222 @@ export function VerifyEmailStatus() {
     verified,
   ]);
 
-  const description = useMemo(() => {
-    if (status === "verified") {
-      return "Your email is verified. You can continue to sign in.";
-    }
+  return (
+    <div className="space-y-5">
+      <StatusPanel status={status} email={email} sent={sent} errorMessage={errorMessage} />
 
-    if (status === "already-verified") {
-      return "This verification link was already used. Your email is already verified.";
-    }
+      <div className="flex flex-col gap-3">
+        {status === "verified" ? (
+          <Button asChild className="h-11 w-full text-[13.5px] font-medium shadow-sm">
+            <Link href="/login">Continue to sign in</Link>
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full text-[13.5px] font-medium"
+            onClick={() => void checkVerificationStatus()}
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Checking…
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Refresh status
+              </>
+            )}
+          </Button>
+        )}
 
-    if (status === "expired") {
-      return "This verification link has expired. Please request a new verification email.";
-    }
+        <p className="text-center text-[12.5px] text-muted-foreground">
+          Wrong email or didn&apos;t receive it?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Back to sign up
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
 
-    if (status === "invalid-link") {
-      return "This verification link is invalid.";
-    }
+type StatusPanelProps = {
+  status: VerificationStatus;
+  email: string | null;
+  sent: boolean;
+  errorMessage: string | null;
+};
 
-    if (status === "not-verified") {
-      return "We found your account, but your email is not verified yet.";
-    }
+function StatusPanel({ status, email, sent, errorMessage }: StatusPanelProps) {
+  const config = useMemo(() => getStatusConfig(status, sent), [status, sent]);
 
-    if (status === "no-session") {
-      return "No active session was found. Please sign in again after verifying your email.";
-    }
-
-    if (status === "error") {
-      return "We could not confirm your verification status right now.";
-    }
-
-    return "Checking your email verification status...";
-  }, [status]);
+  if (!config) return null;
 
   return (
-    <AuthCard
-      title="Email Verification Status"
-      description={description}
-      footerLabel="Back to"
-      footerHref="/login"
-      footerActionText="Sign in"
+    <div
+      className={`flex gap-3 border p-4 ${config.borderClass} ${config.bgClass}`}
+      role={config.role}
     >
-      <div className="space-y-4">
-        {status === "verified" && (
-          <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
-            <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-              Email verified successfully.
-            </p>
-            {email && (
-              <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                Verified account: {email}
-              </p>
-            )}
-          </div>
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center ${config.iconBgClass} ${config.iconColorClass}`}
+      >
+        {config.icon}
+      </span>
+      <div className="flex-1 space-y-1">
+        <p className={`text-[13.5px] font-semibold ${config.titleColorClass}`}>
+          {config.title}
+        </p>
+        <p className={`text-[13px] leading-relaxed ${config.bodyColorClass}`}>
+          {config.body}
+        </p>
+        {email && status !== "no-session" && status !== "error" && status !== "loading" && (
+          <p
+            className={`pt-1 font-mono text-[12px] tracking-tight ${config.bodyColorClass}`}
+          >
+            {email}
+          </p>
         )}
-
-        {status === "not-verified" && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
-              {sent
-                ? "Verification email sent."
-                : "Your email is still not verified."}
-            </p>
-            {email && (
-              <p className="mt-1 text-sm text-amber-800 dark:text-amber-400">
-                Account email: {email}
-              </p>
-            )}
-            <p className="mt-2 text-sm text-amber-800 dark:text-amber-400">
-              {sent
-                ? "Please check your inbox and spam folder for the verification link."
-                : "Check your inbox and spam folder, then click Refresh Status."}
-            </p>
-          </div>
+        {status === "error" && errorMessage && (
+          <p className={`pt-1 text-[12px] ${config.bodyColorClass}`}>
+            {errorMessage}
+          </p>
         )}
-
-        {status === "already-verified" && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
-              This link was already used.
-            </p>
-            {email && (
-              <p className="mt-1 text-sm text-amber-800 dark:text-amber-400">
-                Account email: {email}
-              </p>
-            )}
-          </div>
-        )}
-
-        {status === "expired" && (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
-            <p className="text-sm font-medium text-red-900 dark:text-red-300">
-              Verification link expired.
-            </p>
-            <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-              Please sign in and request another verification email.
-            </p>
-          </div>
-        )}
-
-        {status === "invalid-link" && (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
-            <p className="text-sm font-medium text-red-900 dark:text-red-300">
-              Invalid verification link.
-            </p>
-            <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-              Please use the latest email link.
-            </p>
-          </div>
-        )}
-
-        {status === "no-session" && (
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">
-              Open your verification link from email, then return here and sign in.
-            </p>
-          </div>
-        )}
-
-        {status === "error" && (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
-            <p className="text-sm font-medium text-red-900 dark:text-red-300">
-              Failed to check verification status.
-            </p>
-            {errorMessage && (
-              <p className="mt-1 text-sm text-red-800 dark:text-red-400">
-                {errorMessage}
-              </p>
-            )}
-          </div>
-        )}
-
-        {status === "loading" && (
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Checking status...</p>
-          </div>
-        )}
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => void checkVerificationStatus()}
-          disabled={status === "loading"}
-        >
-          {status === "loading" ? "Checking..." : "Refresh Status"}
-        </Button>
       </div>
-    </AuthCard>
+    </div>
   );
+}
+
+type StatusConfig = {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  role: "status" | "alert";
+  borderClass: string;
+  bgClass: string;
+  iconBgClass: string;
+  iconColorClass: string;
+  titleColorClass: string;
+  bodyColorClass: string;
+};
+
+function getStatusConfig(
+  status: VerificationStatus,
+  sent: boolean,
+): StatusConfig | null {
+  switch (status) {
+    case "loading":
+      return {
+        icon: <Loader2 className="h-4 w-4 animate-spin" />,
+        title: "Checking verification status",
+        body: "One moment while we confirm your account state.",
+        role: "status",
+        borderClass: "border-border",
+        bgClass: "bg-muted/40",
+        iconBgClass: "bg-foreground/5",
+        iconColorClass: "text-foreground",
+        titleColorClass: "text-foreground",
+        bodyColorClass: "text-muted-foreground",
+      };
+    case "verified":
+      return {
+        icon: <CheckCircle2 className="h-4 w-4" />,
+        title: "Email verified",
+        body: "Your account is ready. Sign in to continue setting up your workspace.",
+        role: "status",
+        borderClass: "border-emerald-300/70 dark:border-emerald-800/70",
+        bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
+        iconBgClass: "bg-emerald-100 dark:bg-emerald-900/40",
+        iconColorClass: "text-emerald-700 dark:text-emerald-300",
+        titleColorClass: "text-emerald-900 dark:text-emerald-200",
+        bodyColorClass: "text-emerald-800/85 dark:text-emerald-300/85",
+      };
+    case "not-verified":
+      return {
+        icon: <MailOpen className="h-4 w-4" />,
+        title: sent ? "Verification email sent" : "Email not verified yet",
+        body: sent
+          ? "Open the email we just sent and click the verification link to activate your account. The link expires in 15 minutes."
+          : "Check your inbox and spam folder for our verification link, then return here and refresh.",
+        role: "status",
+        borderClass: "border-amber-300/70 dark:border-amber-800/70",
+        bgClass: "bg-amber-50 dark:bg-amber-950/30",
+        iconBgClass: "bg-amber-100 dark:bg-amber-900/40",
+        iconColorClass: "text-amber-700 dark:text-amber-300",
+        titleColorClass: "text-amber-900 dark:text-amber-200",
+        bodyColorClass: "text-amber-800/85 dark:text-amber-300/85",
+      };
+    case "already-verified":
+      return {
+        icon: <CheckCircle2 className="h-4 w-4" />,
+        title: "Link already used",
+        body: "This verification link has already been redeemed. Your account is verified — sign in to continue.",
+        role: "status",
+        borderClass: "border-amber-300/70 dark:border-amber-800/70",
+        bgClass: "bg-amber-50 dark:bg-amber-950/30",
+        iconBgClass: "bg-amber-100 dark:bg-amber-900/40",
+        iconColorClass: "text-amber-700 dark:text-amber-300",
+        titleColorClass: "text-amber-900 dark:text-amber-200",
+        bodyColorClass: "text-amber-800/85 dark:text-amber-300/85",
+      };
+    case "expired":
+      return {
+        icon: <AlertTriangle className="h-4 w-4" />,
+        title: "Verification link expired",
+        body: "Your verification link has expired. Sign in to request a fresh verification email.",
+        role: "alert",
+        borderClass: "border-red-300/70 dark:border-red-800/70",
+        bgClass: "bg-red-50 dark:bg-red-950/30",
+        iconBgClass: "bg-red-100 dark:bg-red-900/40",
+        iconColorClass: "text-red-700 dark:text-red-300",
+        titleColorClass: "text-red-900 dark:text-red-200",
+        bodyColorClass: "text-red-800/85 dark:text-red-300/85",
+      };
+    case "invalid-link":
+      return {
+        icon: <AlertCircle className="h-4 w-4" />,
+        title: "Invalid verification link",
+        body: "This link can't be used. Open the most recent email we sent you and try again.",
+        role: "alert",
+        borderClass: "border-red-300/70 dark:border-red-800/70",
+        bgClass: "bg-red-50 dark:bg-red-950/30",
+        iconBgClass: "bg-red-100 dark:bg-red-900/40",
+        iconColorClass: "text-red-700 dark:text-red-300",
+        titleColorClass: "text-red-900 dark:text-red-200",
+        bodyColorClass: "text-red-800/85 dark:text-red-300/85",
+      };
+    case "no-session":
+      return {
+        icon: <Inbox className="h-4 w-4" />,
+        title: "Open your verification link",
+        body: "Click the verification link from the email we sent you, then return here and sign in.",
+        role: "status",
+        borderClass: "border-border",
+        bgClass: "bg-muted/40",
+        iconBgClass: "bg-foreground/5",
+        iconColorClass: "text-foreground",
+        titleColorClass: "text-foreground",
+        bodyColorClass: "text-muted-foreground",
+      };
+    case "error":
+      return {
+        icon: <AlertCircle className="h-4 w-4" />,
+        title: "Couldn't check verification status",
+        body: "We hit a hiccup confirming your status. Try refreshing in a moment.",
+        role: "alert",
+        borderClass: "border-red-300/70 dark:border-red-800/70",
+        bgClass: "bg-red-50 dark:bg-red-950/30",
+        iconBgClass: "bg-red-100 dark:bg-red-900/40",
+        iconColorClass: "text-red-700 dark:text-red-300",
+        titleColorClass: "text-red-900 dark:text-red-200",
+        bodyColorClass: "text-red-800/85 dark:text-red-300/85",
+      };
+    default:
+      return null;
+  }
 }
