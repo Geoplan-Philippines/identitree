@@ -117,7 +117,7 @@ export function ResetPasswordForm() {
                   placeholder="Enter new password"
                   autoComplete="new-password"
                   aria-invalid={fieldState.invalid}
-                  className="pr-10"
+                  className="h-11 px-3 pr-10 text-[14px]"
                 />
                 <button
                   type="button"
@@ -146,7 +146,7 @@ export function ResetPasswordForm() {
                   placeholder="Confirm new password"
                   autoComplete="new-password"
                   aria-invalid={fieldState.invalid}
-                  className="pr-10"
+                  className="h-11 px-3 pr-10 text-[14px]"
                 />
                 <button
                   type="button"
@@ -161,7 +161,11 @@ export function ResetPasswordForm() {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="h-11 w-full text-[13.5px] font-medium"
+          disabled={form.formState.isSubmitting}
+        >
           {form.formState.isSubmitting ? "Updating password..." : "Reset password"}
         </Button>
       </FieldGroup>
