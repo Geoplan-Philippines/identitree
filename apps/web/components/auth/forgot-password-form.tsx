@@ -55,29 +55,33 @@ export function ForgotPasswordForm() {
 
   if (isSubmitted) {
     return (
-      <div className="text-center space-y-4 py-4">
+      <div className="space-y-4 py-4 text-center">
         <div className="flex justify-center">
-          <div className="bg-primary/10 p-3 rounded-full">
+          <div className="rounded-full bg-primary/10 p-3">
             <CheckCircle2 className="size-8 text-primary" />
           </div>
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-bold tracking-tight">Check your email</h2>
-          <p className="text-sm text-muted-foreground px-6">
-            We&apos;ve sent a password reset link to <span className="font-medium text-foreground">{emailSent}</span>.
+          <p className="px-6 text-sm text-muted-foreground">
+            We&apos;ve sent a password reset link to{" "}
+            <span className="font-medium text-foreground">{emailSent}</span>.
           </p>
         </div>
-        <p className="text-xs text-muted-foreground pt-2">
+        <p className="pt-2 text-xs text-muted-foreground">
           Didn&apos;t receive it? Check your spam folder or{" "}
           <button
             onClick={() => setIsSubmitted(false)}
-            className="text-primary hover:underline font-medium"
+            className="font-medium text-primary hover:underline"
           >
             try again
           </button>
         </p>
-        <div className="pt-4">
-          <Button variant="outline" asChild className="w-full">
+        <div className="pt-3">
+          <Button
+            asChild
+            className="h-11 w-full bg-blue-600 text-[13.5px] font-medium text-white hover:bg-blue-700"
+          >
             <Link href="/login">
               <ArrowLeft className="mr-2 size-4" />
               Back to login
@@ -104,20 +108,25 @@ export function ForgotPasswordForm() {
                 placeholder="you@company.com"
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
+                className="h-11 px-3 text-[14px]"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="h-11 w-full text-[13.5px] font-medium"
+          disabled={form.formState.isSubmitting}
+        >
           {form.formState.isSubmitting ? "Sending link..." : "Send reset link"}
         </Button>
 
-        <div className="text-center pt-2">
+        <div className="mt-1 text-center">
           <Link
             href="/login"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5"
+            className="flex items-center justify-center gap-1.5 text-sm text-blue-600 transition-colors hover:text-blue-700"
           >
             <ArrowLeft className="size-3.5" />
             Back to login

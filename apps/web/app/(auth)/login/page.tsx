@@ -1,4 +1,4 @@
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
 import { LoginForm } from "@/components/auth/login-form";
 import { redirectAuthenticatedUserAwayFromGuestPages } from "@/lib/auth/redirects";
 
@@ -6,14 +6,17 @@ export default async function LoginPage() {
   await redirectAuthenticatedUserAwayFromGuestPages();
 
   return (
-    <AuthCard
-      title="Sign in to your account"
-      description="Use your email and password to access your workspace."
-      footerLabel="Need an account?"
-      footerHref="/signup"
-      footerActionText="Create one"
+    <AuthSplitLayout
+      eyebrow="Sign in"
+      title="Welcome back."
+      description="Sign in to manage your NFC credentials, digital profiles, and team workspace."
+      secondaryAction={{
+        label: "New to Identitree?",
+        href: "/signup",
+        actionText: "Create account",
+      }}
     >
       <LoginForm />
-    </AuthCard>
+    </AuthSplitLayout>
   );
 }
