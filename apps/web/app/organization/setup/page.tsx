@@ -9,7 +9,7 @@ export default async function OrganizationSetupPage() {
   return (
     <AuthCard
       footerLabel="Already have a workspace?"
-      footerHref="/login"
+      footerHref="/signout"
       footerActionText="Sign in"
     >
       <header className="mb-7 space-y-2 text-center">
