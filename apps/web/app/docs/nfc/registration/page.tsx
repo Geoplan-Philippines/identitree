@@ -66,7 +66,7 @@ export default function NfcRegistrationDocsPage() {
             </div>
             <h3 className="text-xl font-bold uppercase tracking-tight text-foreground">Use the Activate Page</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The fastest way to link a customer-owned NFC card. Visit the activation portal, paste your profile link, then tap your card to the back of your phone — the card is written and registered in a single step.
+              The fastest way to link a customer-owned NFC card. Visit the activation portal, paste your profile link, then tap your card to the back of your phone. The card is written and registered in a single step.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               <span className="font-semibold text-foreground">Requirement:</span> Chrome browser on an Android phone with NFC enabled.
@@ -91,7 +91,7 @@ export default function NfcRegistrationDocsPage() {
             >
               <img
                 src="https://res.cloudinary.com/djfuei11u/image/upload/v1777876753/viber_image_2026-05-04_14-38-36-681_kvjllt.jpg"
-                alt="Identitree Activate Page - NFC Card Registration"
+                alt="Handshakes Activate Page - NFC Card Registration"
                 className="w-full object-contain"
               />
             </a>
@@ -129,7 +129,7 @@ export default function NfcRegistrationDocsPage() {
               >
                 <img
                   src="https://res.cloudinary.com/djfuei11u/image/upload/v1777868803/ChatGPT_Image_May_4_2026_12_26_30_PM_tfp7vc.png"
-                  alt="Identitree Dashboard - Create and Configure Card"
+                  alt="Handshakes Dashboard - Create and Configure Card"
                   className="h-full w-full object-contain"
                 />
               </a>
@@ -153,7 +153,7 @@ export default function NfcRegistrationDocsPage() {
               >
                 <img
                   src="https://res.cloudinary.com/djfuei11u/image/upload/v1777868964/Screenshot_2026-05-04_122902_to9nvm.png"
-                  alt="Identitree Profile Editor - Add Your Details"
+                  alt="Handshakes Profile Editor - Add Your Details"
                   className="h-full w-full object-contain"
                 />
               </a>
@@ -312,11 +312,11 @@ export default function NfcRegistrationDocsPage() {
               <div className="flex size-10 items-center justify-center bg-foreground text-background text-sm font-bold">08</div>
               <h3 className="text-xl font-bold uppercase tracking-tight text-foreground">Input Profile Link</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Ensure you select <span className="text-foreground font-bold italic underline decoration-emerald-500/50 underline-offset-4">https://</span> from the protocol dropdown. Paste your Identitree profile link and tap <span className="text-foreground font-bold italic">OK</span>.
+                Ensure you select <span className="text-foreground font-bold italic underline decoration-emerald-500/50 underline-offset-4">https://</span> from the protocol dropdown. Paste your Handshakes profile link and tap <span className="text-foreground font-bold italic">OK</span>.
               </p>
               <div className="p-3 border border-border border-dashed bg-muted/10 text-[10px] font-mono text-muted-foreground">
                 <span className="text-foreground font-bold uppercase tracking-widest block mb-1">Example Format:</span>
-                identitree.geoplanph.com/org-slug/name-slug?ref=nfc_tap
+                handshakes.cards/org-slug/name-slug?ref=nfc_tap
               </div>
               <div className="bg-foreground text-background p-4 text-[10px] leading-relaxed font-bold">
                 <span className="underline decoration-background/50 underline-offset-4 uppercase tracking-widest">Critical:</span> To track performance, always append <code className="bg-background/20 px-1 py-0.5 font-mono">?ref=nfc_tap</code> to your URL. This distinguishes physical taps from QR/Web traffic.
@@ -434,7 +434,7 @@ export default function NfcRegistrationDocsPage() {
           <h4 className="text-xl font-black uppercase tracking-tight">Analytics Tracking</h4>
         </div>
         <p className="text-sm leading-relaxed opacity-90 max-w-2xl">
-          To track performance, append <code className="bg-background/20 px-1.5 py-0.5 font-mono">?ref=nfc_tap</code> to your URL. This allows Identitree to distinguish between QR codes, direct links, and physical card taps.
+          To track performance, append <code className="bg-background/20 px-1.5 py-0.5 font-mono">?ref=nfc_tap</code> to your URL. This allows Handshakes to distinguish between QR codes, direct links, and physical card taps.
         </p>
       </div>
 

@@ -8,6 +8,7 @@ import { NfcCard } from "@/lib/services/nfc-cards.service";
 import { NfcProfileView } from "@/components/nfc/nfc-profile-view";
 import { ProfileForm } from "@/components/nfc/profile-form";
 import { NfcCardDialog } from "@/components/nfc/nfc-card-dialog";
+import { CardStatusBadge } from "@/components/nfc/card-status-badge";
 import { QrCodeTooltipContent } from "@/components/nfc/qr-code-tooltip-content";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,8 @@ import {
 interface CardsClientProps {
   initialData: NfcCard[];
 }
+
+const formatCardType = (cardType: string) => cardType.replaceAll("_", " ");
 
 export function CardsClient({ initialData }: CardsClientProps) {
   const { data, refetch } = useNfcCards(initialData);
@@ -90,6 +93,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           count={filteredCards.length}
+          total={cards.length}
         />
 
         <ScrollArea className="flex-1 pr-4 min-h-0">
@@ -114,7 +118,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
                       onSuccess={refetch}
                       trigger={
                         <Button>
-                          <Plus className="size-3.5 mr-1.5" />
+                          <Plus className="size-3.5" />
                           New card
                         </Button>
                       }
@@ -137,133 +141,157 @@ export function CardsClient({ initialData }: CardsClientProps) {
                 </Empty>
               </div>
             ) : (
-              filteredCards.map((card) => (
-                <div
-                  key={card.id}
-                  className={cn(
-                    "relative group border p-4 flex flex-col gap-3 transition-all duration-200 overflow-hidden rounded-none",
-                    selectedCardId === card.id
-                      ? "border-foreground bg-foreground/5 shadow-md"
-                      : "bg-background hover:bg-muted/30 border-border hover:border-foreground/20 shadow-sm"
-                  )}
-                >
-                  <div className="flex items-center justify-between relative z-10">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Type</span>
-                      <span className="font-bold text-sm uppercase">{card.cardType.replace("_", " ")}</span>
-                    </div>
-                    <Badge
-                      variant={card.profile ? "default" : "secondary"}
-                      className="text-[9px] h-4 rounded-none px-1.5 uppercase font-bold"
-                    >
-                      {card.profile ? "ASSIGNED" : card.status}
-                    </Badge>
-                  </div>
+              filteredCards.map((card) => {
+                const needsActivation =
+                  !!card.profile && !card.hardwareId && card.cardType === "CUSTOMER_OWNED";
 
-                  <div className="flex flex-col gap-1 relative z-10">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Profile</span>
-                    <span className="font-extrabold text-lg tracking-tight uppercase">
-                      {card.profile ? `${card.profile.firstName} ${card.profile.lastName}` : "Unassigned"}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5 relative z-10 mt-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Encoded URL</span>
-                      <div className="h-px flex-1 bg-border/40" />
+                return (
+                  <div
+                    key={card.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View details for ${card.profile ? `${card.profile.firstName} ${card.profile.lastName}` : formatCardType(card.cardType)} card`}
+                    onClick={() => setSelectedCardId(card.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedCardId(card.id);
+                      }
+                    }}
+                    className={cn(
+                      "relative group border p-4 flex flex-col gap-3 transition-all duration-200 overflow-hidden rounded-2xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30",
+                      selectedCardId === card.id
+                        ? "border-foreground bg-foreground/5 shadow-md"
+                        : "bg-background hover:bg-muted/30 border-border hover:border-foreground/20 shadow-sm"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 relative z-10">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Card Type</span>
+                        <span className="font-bold text-sm uppercase truncate">{formatCardType(card.cardType)}</span>
+                      </div>
+                      <CardStatusBadge status={card.status} />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={card.encodedUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[11px] text-foreground font-medium truncate font-mono bg-muted px-2 py-1 border border-border flex-1 hover:bg-muted/80 transition-colors cursor-alias"
-                        onClick={(e) => e.stopPropagation()}
+
+                    <div className="flex flex-col gap-1 relative z-10">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Profile</span>
+                      <span
+                        className={cn(
+                          "font-extrabold text-lg tracking-tight uppercase truncate",
+                          !card.profile && "text-muted-foreground"
+                        )}
                       >
-                        {card.encodedUrl}
-                      </a>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 rounded-none border border-border hover:bg-muted"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigator.clipboard.writeText(card.encodedUrl);
-                              toast.success("URL copied to clipboard!");
-                            }}
-                          >
-                            <Copy size={12} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Copy URL</TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 rounded-none border border-border hover:bg-muted"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              try {
-                                const qrUrl = new URL(card.encodedUrl);
-                                qrUrl.searchParams.set("ref", "qr");
-                                downloadQrCode(qrUrl.toString(), `card-${card.id}-qr.png`);
-                                toast.success("QR Code downloaded!");
-                              } catch (err) {
-                                console.error("Invalid URL", err);
-                                toast.error("Failed to generate QR Code");
-                              }
-                            }}
-                          >
-                            <QrCode size={12} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="p-2 border-border shadow-lg">
-                          <QrCodeTooltipContent url={card.encodedUrl} />
-                        </TooltipContent>
-                      </Tooltip>
+                        {card.profile ? `${card.profile.firstName} ${card.profile.lastName}` : "Unassigned"}
+                      </span>
                     </div>
-                  </div>
 
-                  <div className="flex flex-col gap-1 relative z-10">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Hardware ID</span>
-                    <span className="text-[11px] font-mono text-muted-foreground font-bold">{card.hardwareId || "N/A"}</span>
-                  </div>
-
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        size="sm"
-                        className="w-full rounded-none font-bold uppercase text-[10px]"
-                        variant={card.profile ? "outline" : "default"}
-                        onClick={() => setSelectedCardId(card.id)}
-                      >
-                        {card.profile ? "View Details" : "Create Profile"}
-                      </Button>
-
-                      {!card.hardwareId && card.profile && card.cardType === "CUSTOMER_OWNED" && (
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="default"
-                          className="w-full rounded-none font-bold uppercase text-[10px]"
+                    <div className="flex flex-col gap-1.5 relative z-10 mt-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Encoded URL</span>
+                        <div className="h-px flex-1 bg-border/40" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={card.encodedUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={card.encodedUrl}
+                          className="text-[11px] text-foreground font-medium truncate font-mono bg-muted px-2 py-1 rounded-lg border border-border flex-1 hover:bg-muted/80 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <Link
-                            href={`/activate?url=${encodeURIComponent(card.encodedUrl)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Nfc className="mr-2 size-3" />
-                            Activate Card
-                          </Link>
-                        </Button>
-                      )}
+                          {card.encodedUrl}
+                        </a>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label="Copy card URL"
+                              className="h-7 w-7 rounded-lg border border-border hover:bg-muted"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(card.encodedUrl);
+                                toast.success("URL copied to clipboard!");
+                              }}
+                            >
+                              <Copy size={12} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Copy URL</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label="Download QR code"
+                              className="h-7 w-7 rounded-lg border border-border hover:bg-muted"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                try {
+                                  const qrUrl = new URL(card.encodedUrl);
+                                  qrUrl.searchParams.set("ref", "qr");
+                                  downloadQrCode(qrUrl.toString(), `card-${card.id}-qr.png`);
+                                  toast.success("QR Code downloaded!");
+                                } catch (err) {
+                                  console.error("Invalid URL", err);
+                                  toast.error("Failed to generate QR Code");
+                                }
+                              }}
+                            >
+                              <QrCode size={12} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="p-2 border-border shadow-lg">
+                            <QrCodeTooltipContent url={card.encodedUrl} />
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                     </div>
+
+                    {card.hardwareId && (
+                      <div className="flex flex-col gap-1 relative z-10">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Hardware ID</span>
+                        <span className="text-[11px] font-mono text-muted-foreground font-bold break-all">{card.hardwareId}</span>
+                      </div>
+                    )}
+
+                    {(needsActivation || !card.profile) && (
+                      <div className="flex flex-col gap-2 mt-auto pt-1">
+                        {needsActivation ? (
+                          <Button
+                            asChild
+                            variant="default"
+                            className="w-full rounded-lg font-bold uppercase text-xs tracking-wider"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Link
+                              href={`/activate?url=${encodeURIComponent(card.encodedUrl)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Nfc className="size-3" />
+                              Activate Card
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button
+                            className="w-full rounded-lg font-bold uppercase text-xs tracking-wider"
+                            variant="default"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCardId(card.id);
+                            }}
+                          >
+                            Create Profile
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))
+                );
+              })
               )}
           </div>
         </ScrollArea>
@@ -273,23 +301,24 @@ export function CardsClient({ initialData }: CardsClientProps) {
       {selectedCardId && selectedCard && (() => {
         const content = (
           <>
-            <div className="p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-background sticky top-0 z-20 rounded-none">
+            <div className="p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-background sticky top-0 z-20">
               <div className="flex items-start sm:items-center gap-4">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedCardId(null)}
-                  className="rounded-none hover:bg-muted shrink-0"
+                  className="rounded-lg hover:bg-muted shrink-0"
                 >
                   <MoveLeftIcon size={20} />
                 </Button>
                 <div className="space-y-0.5 min-w-0">
                   <h3 className="font-black text-lg tracking-tight uppercase truncate">Card Details</h3>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded-none border border-border truncate max-w-[120px] sm:max-w-none">{selectedCard.id}</span>
-                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-bold uppercase tracking-tighter rounded-none border-border shrink-0">
-                      {selectedCard.cardType}
+                    <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded-lg border border-border truncate max-w-[120px] sm:max-w-none">{selectedCard.id}</span>
+                    <Badge variant="outline" className="text-[9px] h-5 px-1.5 font-bold uppercase tracking-tighter rounded-lg border-border shrink-0">
+                      {formatCardType(selectedCard.cardType)}
                     </Badge>
+                    <CardStatusBadge status={selectedCard.status} />
                   </div>
                 </div>
               </div>
@@ -315,7 +344,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
                       {updateMutation.isPending ? "Updating..." : (selectedCard.status === "ACTIVE" ? "Deactivate" : "Activate")}
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="rounded-none">
+                  <AlertDialogContent className="rounded-lg">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="font-bold text-lg">
                         {selectedCard.status === "ACTIVE" ? "Deactivate Card?" : "Activate Card?"}
@@ -327,10 +356,10 @@ export function CardsClient({ initialData }: CardsClientProps) {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="rounded-none border border-black font-bold uppercase">Cancel</AlertDialogCancel>
+                      <AlertDialogCancel className="rounded-lg border border-black font-bold uppercase">Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         className={cn(
-                          "rounded-none font-bold uppercase",
+                          "rounded-lg font-bold uppercase",
                           selectedCard.status === "ACTIVE" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""
                         )}
                         onClick={async () => {
@@ -357,7 +386,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
                     </div>
 
                     {selectedCard.profile && !isEditing ? (
-                      <div className="bg-background rounded-none overflow-hidden">
+                      <div className="bg-background rounded-lg overflow-hidden">
                         <NfcProfileView
                           profile={selectedCard.profile}
                           cardId={selectedCard.id}
@@ -365,7 +394,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
                         />
                       </div>
                     ) : (
-                      <div className="bg-background rounded-none border-border p-6 sm:p-12 flex flex-col items-center justify-center text-center space-y-10 shadow-inner">
+                      <div className="bg-background rounded-lg border-border p-6 sm:p-12 flex flex-col items-center justify-center text-center space-y-10 shadow-inner">
                         {!isEditing && (
                           <div className="space-y-4">
                             <h4 className="text-2xl font-black tracking-tight uppercase">Empty Profile</h4>
@@ -407,7 +436,7 @@ export function CardsClient({ initialData }: CardsClientProps) {
         }
 
         return (
-          <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-none">
+          <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-2xl">
             {content}
           </div>
         );

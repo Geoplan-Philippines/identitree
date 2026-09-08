@@ -142,14 +142,14 @@ export function VerifyEmailStatus() {
 
       <div className="flex flex-col gap-3">
         {status === "verified" ? (
-          <Button asChild className="h-11 w-full text-[13.5px] font-medium shadow-sm">
+          <Button asChild className="w-full text-[13.5px] font-medium shadow-sm">
             <Link href="/login">Continue to sign in</Link>
           </Button>
         ) : (
           <Button
             type="button"
             variant="outline"
-            className="h-11 w-full text-[13.5px] font-medium"
+            className="w-full text-[13.5px] font-medium"
             onClick={() => void checkVerificationStatus()}
             disabled={status === "loading"}
           >
@@ -290,7 +290,7 @@ function getStatusConfig(
       return {
         icon: <CheckCircle2 className="h-4 w-4" />,
         title: "Link already used",
-        body: "This verification link has already been redeemed. Your account is verified — sign in to continue.",
+        body: "This verification link has already been redeemed. Your account is verified. Sign in to continue.",
         role: "status",
         borderClass: "border-amber-300/70 dark:border-amber-800/70",
         bgClass: "bg-amber-50 dark:bg-amber-950/30",

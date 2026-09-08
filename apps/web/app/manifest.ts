@@ -2,20 +2,20 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Identitree",
-    short_name: "Identitree",
+    name: "Handshakes",
+    short_name: "Handshakes",
     description: "Manage digital business cards, contacts, teams, and analytics in one premium workspace.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#0f172a",
+    background_color: "#FAF6EC",
+    theme_color: "#0D2A1F",
     icons: [
       {
-        src: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
-        sizes: "any",
+        src: "/icon.png",
+        sizes: "512x512",
         type: "image/png",
+        purpose: "any",
       },
     ],
-
   };
 }

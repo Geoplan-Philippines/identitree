@@ -73,21 +73,21 @@ export function DocsSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar variant="sidebar" collapsible="offcanvas" className="border-r border-border top-14 h-[calc(100vh-56px)]">
+    <Sidebar variant="sidebar" collapsible="offcanvas" className="border-r border-sidebar-border top-14 h-[calc(100vh-56px)]">
       <SidebarContent className="pt-2">
         <SidebarGroup>
           <div className="md:hidden mb-4 px-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-sidebar-foreground/60" />
               <input
                 type="search"
                 placeholder="Search..."
-                className="h-8 w-full rounded-none border border-border bg-muted/30 pl-9 pr-3 text-xs outline-none"
+                className="h-8 w-full rounded-lg border border-sidebar-border bg-sidebar-accent/40 pl-9 pr-3 text-xs text-sidebar-foreground placeholder:text-sidebar-foreground/60 outline-none"
               />
             </div>
           </div>
           
-          <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
+          <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-brass">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -106,7 +106,7 @@ export function DocsSidebar() {
 
         {docGroups.map((group: DocGroup) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
+            <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-brass">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -155,7 +155,7 @@ export function DocsSidebar() {
                         asChild
                         isActive={isActive}
                         tooltip={item.label}
-                        className="rounded-none h-9"
+                        className="h-9"
                       >
                         {item.href ? (
                           <Link href={item.href}>

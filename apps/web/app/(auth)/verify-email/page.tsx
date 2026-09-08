@@ -22,7 +22,7 @@ export default async function VerifyEmailPage() {
           to get started.
         </>
       }
-      subheading="We sent a verification link to your inbox. Open it to activate your Identitree workspace — it takes about 10 seconds."
+      subheading="We sent a verification link to your inbox. Open it to activate your Handshakes workspace. It takes about 10 seconds."
       navAction={{
         prompt: "Already verified?",
         label: "Sign in",

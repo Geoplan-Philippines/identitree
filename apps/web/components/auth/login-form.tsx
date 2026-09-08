@@ -129,33 +129,9 @@ export function LoginForm() {
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="space-y-5"
+      className="flex flex-col gap-6"
       noValidate
     >
-      <Button
-        type="button"
-        variant="outline"
-        className="h-11 w-full text-[13.5px] font-medium"
-        onClick={() => void handleGoogleSignIn()}
-        disabled={isGoogleLoading}
-      >
-        {isGoogleLoading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Redirecting…
-          </>
-        ) : (
-          <>
-            <GoogleIcon />
-            Continue with Google
-          </>
-        )}
-      </Button>
-
-      <FieldSeparator className="text-[11px] uppercase tracking-[0.16em]">
-        or with email
-      </FieldSeparator>
-
       <FieldGroup className="gap-4">
         <Controller
           name="email"
@@ -175,7 +151,7 @@ export function LoginForm() {
                 placeholder="you@company.com"
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
-                className="h-11 px-3 text-[14px]"
+                className="h-11 px-3"
               />
               {fieldState.invalid && (
                 <FieldError errors={[fieldState.error]} />
@@ -211,7 +187,7 @@ export function LoginForm() {
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   aria-invalid={fieldState.invalid}
-                  className="h-11 px-3 pr-10 text-[14px]"
+                  className="h-11 px-3 pr-10"
                 />
                 <button
                   type="button"
@@ -231,8 +207,8 @@ export function LoginForm() {
 
         <Button
           type="submit"
-          className="mt-1 h-11 w-full text-[13.5px] font-medium shadow-sm"
-          disabled={form.formState.isSubmitting}
+          className="w-full text-[13.5px] font-medium shadow-sm"
+          disabled={form.formState.isSubmitting || isGoogleLoading}
         >
           {form.formState.isSubmitting ? (
             <>
@@ -240,10 +216,34 @@ export function LoginForm() {
               Signing in…
             </>
           ) : (
-            "Sign in to Identitree"
+            "Sign in"
           )}
         </Button>
       </FieldGroup>
+
+      <FieldSeparator className="text-[11px] uppercase tracking-[0.16em]">
+        or
+      </FieldSeparator>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full text-[13.5px] font-medium"
+        onClick={() => void handleGoogleSignIn()}
+        disabled={isGoogleLoading || form.formState.isSubmitting}
+      >
+        {isGoogleLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Redirecting…
+          </>
+        ) : (
+          <>
+            <GoogleIcon />
+            Continue with Google
+          </>
+        )}
+      </Button>
     </form>
   );
 }

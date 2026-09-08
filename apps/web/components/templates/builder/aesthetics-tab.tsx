@@ -28,10 +28,10 @@ export function AestheticsTab({ form }: AestheticsTabProps) {
               <Field>
                 <FieldLabel>Button Style</FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? "sharp"}>
-                  <SelectTrigger className="rounded-none border-border h-10">
+                  <SelectTrigger className="rounded-lg border-border h-10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-none">
+                  <SelectContent className="rounded-lg">
                     <SelectItem value="sharp">Sharp</SelectItem>
                     <SelectItem value="rounded">Rounded</SelectItem>
                     <SelectItem value="pill">Pill</SelectItem>
@@ -47,10 +47,10 @@ export function AestheticsTab({ form }: AestheticsTabProps) {
               <Field>
                 <FieldLabel>Avatar Frame</FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? "square"}>
-                  <SelectTrigger className="rounded-none border-border h-10">
+                  <SelectTrigger className="rounded-lg border-border h-10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-none">
+                  <SelectContent className="rounded-lg">
                     <SelectItem value="square">Square</SelectItem>
                     <SelectItem value="circle">Circle</SelectItem>
                     <SelectItem value="rounded">Rounded</SelectItem>
@@ -69,10 +69,10 @@ export function AestheticsTab({ form }: AestheticsTabProps) {
               <Field>
                 <FieldLabel>Page Spacing</FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? "relaxed"}>
-                  <SelectTrigger className="rounded-none border-border h-10">
+                  <SelectTrigger className="rounded-lg border-border h-10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-none">
+                  <SelectContent className="rounded-lg">
                     <SelectItem value="compact">Compact</SelectItem>
                     <SelectItem value="relaxed">Relaxed</SelectItem>
                     <SelectItem value="loose">Loose</SelectItem>
@@ -81,7 +81,7 @@ export function AestheticsTab({ form }: AestheticsTabProps) {
               </Field>
             )}
           />
-          <div className="border border-border bg-background p-3 flex items-center justify-between">
+          <div className="flex items-center justify-between self-start">
             <FieldLabel className="mb-0">Glassmorphism</FieldLabel>
             <Controller
               name="config.glassmorphism"

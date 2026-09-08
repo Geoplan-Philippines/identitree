@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ActivateClient } from "@/components/nfc/activate-client";
 
 export const metadata: Metadata = {
-  title: "Activate Your NFC Card | Identitree",
+  title: "Activate Your NFC Card | Handshakes",
   description: "Link your personal NFC card to your digital profile.",
 };
 

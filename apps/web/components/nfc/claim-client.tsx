@@ -109,10 +109,10 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
           </p>
         </div>
 
-        <Card className="border border-border bg-background shadow-sm rounded-none overflow-hidden">
+        <Card className="border border-border bg-background shadow-sm rounded-2xl overflow-hidden">
           <CardHeader className="border-b border-border bg-muted/20 p-6">
             <div className="flex items-center gap-3">
-              <div className="bg-foreground text-background p-2 rounded-none">
+              <div className="bg-foreground text-background p-2 rounded-lg">
                 <CreditCard className="size-5" />
               </div>
               <div>
@@ -135,16 +135,16 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
                   </Label>
                   <Input
                     id="url"
-                    placeholder="https://identitree.geoplan.ph/org/slug"
+                    placeholder="https://handshakes.cards/org/slug"
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
-                    className="rounded-none border-border bg-muted/10 h-12"
+                    className="rounded-lg border-border bg-muted/10 h-12"
                   />
                 </div>
                 <Button
                   onClick={handleStartLinking}
                   disabled={!targetUrl}
-                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-none font-bold uppercase tracking-widest text-[10px]"
+                  className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-lg font-bold uppercase tracking-widest text-[10px]"
                 >
                   Link & Proceed to Tap
                 </Button>
@@ -155,7 +155,7 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
               <div className="flex flex-col items-center justify-center py-6 space-y-6 animate-in zoom-in-95 duration-300">
                 <div className="relative">
                   <div className="absolute inset-0 bg-foreground/5 animate-ping rounded-full" />
-                  <div className="relative bg-muted border border-border p-8 rounded-none">
+                  <div className="relative bg-muted border border-border p-8 rounded-lg">
                     <Smartphone className={cn("size-10 transition-transform", isScanning && "animate-bounce")} />
                   </div>
                 </div>
@@ -178,7 +178,7 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
 
             {step === "success" && (
               <div className="flex flex-col items-center justify-center py-4 space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                <div className="bg-foreground text-background p-5 rounded-none border border-foreground">
+                <div className="bg-foreground text-background p-5 rounded-lg border border-foreground">
                   <CheckCircle2 className="size-10" />
                 </div>
                 <div className="text-center space-y-2">
@@ -197,7 +197,7 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
                    <Button
                     variant="outline"
                     onClick={handleReset}
-                    className="w-full h-11 rounded-none border-border font-bold uppercase tracking-widest text-[10px] hover:bg-muted"
+                    className="w-full rounded-lg border-border font-bold uppercase tracking-widest text-[10px] hover:bg-muted"
                   >
                     Activate Another Card
                   </Button>
@@ -208,7 +208,7 @@ export function ClaimClient({ initialHardwareId }: ClaimClientProps) {
         </Card>
 
         <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 text-center leading-loose">
-          Secure Registration • Identitree NFC
+          Secure Registration • Handshakes NFC
         </p>
       </div>
     </main>

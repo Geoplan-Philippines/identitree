@@ -13,6 +13,10 @@ import { cn } from "@/lib/utils";
 import { requireOrganizationAccess } from "@/lib/auth/redirects";
 import { PageHeader } from "@/components/shared/page-shell";
 
+// Coming-soon settings tabs are hidden for now. Flip this to `true` to show the
+// Members / Billing / Notifications tabs (with a "Soon" badge) again.
+const SHOW_COMING_SOON: boolean = false;
+
 const settingsOptions = [
   {
     id: "organization",
@@ -63,8 +67,10 @@ export default async function SettingsPage({ params, searchParams }: SettingsPag
 
       <div className="flex flex-col md:flex-row gap-10 flex-1">
         {/* Settings Navigation Menu */}
-        <nav className="flex md:flex-col overflow-x-auto md:overflow-visible w-full md:w-56 shrink-0 gap-1 pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-border scrollbar-hide">
-          {settingsOptions.map((option) => {
+        <nav className="flex md:flex-col overflow-x-auto md:overflow-visible w-full md:w-56 shrink-0 gap-1 pb-2 md:pb-0 md:pr-4 border-b md:border-b-0 md:border-r border-border scrollbar-hide">
+          {settingsOptions
+            .filter((option) => SHOW_COMING_SOON || !option.comingSoon)
+            .map((option) => {
             const isActive = tab === option.id;
             const href = `/dashboard/${slug}/settings?tab=${option.id}`;
 

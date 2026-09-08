@@ -42,7 +42,7 @@ export function DefaultLayout({ profile, config, isFlipped }: CardProps) {
       <div
         className={cn(
           "absolute inset-0 overflow-hidden rounded-lg border border-foreground/10 p-6 text-foreground",
-          !config?.cardPrimaryColor && !bgImage && "bg-[linear-gradient(135deg,#ffffff_0%,#f9fbfb_48%,#edf5f1_100%)]"
+          !config?.cardPrimaryColor && !bgImage && "bg-[linear-gradient(135deg,var(--paper),var(--cream))]"
         )}
         style={{ ...frontBgStyle, ...textStyle }}
       >
@@ -73,7 +73,7 @@ export function DefaultLayout({ profile, config, isFlipped }: CardProps) {
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full" />
             </span>
           )}
-          <span className="truncate max-w-[140px]" style={textStyle}>{profile.organization?.name || "Identitree"}</span>
+          <span className="truncate max-w-[140px]" style={textStyle}>{profile.organization?.name || "Handshakes"}</span>
           {logoAlign !== "left" && profile.organization?.logo && (
             <span className="flex size-7 shrink-0 items-center justify-center">
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full" />
@@ -111,8 +111,8 @@ export function DefaultLayout({ profile, config, isFlipped }: CardProps) {
       {/* Back Side */}
       <div
         className={cn(
-          "absolute inset-0 overflow-hidden rounded-lg border border-white/10 p-6 text-white",
-          !config?.cardSecondaryColor && "bg-[linear-gradient(135deg,#101312_0%,#191f1b_58%,#20372d_100%)]"
+          "absolute inset-0 overflow-hidden rounded-lg border border-cream/10 p-6 text-cream",
+          !config?.cardSecondaryColor && "bg-[linear-gradient(135deg,var(--forest-ink),var(--forest))]"
         )}
         style={{
           backfaceVisibility: "hidden",
@@ -131,7 +131,7 @@ export function DefaultLayout({ profile, config, isFlipped }: CardProps) {
             <p className="text-lg font-semibold leading-tight">
               Connect with clarity.
             </p>
-            <p className="mt-2 max-w-[12rem] text-[10px] leading-relaxed text-white/65">
+            <p className="mt-2 max-w-[12rem] text-[10px] leading-relaxed text-cream/65">
               Digital identity powered by NFC technology.
             </p>
           </div>

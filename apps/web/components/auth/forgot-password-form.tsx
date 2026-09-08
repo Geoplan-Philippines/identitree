@@ -80,10 +80,10 @@ export function ForgotPasswordForm() {
         <div className="pt-3">
           <Button
             asChild
-            className="h-11 w-full bg-blue-600 text-[13.5px] font-medium text-white hover:bg-blue-700"
+            className="w-full bg-blue-600 text-[13.5px] font-medium text-white hover:bg-blue-700"
           >
             <Link href="/login">
-              <ArrowLeft className="mr-2 size-4" />
+              <ArrowLeft className="size-4" />
               Back to login
             </Link>
           </Button>
@@ -117,7 +117,7 @@ export function ForgotPasswordForm() {
 
         <Button
           type="submit"
-          className="h-11 w-full text-[13.5px] font-medium"
+          className="w-full text-[13.5px] font-medium"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? "Sending link..." : "Send reset link"}

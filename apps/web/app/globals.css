@@ -4,75 +4,99 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  Handshakes brand identity — "The ritual, modernized."
+  Forest Ink · Brass · Cream · Paper · Forest.
+  Light = the everyday product surface (paper + forest ink).
+  Dark  = the premium forest chrome (forest ink + cream).
+*/
+
 :root {
-  --background: oklch(1.0000 0 0);
-  --foreground: oklch(0.2697 0 0);
-  --card: oklch(1.0000 0 0);
-  --card-foreground: oklch(0.2697 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.2697 0 0);
-  --primary: oklch(0.5296 0.1863 258.1459);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.9686 0.0035 247.8590);
-  --secondary-foreground: oklch(0.2697 0 0);
-  --muted: oklch(0.9696 0 0);
-  --muted-foreground: oklch(0.5547 0 0);
-  --accent: oklch(0.9633 0.0154 255.0359);
-  --accent-foreground: oklch(0.4430 0.1522 257.9241);
-  --destructive: oklch(0.5409 0.2143 28.4788);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.8610 0 0);
-  --input: oklch(0.9234 0 0);
-  --ring: oklch(0.5296 0.1863 258.1459);
-  --chart-1: oklch(0.5296 0.1863 258.1459);
-  --chart-2: oklch(0.6902 0.1481 162.3676);
-  --chart-3: oklch(0.6683 0.1657 54.1917);
-  --chart-4: oklch(0.5815 0.2477 311.2650);
-  --chart-5: oklch(0.6057 0.2357 11.9397);
-  --sidebar: oklch(0.9848 0 0);
-  --sidebar-foreground: oklch(0.3705 0 0);
-  --sidebar-primary: oklch(0.5296 0.1863 258.1459);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9498 0.0109 255.0143);
-  --sidebar-accent-foreground: oklch(0.4430 0.1522 257.9241);
-  --sidebar-border: oklch(0.9234 0 0);
-  --sidebar-ring: oklch(0.5296 0.1863 258.1459);
-  --radius: 0;
+  /* Brand constants — same physical color in both themes */
+  --paper: oklch(0.9735 0.0139 88.68);
+  --cream: oklch(0.9435 0.0262 90.10);
+  --forest-ink: oklch(0.2589 0.0409 165.64);
+  --forest: oklch(0.3057 0.0550 170.17);
+  --brass: oklch(0.6633 0.1084 77.42);
+  --brass-foreground: oklch(0.2589 0.0409 165.64);
+
+  --background: oklch(0.9735 0.0139 88.68);
+  --foreground: oklch(0.2589 0.0409 165.64);
+  --card: oklch(0.9435 0.0262 90.10);
+  --card-foreground: oklch(0.2589 0.0409 165.64);
+  --popover: oklch(0.9435 0.0262 90.10);
+  --popover-foreground: oklch(0.2589 0.0409 165.64);
+  --primary: oklch(0.2589 0.0409 165.64);
+  --primary-foreground: oklch(0.9735 0.0139 88.68);
+  --secondary: oklch(0.9204 0.0296 87.55);
+  --secondary-foreground: oklch(0.2589 0.0409 165.64);
+  --muted: oklch(0.9281 0.0235 90.76);
+  --muted-foreground: oklch(0.4794 0.0206 153.13);
+  --accent: oklch(0.9265 0.0336 88.06);
+  --accent-foreground: oklch(0.2589 0.0409 165.64);
+  --destructive: oklch(0.5515 0.1669 30.60);
+  --destructive-foreground: oklch(0.9735 0.0139 88.68);
+  --border: oklch(0.8501 0.0383 88.48);
+  --input: oklch(0.8346 0.0385 88.48);
+  --ring: oklch(0.6633 0.1084 77.42);
+  --chart-1: oklch(0.6633 0.1084 77.42);
+  --chart-2: oklch(0.3057 0.0550 170.17);
+  --chart-3: oklch(0.3874 0.0698 166.54);
+  --chart-4: oklch(0.5794 0.0960 76.85);
+  --chart-5: oklch(0.6097 0.0703 121.73);
+  /* Nav bar = "premium forest chrome": deep forest-ink sidebar against the
+     paper page (14:1 surface contrast), cream text, brass focus ring. */
+  --sidebar: oklch(0.2589 0.0409 165.64);
+  --sidebar-foreground: oklch(0.8694 0.0247 135.70);
+  --sidebar-primary: oklch(0.9435 0.0262 90.10);
+  --sidebar-primary-foreground: oklch(0.2589 0.0409 165.64);
+  --sidebar-accent: oklch(0.3874 0.0698 166.54);
+  --sidebar-accent-foreground: oklch(0.9435 0.0262 90.10);
+  --sidebar-border: oklch(0.3598 0.0537 165.06);
+  --sidebar-ring: oklch(0.6633 0.1084 77.42);
+  --radius: 0.625rem;
 }
 
 .dark {
-  --background: oklch(0.2376 0 0);
-  --foreground: oklch(0.9389 0 0);
-  --card: oklch(0.2697 0 0);
-  --card-foreground: oklch(0.9389 0 0);
-  --popover: oklch(0.2697 0 0);
-  --popover-foreground: oklch(0.9389 0 0);
-  --primary: oklch(0.7782 0.1158 252.5545);
-  --primary-foreground: oklch(0.2074 0.0625 252.2461);
-  --secondary: oklch(0.3211 0 0);
-  --secondary-foreground: oklch(0.9389 0 0);
-  --muted: oklch(0.3008 0 0);
-  --muted-foreground: oklch(0.7244 0 0);
-  --accent: oklch(0.3148 0.1071 255.8956);
-  --accent-foreground: oklch(0.8647 0.0685 252.0087);
-  --destructive: oklch(0.5789 0.2217 27.8067);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.3705 0 0);
-  --input: oklch(0.3705 0 0);
-  --ring: oklch(0.7782 0.1158 252.5545);
-  --chart-1: oklch(0.7782 0.1158 252.5545);
-  --chart-2: oklch(0.7750 0.1362 166.9055);
-  --chart-3: oklch(0.8380 0.1371 82.1273);
-  --chart-4: oklch(0.6863 0.1603 305.6668);
-  --chart-5: oklch(0.6856 0.1898 352.1927);
-  --sidebar: oklch(0.2156 0 0);
-  --sidebar-foreground: oklch(0.8845 0 0);
-  --sidebar-primary: oklch(0.7782 0.1158 252.5545);
-  --sidebar-primary-foreground: oklch(0.2074 0.0625 252.2461);
-  --sidebar-accent: oklch(0.3211 0 0);
-  --sidebar-accent-foreground: oklch(0.9619 0 0);
-  --sidebar-border: oklch(0.3411 0 0);
-  --sidebar-ring: oklch(0.7782 0.1158 252.5545);
+  --paper: oklch(0.9735 0.0139 88.68);
+  --cream: oklch(0.9435 0.0262 90.10);
+  --forest-ink: oklch(0.2589 0.0409 165.64);
+  --forest: oklch(0.3057 0.0550 170.17);
+  --brass: oklch(0.6633 0.1084 77.42);
+  --brass-foreground: oklch(0.2589 0.0409 165.64);
+
+  --background: oklch(0.2589 0.0409 165.64);
+  --foreground: oklch(0.9435 0.0262 90.10);
+  --card: oklch(0.3057 0.0550 170.17);
+  --card-foreground: oklch(0.9435 0.0262 90.10);
+  --popover: oklch(0.3057 0.0550 170.17);
+  --popover-foreground: oklch(0.9435 0.0262 90.10);
+  --primary: oklch(0.9435 0.0262 90.10);
+  --primary-foreground: oklch(0.2589 0.0409 165.64);
+  --secondary: oklch(0.3548 0.0622 167.30);
+  --secondary-foreground: oklch(0.9435 0.0262 90.10);
+  --muted: oklch(0.3243 0.0564 167.46);
+  --muted-foreground: oklch(0.7680 0.0218 156.68);
+  --accent: oklch(0.3874 0.0698 166.54);
+  --accent-foreground: oklch(0.9435 0.0262 90.10);
+  --destructive: oklch(0.6054 0.1605 32.16);
+  --destructive-foreground: oklch(0.9735 0.0139 88.68);
+  --border: oklch(0.3879 0.0558 166.85);
+  --input: oklch(0.3879 0.0558 166.85);
+  --ring: oklch(0.6633 0.1084 77.42);
+  --chart-1: oklch(0.7153 0.1092 77.50);
+  --chart-2: oklch(0.6865 0.0760 125.43);
+  --chart-3: oklch(0.5983 0.0803 164.21);
+  --chart-4: oklch(0.8856 0.0454 91.76);
+  --chart-5: oklch(0.6890 0.0895 47.71);
+  --sidebar: oklch(0.2361 0.0387 163.06);
+  --sidebar-foreground: oklch(0.8694 0.0247 135.70);
+  --sidebar-primary: oklch(0.9435 0.0262 90.10);
+  --sidebar-primary-foreground: oklch(0.2589 0.0409 165.64);
+  --sidebar-accent: oklch(0.3256 0.0538 168.16);
+  --sidebar-accent-foreground: oklch(0.9435 0.0262 90.10);
+  --sidebar-border: oklch(0.3598 0.0537 165.06);
+  --sidebar-ring: oklch(0.6633 0.1084 77.42);
 }
 
 @theme inline {
@@ -109,8 +133,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-heading: var(--font-sans);
+  /* Handshakes brand tokens — direct use (bg-brass, text-forest, etc.) */
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
+  --color-forest: var(--forest);
+  --color-forest-ink: var(--forest-ink);
+  --color-brass: var(--brass);
+  --color-brass-foreground: var(--brass-foreground);
+
   --font-sans: var(--font-sans);
+  --font-heading: var(--font-display);
+  --font-display: var(--font-display);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -124,11 +157,20 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
     letter-spacing: var(--tracking-normal);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 }
 
 @layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -140,4 +182,22 @@
 
 .main-container {
   @apply px-6 md:px-10 lg:px-16 mx-auto max-w-7xl w-full;
+}
+
+/*
+  "Coming soon" info toasts use the brand forest green instead of Sonner's
+  default blue. Scoped to the info type only (the sole info toasts are the
+  coming-soon notifs). The leading `html` lifts specificity above Sonner's
+  own [data-sonner-toaster][data-sonner-theme] rules so this wins regardless
+  of stylesheet order.
+*/
+html [data-sonner-toaster][data-sonner-theme="light"] {
+  --info-bg: oklch(0.96 0.03 165);
+  --info-border: oklch(0.88 0.07 164);
+  --info-text: oklch(0.44 0.12 162);
+}
+html [data-sonner-toaster][data-sonner-theme="dark"] {
+  --info-bg: oklch(0.24 0.05 165);
+  --info-border: oklch(0.34 0.07 164);
+  --info-text: oklch(0.80 0.13 158);
 }

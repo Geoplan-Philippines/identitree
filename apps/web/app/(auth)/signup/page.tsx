@@ -18,7 +18,7 @@ export default async function SignupPage() {
         <>
           Start your free
           <br />
-          Identitree workspace.
+          Handshakes workspace.
         </>
       }
       subheading="No credit card required. Set up your team and issue your first credential in under a minute."

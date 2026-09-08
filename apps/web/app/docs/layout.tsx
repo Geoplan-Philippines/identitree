@@ -4,11 +4,12 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DocsHeader } from "@/components/docs/header";
 import { DocsSidebar } from "@/components/docs/sidebar";
+import { Logo } from "@/components/shared/logo";
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
     <TooltipProvider>
-      <SidebarProvider className="flex min-h-screen w-full flex-col">
+      <SidebarProvider className="flex min-h-[100dvh] w-full flex-col">
         <DocsHeader />
         <div className="flex flex-1">
           <DocsSidebar />
@@ -22,14 +23,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             <footer className="border-t border-border py-12 px-4 md:px-8">
               <div className="flex flex-col md:flex-row justify-between gap-8">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2.5 outline-none">
-                    <span className="flex size-5 items-center justify-center rounded-[4px] bg-foreground text-background text-[9px] font-bold tracking-tight">
-                      I
-                    </span>
-                    <span className="text-sm font-semibold tracking-tight text-foreground">
-                      Identitree
-                    </span>
-                  </div>
+                  <Logo className="text-foreground" wordClassName="text-sm" />
                   <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
                     The premium ecosystem for NFC digital business cards and professional identities.
                   </p>

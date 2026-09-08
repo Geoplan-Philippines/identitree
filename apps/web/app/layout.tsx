@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Work_Sans, Poppins } from "next/font/google";
 import { Header } from "@/components/shared/header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -9,19 +9,27 @@ import { PostHogProvider } from "@/providers/posthog-provider";
 import { PostHogPageView } from "@/components/posthog-pageview";
 import { Suspense } from "react";
 
-
-const inter = Inter({
+// Work Sans — the everyday voice: UI, body, contact details.
+const workSans = Work_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Poppins — the display face: "The ritual, modernized."
+const poppins = Poppins({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://identitree.geoplanph.com"),
   title: {
-    default: "Identitree — Premium NFC Digital Business Cards for Teams",
-    template: "%s | Identitree",
+    default: "Handshakes: Premium NFC Digital Business Cards for Teams",
+    template: "%s | Handshakes",
   },
 
   description:
@@ -32,8 +40,8 @@ export const metadata: Metadata = {
     { name: "Chester Luke Maligaso" },
     { name: "Ace Gabriel P. Pasiliao" },
   ],
-  creator: "Identitree",
-  publisher: "Identitree",
+  creator: "Handshakes",
+  publisher: "Handshakes",
 
   formatDetection: {
     email: false,
@@ -44,15 +52,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://identitree.geoplanph.com",
-    siteName: "Identitree",
-    title: "Identitree — NFC Digital Business Cards",
+    siteName: "Handshakes",
+    title: "Handshakes: NFC Digital Business Cards",
     description: "Manage digital business cards, contacts, teams, and analytics in one premium workspace.",
     images: [
       {
-        url: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
-        width: 1200,
-        height: 630,
-        alt: "Identitree",
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Handshakes",
       },
     ],
   },
@@ -60,9 +68,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Identitree — NFC Digital Business Cards",
+    title: "Handshakes: NFC Digital Business Cards",
     description: "Manage digital business cards, contacts, teams, and analytics in one premium workspace.",
-    images: ["https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png"],
+    images: ["/icon.png"],
     creator: "@geoplanph",
   },
   robots: {
@@ -77,11 +85,8 @@ export const metadata: Metadata = {
     },
   },
   category: "technology",
-  icons: {
-    icon: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
-    shortcut: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
-    apple: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png",
-  },
+  // Favicon + apple-icon come from app/icon.png and app/apple-icon.png
+  // (file convention → content-hashed URLs that bust caches on deploy).
 };
 
 
@@ -92,9 +97,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${workSans.variable} ${poppins.variable}`}>
       <head>
-        <meta name="theme-color" content="#0f172a" />
+        <meta name="theme-color" content="#0D2A1F" />
       </head>
 
 

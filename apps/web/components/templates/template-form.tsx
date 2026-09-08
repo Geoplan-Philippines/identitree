@@ -88,12 +88,12 @@ export function TemplateForm({ initialData, onSuccess, onCancel }: TemplateFormP
       {/* Editor Side */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList variant="line" className="w-full justify-start rounded-none border-b border-border bg-transparent p-0 h-11 gap-6 overflow-x-auto no-scrollbar">
+          <TabsList variant="line" className="w-full justify-start rounded-lg border-b border-border bg-transparent p-0 h-11 gap-6 overflow-x-auto no-scrollbar">
             {["basics", "branding", "layers", "aesthetics"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="shrink-0 rounded-none px-0 font-semibold text-sm h-full capitalize border-transparent data-active:border-foreground"
+                className="shrink-0 rounded-lg px-0 font-semibold text-sm h-full capitalize border-transparent data-active:border-foreground"
               >
                 {tab}
               </TabsTrigger>
@@ -125,21 +125,21 @@ export function TemplateForm({ initialData, onSuccess, onCancel }: TemplateFormP
           <Button
             type="button"
             variant="outline"
-            className="rounded-none font-black lg:hidden shrink-0"
+            className="lg:hidden shrink-0"
             onClick={() => setIsPreviewOpen(true)}
           >
-            <Eye className="mr-2 h-4 w-4" />
+            <Eye className="h-4 w-4" />
             Preview
           </Button>
 
           <Button
             type="submit"
-            className="rounded-none font-black flex-1 lg:flex-none bg-primary text-primary-foreground"
+            className="flex-1 lg:flex-none"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Processing...
               </>
             ) : (
@@ -152,13 +152,13 @@ export function TemplateForm({ initialData, onSuccess, onCancel }: TemplateFormP
       {/* Mobile Preview Modal */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
-          className="p-0 border-none max-w-[95vw] h-[90dvh] flex flex-col rounded-none overflow-hidden bg-transparent shadow-none [&>button]:text-white [&>button]:bg-black/50 [&>button]:rounded-none [&>button]:top-4 [&>button]:right-4"
+          className="p-0 border-none max-w-[95vw] h-[90dvh] flex flex-col rounded-lg overflow-hidden bg-transparent shadow-none [&>button]:text-white [&>button]:bg-black/50 [&>button]:rounded-none [&>button]:top-4 [&>button]:right-4"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Template Preview</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 bg-white relative overflow-y-auto rounded-none shadow-2xl m-2 scrollbar-thin scrollbar-thumb-gray-300">
+          <div className="flex-1 bg-white relative overflow-y-auto rounded-lg shadow-2xl m-2 scrollbar-thin scrollbar-thumb-gray-300">
             <div className="min-h-full flex flex-col">
               <TemplatePreview
                 profile={mockProfile as any}
@@ -178,7 +178,7 @@ export function TemplateForm({ initialData, onSuccess, onCancel }: TemplateFormP
 
       {/* Preview Side */}
       <div className="relative hidden lg:block">
-        <div className="sticky top-0 bg-muted/10 border border-border h-full min-h-[600px] flex flex-col rounded-none overflow-hidden">
+        <div className="sticky top-0 bg-muted/10 border border-border h-full min-h-[600px] flex flex-col rounded-2xl overflow-hidden">
           <div className="p-4 border-b border-border bg-background flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live Preview</span>
             <div className="flex gap-1">

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "@/components/shared/logo";
 
 type Step = {
   number: string;
@@ -32,12 +33,12 @@ export function AuthFlowShell({
   children,
 }: AuthFlowShellProps) {
   return (
-    <div className="grid min-h-screen w-full bg-background text-foreground lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+    <div className="grid min-h-[100dvh] w-full bg-background text-foreground lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       {/* Left Panel — Editorial Hero */}
-      <aside className="relative hidden overflow-hidden bg-[oklch(0.16_0.02_260)] lg:block">
+      <aside className="relative hidden overflow-hidden bg-forest-ink lg:block">
         <Image
           src="/assets/register-hero.png"
-          alt="Identitree NFC credentials in use"
+          alt="Handshakes NFC credentials in use"
           fill
           priority
           sizes="(min-width: 1024px) 55vw, 100vw"
@@ -48,62 +49,20 @@ export function AuthFlowShell({
         <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/45 via-black/10 to-transparent" />
 
         {/* Top-left: brand on image */}
-        <div className="absolute left-10 top-10 z-10 inline-flex items-center gap-2.5 text-white xl:left-14 xl:top-12">
-          <span
-            aria-hidden
-            className="relative flex h-8 w-8 items-center justify-center bg-white text-[oklch(0.16_0.02_260)]"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 21V11" />
-              <path d="M12 11c0-3.5 2.5-6 6-6" />
-              <path d="M12 14c0-3.5-2.5-6-6-6" />
-              <path d="M9 21h6" />
-            </svg>
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight">
-            Identitree
-          </span>
+        <div className="absolute left-10 top-10 z-10 text-white xl:left-14 xl:top-12">
+          <Logo variant="ink" markClassName="w-8" wordClassName="text-[17px]" />
         </div>
       </aside>
 
       {/* Right Panel — Step Content */}
-      <div className="relative flex min-h-screen flex-col px-6 py-8 sm:px-10 md:px-14 lg:px-14 xl:px-20">
+      <div className="relative flex min-h-[100dvh] flex-col px-6 py-8 sm:px-10 md:px-14 lg:px-14 xl:px-20">
         <header className="flex items-center justify-between">
           {/* Brand on mobile (hero hidden); invisible on desktop to preserve space */}
           <Link
             href="/"
-            className="group inline-flex items-center gap-2.5 transition-opacity hover:opacity-90 lg:invisible"
+            className="group inline-flex items-center text-foreground transition-opacity hover:opacity-90 lg:invisible"
           >
-            <span
-              aria-hidden
-              className="relative flex h-8 w-8 items-center justify-center bg-foreground text-background"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 21V11" />
-                <path d="M12 11c0-3.5 2.5-6 6-6" />
-                <path d="M12 14c0-3.5-2.5-6-6-6" />
-                <path d="M9 21h6" />
-              </svg>
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight">
-              Identitree
-            </span>
+            <Logo markClassName="w-8" wordClassName="text-[17px]" />
           </Link>
 
           {navAction && (
@@ -145,12 +104,9 @@ export function AuthFlowShell({
         </div>
 
         <footer className="flex items-center justify-between pt-6 text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Identitree, Inc.</p>
+          <p>&copy; {new Date().getFullYear()} Handshakes, Inc.</p>
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden className="relative inline-flex h-1.5 w-1.5">
-              <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
+            <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             All systems normal
           </span>
         </footer>

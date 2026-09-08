@@ -163,7 +163,7 @@ export function ResetPasswordForm() {
 
         <Button
           type="submit"
-          className="h-11 w-full text-[13.5px] font-medium"
+          className="w-full text-[13.5px] font-medium"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? "Updating password..." : "Reset password"}

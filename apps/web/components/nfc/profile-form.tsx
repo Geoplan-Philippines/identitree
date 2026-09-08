@@ -129,7 +129,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
       name: organization.name,
       logo: organization.logo ?? undefined,
       website: (organization as any).website ?? undefined,
-    } : (initialData?.organization || { name: "Identitree" }),
+    } : (initialData?.organization || { name: "Handshakes" }),
     linkedinUsername: formValues.linkedinUsername,
     whatsappNumber: formValues.whatsappNumber,
     viberNumber: formValues.viberNumber,
@@ -204,7 +204,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
               {isEditing ? "Update Identity" : "New Identity"}
             </h3>
             {onCancel && (
-              <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="rounded-none uppercase font-bold text-xs">
+              <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="rounded-lg uppercase font-bold text-xs">
                 Cancel
               </Button>
             )}
@@ -222,7 +222,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="firstName">First Name</FieldLabel>
-                    <Input {...field} id="firstName" placeholder="John" className="rounded-none" />
+                    <Input {...field} id="firstName" placeholder="John" className="rounded-lg" />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
@@ -233,7 +233,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
-                    <Input {...field} id="lastName" placeholder="Doe" className="rounded-none" />
+                    <Input {...field} id="lastName" placeholder="Doe" className="rounded-lg" />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
@@ -246,7 +246,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input {...field} id="email" type="email" placeholder="john.doe@example.com" className="rounded-none" />
+                  <Input {...field} id="email" type="email" placeholder="john.doe@example.com" className="rounded-lg" />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -258,7 +258,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="positionTitle">Position Title</FieldLabel>
-                  <Input {...field} id="positionTitle" placeholder="Software Developer" className="rounded-none" />
+                  <Input {...field} id="positionTitle" placeholder="Software Developer" className="rounded-lg" />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -271,7 +271,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="contactNumber">Contact Number</FieldLabel>
                   <div className="relative flex">
-                    <span className="inline-flex items-center px-3 bg-muted text-foreground text-sm font-bold">
+                    <span className="inline-flex items-center px-3 bg-muted text-foreground text-sm font-bold rounded-l-lg border border-r-0 border-input">
                       +63
                     </span>
                     <Input
@@ -282,7 +282,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                         field.onChange(e);
                       }}
                       placeholder="912 345 6789"
-                      className="rounded-none border-l-0"
+                      className="rounded-l-none rounded-r-lg border-l-0"
                     />
                   </div>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -308,7 +308,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="rounded-none border-dashed"
+                    className="rounded-lg border-dashed"
                   />
                 </div>
               </div>
@@ -327,7 +327,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="linkedinUsername">LinkedIn (Optional)</FieldLabel>
-                    <Input {...field} id="linkedinUsername" placeholder="johndoe" className="rounded-none" />
+                    <Input {...field} id="linkedinUsername" placeholder="johndoe" className="rounded-lg" />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
@@ -341,7 +341,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="whatsappNumber">WhatsApp</FieldLabel>
                       <div className="relative flex">
-                        <span className="inline-flex items-center px-3 bg-muted text-foreground text-[10px] font-bold">
+                        <span className="inline-flex items-center px-3 bg-muted text-foreground text-[10px] font-bold rounded-l-lg border border-r-0 border-input">
                           +63
                         </span>
                         <Input
@@ -352,7 +352,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                             field.onChange(e);
                           }}
                           placeholder="912 345 6789"
-                          className="rounded-none border-l-0 text-sm"
+                          className="rounded-l-none rounded-r-lg border-l-0 text-sm"
                         />
                       </div>
                     </Field>
@@ -365,7 +365,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="viberNumber">Viber</FieldLabel>
                       <div className="relative flex">
-                        <span className="inline-flex items-center px-3 bg-muted text-foreground text-[10px] font-bold">
+                        <span className="inline-flex items-center px-3 bg-muted text-foreground text-[10px] font-bold rounded-l-lg border border-r-0 border-input">
                           +63
                         </span>
                         <Input
@@ -376,7 +376,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                             field.onChange(e);
                           }}
                           placeholder="912 345 6789"
-                          className="rounded-none border-l-0 text-sm"
+                          className="rounded-l-none rounded-r-lg border-l-0 text-sm"
                         />
                       </div>
                     </Field>
@@ -398,19 +398,20 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
                 <Field data-invalid={fieldState.invalid}>
                   <div className="grid grid-cols-3 gap-2">
                     {templates.map((template) => (
-                      <button
+                      <Button
                         key={template.id}
                         type="button"
+                        variant="outline"
                         onClick={() => field.onChange(template.id)}
                         className={cn(
-                          "flex flex-col items-center gap-2 rounded-none border p-3 transition-all",
+                          "h-auto w-full flex-col gap-2 whitespace-normal p-3 text-center",
                           field.value === template.id
-                            ? "border-foreground bg-foreground text-background shadow-md"
-                            : "border-border bg-background text-foreground hover:border-foreground/50"
+                            ? "border-foreground bg-foreground text-background shadow-md hover:bg-foreground hover:text-background"
+                            : "hover:border-foreground/50 hover:bg-background hover:text-foreground"
                         )}
                       >
                         <span className="text-[10px] font-bold uppercase tracking-widest">{template.name}</span>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -420,7 +421,7 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
 
             {/* Live Preview sits right under the selector */}
             <div className={cn(
-              "mt-4 border border-border p-8 rounded-none transition-colors duration-500",
+              "mt-4 border border-border p-8 rounded-lg transition-colors duration-500",
               (previewProfile.template?.layoutKey === "glass" || previewProfile.template?.layoutKey === "modern-dark")
                 ? "bg-slate-950 border-slate-800"
                 : "bg-muted/30 border-border"
@@ -456,8 +457,8 @@ export function ProfileForm({ cardId, initialData, onSuccess, onCancel }: Profil
             </div>
           </div>
 
-          <Button type="submit" className="w-full rounded-none font-bold uppercase" disabled={isFormLoading}>
-            {isFormLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          <Button type="submit" className="w-full rounded-lg font-bold uppercase" disabled={isFormLoading}>
+            {isFormLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {isEditing ? "Save Changes" : "Create Profile"}
           </Button>
         </FieldGroup>

@@ -65,12 +65,11 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
             description="Manage Organization Layouts"
           />
           <Button
-            size="sm"
             asChild
-            className="rounded-none"
+            className="rounded-lg"
           >
             <Link href={`/dashboard/${slug}/templates/new`}>
-              <Plus className="size-3.5 mr-1.5" />
+              <Plus className="size-3.5" />
               New Template
             </Link>
           </Button>
@@ -96,7 +95,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                   <EmptyContent>
                     <Button asChild>
                       <Link href={`/dashboard/${slug}/templates/new`}>
-                        <Plus className="size-3.5 mr-1.5" />
+                        <Plus className="size-3.5" />
                         Create First Template
                       </Link>
                     </Button>
@@ -108,7 +107,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                 <div
                   key={template.id}
                   className={cn(
-                    "relative group border p-4 flex flex-col gap-4 transition-all duration-200 overflow-hidden rounded-none cursor-pointer",
+                    "relative group border p-4 flex flex-col gap-4 transition-all duration-200 overflow-hidden rounded-2xl cursor-pointer",
                     selectedTemplateId === template.id
                       ? "border-foreground bg-foreground/5 shadow-md"
                       : "bg-background hover:bg-muted/30 border-border hover:border-foreground/20 shadow-sm"
@@ -122,7 +121,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                     </div>
                     <Badge
                       variant={template.availability === "GLOBAL" ? "secondary" : "default"}
-                      className="text-[9px] h-4 rounded-none px-1.5 uppercase font-bold"
+                      className="text-[9px] h-4 rounded-lg px-1.5 uppercase font-bold"
                     >
                       {template.availability}
                     </Badge>
@@ -152,20 +151,20 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
       {selectedTemplateId && selectedTemplate && (() => {
         const detailContent = (
           <>
-            <div className="px-5 py-4 border-b flex items-center justify-between gap-4 bg-background sticky top-0 z-20 rounded-none">
+            <div className="px-5 py-4 border-b flex items-center justify-between gap-4 bg-background sticky top-0 z-20">
               <div className="flex items-center gap-3 min-w-0">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedTemplateId(null)}
-                  className="rounded-none hover:bg-muted shrink-0 h-9 w-9"
+                  className="rounded-lg hover:bg-muted shrink-0 h-9 w-9"
                 >
                   <MoveLeftIcon size={18} />
                 </Button>
                 <div className="flex flex-col min-w-0">
                   <h3 className="font-black text-base tracking-tight uppercase truncate leading-tight">{selectedTemplate.name}</h3>
                   <div className="flex items-center">
-                    <span className="text-[9px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded-none border border-border/50 truncate max-w-[140px] sm:max-w-none">
+                    <span className="text-[9px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded-lg border border-border/50 truncate max-w-[140px] sm:max-w-none">
                       {selectedTemplate.id}
                     </span>
                   </div>
@@ -178,13 +177,13 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="rounded-none uppercase font-bold text-[10px]"
+                        className="rounded-lg uppercase font-bold text-[10px]"
                       >
-                        <Trash className="size-3.5 sm:mr-1.5" />
+                        <Trash className="size-3.5" />
                         <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-none">
+                    <AlertDialogContent className="rounded-lg">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="font-bold">Delete Template?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -192,9 +191,9 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-none uppercase font-bold">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-lg uppercase font-bold">Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          className="rounded-none uppercase font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="rounded-lg uppercase font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           onClick={async () => {
                             await deleteMutation.mutateAsync(selectedTemplate.id);
                             toast.success("Template deleted successfully");
@@ -216,7 +215,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                 <div className="max-w-full sm:max-w-4xl mx-auto space-y-8">
                   {/* System Message */}
                   {selectedTemplate.availability === "GLOBAL" && (
-                    <div className="bg-blue-50/50 border border-blue-200/50 p-6 flex items-start gap-4">
+                    <div className="bg-blue-50/50 rounded-2xl border border-blue-200/50 p-6 flex items-start gap-4">
                       <Info className="size-5 text-blue-600 mt-0.5" />
                       <div className="space-y-1">
                         <h4 className="text-sm font-bold text-blue-900 uppercase tracking-wide">System Template</h4>
@@ -229,7 +228,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Basic Details Section */}
-                    <div className="space-y-6 border border-border bg-background p-4 sm:p-6">
+                    <div className="space-y-6 rounded-2xl border border-border bg-background p-4 sm:p-6">
                       <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
                         <LayoutTemplate className="size-4 text-muted-foreground" />
                         <span className="text-xs font-black uppercase tracking-widest">Template Overview</span>
@@ -243,7 +242,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                         <div className="flex flex-col gap-1">
                           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Availability</span>
                           <div className="flex items-center gap-2">
-                            <Badge className="w-fit rounded-none font-bold uppercase text-[9px] h-4">
+                            <Badge className="w-fit rounded-lg font-bold uppercase text-[9px] h-4">
                               {selectedTemplate.availability}
                             </Badge>
                             {selectedTemplate.availability === "ORG_ONLY" && (
@@ -257,7 +256,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                     </div>
 
                     {/* Layout Configuration Section */}
-                    <div className="space-y-6 border border-border bg-background p-4 sm:p-6">
+                    <div className="space-y-6 rounded-2xl border border-border bg-background p-4 sm:p-6">
                       <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
                         <LayoutTemplate className="size-4 text-muted-foreground" />
                         <span className="text-xs font-black uppercase tracking-widest">Layout Engine</span>
@@ -266,7 +265,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
                       <div className="space-y-4">
                         <div className="flex flex-col gap-1 min-w-0">
                           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Base Layout Key</span>
-                          <code className="text-[10px] sm:text-xs font-bold bg-muted px-2 py-1 w-fit border border-border uppercase truncate max-w-full">
+                          <code className="text-[10px] sm:text-xs font-bold bg-muted px-2 py-1 rounded-lg w-fit border border-border uppercase truncate max-w-full">
                             {selectedTemplate.layoutKey}
                           </code>
                         </div>
@@ -280,16 +279,16 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
 
                   {/* Call to Action for non-global */}
                   {selectedTemplate.availability !== "GLOBAL" && (
-                    <div className="p-6 sm:p-10 border border-border bg-background flex flex-col items-center justify-center space-y-6 text-center overflow-hidden">
+                    <div className="p-6 sm:p-10 rounded-2xl border border-border bg-background flex flex-col items-center justify-center space-y-6 text-center overflow-hidden">
                       <div className="space-y-2 w-full">
                         <h4 className="font-black uppercase text-base tracking-tight">Full-Page Designer</h4>
                         <p className="text-sm text-muted-foreground max-w-full sm:max-w-sm mx-auto leading-relaxed">
                           Launch the immersive design studio to customize every visual detail of this template.
                         </p>
                       </div>
-                      <Button asChild className="rounded-none font-bold px-6 sm:px-10 w-full sm:w-auto">
+                      <Button asChild className="rounded-lg font-bold px-6 sm:px-10 w-full sm:w-auto">
                         <Link href={`/dashboard/${slug}/templates/${selectedTemplate.id}`}>
-                          <ExternalLink className="mr-2 size-4" />
+                          <ExternalLink className="size-4" />
                           Launch Design Studio
                         </Link>
                       </Button>
@@ -316,7 +315,7 @@ export function TemplatesClient({ initialData }: TemplatesClientProps) {
         }
 
         return (
-          <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-none">
+          <div className="flex-1 border bg-muted/5 flex flex-col animate-in slide-in-from-right duration-300 border-border overflow-hidden h-full rounded-2xl">
             {detailContent}
           </div>
         );

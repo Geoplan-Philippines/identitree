@@ -101,13 +101,13 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
   }
 
   const buttonRadius = {
-    sharp: "rounded-none",
+    sharp: "rounded-lg",
     rounded: "rounded-2xl",
     pill: "rounded-full"
   }[config?.buttonStyle || "sharp"];
 
   const avatarRadius = {
-    square: "rounded-none",
+    square: "rounded-lg",
     circle: "rounded-full",
     rounded: "rounded-2xl"
   }[config?.avatarStyle || "circle"];
@@ -141,7 +141,7 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
         onSelectSection?.(id);
       }}
     >
-      <div className="absolute -inset-x-2 -inset-y-1 border border-transparent group-hover/section:border-foreground/10 rounded-none transition-all" />
+      <div className="absolute -inset-x-2 -inset-y-1 border border-transparent group-hover/section:border-foreground/10 rounded-lg transition-all" />
       {children}
     </div>
   );
@@ -250,7 +250,7 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
                 )}>
                   <span
                     className={cn(
-                      "flex size-11 items-center justify-center rounded-none border shadow-sm transition",
+                      "flex size-11 items-center justify-center rounded-lg border shadow-sm transition",
                       !config?.socialsButtonColor && !config?.secondaryButtonColor && theme.secondaryButton,
                       buttonRadius,
                       glassStyle
@@ -283,20 +283,20 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
               {config?.showVCard !== false && (
                 <Button
                   size="lg"
-                  className={cn("h-11 w-full transition-all duration-500 font-bold uppercase text-[10px]", buttonRadius)}
+                  className={cn("h-11 w-full transition-all duration-500 shadow-sm", buttonRadius)}
                   style={{
                     backgroundColor: config?.primaryButtonColor || primaryColor,
                     color: config?.primaryButtonTextColor || "#ffffff",
                   }}
                 >
-                  <Download className="size-3.5 mr-2" />
+                  <Download className="size-4" />
                   {config?.primaryButtonLabel || "Save Contact"}
                 </Button>
               )}
 
               <div
                 className={cn(
-                  "flex h-11 w-full items-center justify-center gap-2 border px-4 text-[10px] font-bold uppercase shadow-sm transition-all duration-500 cursor-pointer bg-transparent",
+                  "flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium shadow-sm transition-all duration-500 cursor-pointer bg-transparent",
                   buttonRadius,
                 )}
                 style={{
@@ -317,7 +317,7 @@ export function TemplatePreview({ profile, layoutKey, onSelectSection, isFlipped
         return (
           <Wrapper id="footer" key="footer" className="items-center">
             <footer className={cn("flex items-center justify-center gap-2 text-[10px] font-bold uppercase transition-colors duration-500", theme.footer)}>
-              <span>Powered by Identitree</span>
+              <span>Powered by Handshakes</span>
             </footer>
           </Wrapper>
         );

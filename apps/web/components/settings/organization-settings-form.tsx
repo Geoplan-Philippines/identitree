@@ -256,7 +256,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
             >
               {isSavingGeneral || isUploading ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   Saving Changes...
                 </>
               ) : (
@@ -290,7 +290,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                     <div className="flex flex-col sm:flex-row sm:items-stretch gap-2">
                       <div className="flex flex-1 flex-col sm:flex-row sm:items-center min-w-0">
                         <span className="inline-flex h-10 items-center border sm:border-r-0 border-input bg-muted px-3 text-[11px] font-medium text-muted-foreground whitespace-nowrap rounded-t-lg sm:rounded-tr-none sm:rounded-l-lg">
-                          identitree.geoplanph.com/dashboard/
+                          handshakes.cards/dashboard/
                         </span>
                         <Input
                           {...field}
@@ -302,7 +302,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                       <Button
                         type="button"
                         variant="destructive"
-                        className="px-6 h-10"
+                        className="px-6"
                         disabled={
                           !form.formState.dirtyFields.slug ||
                           isUpdatingSlug ||
@@ -313,7 +313,7 @@ export function OrganizationSettingsForm({ slug }: { slug: string }) {
                       >
                         {isUpdatingSlug ? (
                           <>
-                            <Loader2 className="mr-2 size-4 animate-spin" />
+                            <Loader2 className="size-4 animate-spin" />
                             Updating...
                           </>
                         ) : (

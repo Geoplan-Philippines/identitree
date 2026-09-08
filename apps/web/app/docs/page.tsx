@@ -3,7 +3,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Documentation",
-  description: "Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Identitree's professional tools.",
+  description: "Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Handshakes's professional tools.",
   alternates: {
     canonical: "https://identitree.geoplanph.com/docs",
   },
@@ -18,12 +18,12 @@ export default function DocsPage() {
           Documentation
         </h1>
         <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-          Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Identitree's professional tools.
+          Learn how to integrate, manage, and scale your NFC digital business card ecosystem with Handshakes's professional tools.
         </p>
       </section>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <div className="group relative overflow-hidden border border-border bg-muted/20 p-6 transition-colors hover:bg-muted/40">
+        <div className="group relative overflow-hidden rounded-2xl border border-border bg-muted/20 p-6 transition-colors hover:bg-muted/40">
           <Zap className="mb-4 size-6 text-foreground" />
           <h3 className="mb-2 text-sm font-bold uppercase tracking-widest text-foreground">Quick Start</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -31,7 +31,7 @@ export default function DocsPage() {
           </p>
         </div>
         
-        <div className="group relative overflow-hidden border border-border bg-muted/20 p-6 transition-colors hover:bg-muted/40">
+        <div className="group relative overflow-hidden rounded-2xl border border-border bg-muted/20 p-6 transition-colors hover:bg-muted/40">
           <Terminal className="mb-4 size-6 text-foreground" />
           <h3 className="mb-2 text-sm font-bold uppercase tracking-widest text-foreground">API Reference</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -48,20 +48,20 @@ export default function DocsPage() {
 
         <div className="grid gap-8">
           <div className="flex flex-col md:flex-row gap-6 md:items-start">
-            <div className="flex size-10 shrink-0 items-center justify-center bg-foreground text-background">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
               <Smartphone className="size-5" />
             </div>
             <div className="space-y-2">
               <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">NFC Technology</h4>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-                Identitree uses high-frequency NFC tags compatible with both iOS and Android. Our platform handles 
+                Handshakes uses high-frequency NFC tags compatible with both iOS and Android. Our platform handles 
                 NDEF record management and dynamic redirection seamlessly.
               </p>
             </div>
           </div>
 
           <div className="flex flex-col md:flex-row gap-6 md:items-start">
-            <div className="flex size-10 shrink-0 items-center justify-center bg-foreground text-background">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
               <Shield className="size-5" />
             </div>
             <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function DocsPage() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-6 md:items-start">
-            <div className="flex size-10 shrink-0 items-center justify-center bg-foreground text-background">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
               <Cpu className="size-5" />
             </div>
             <div className="space-y-2">

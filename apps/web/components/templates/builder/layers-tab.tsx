@@ -102,14 +102,14 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
       name={name}
       control={form.control}
       render={({ field }) => (
-        <div className="flex gap-1 bg-muted p-1 rounded-none border border-border w-fit">
+        <div className="flex gap-1 bg-muted p-1 rounded-lg border border-border w-fit">
           {["left", "center", "right"].map((align) => (
             <Button
               key={align}
               type="button"
               size="icon"
               variant={field.value === align ? "default" : "ghost"}
-              className="h-7 w-7 rounded-none"
+              className="h-7 w-7 rounded-lg"
               onClick={() => field.onChange(align)}
             >
               {align === "left" && <AlignLeft size={14} />}
@@ -141,7 +141,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
           return (
             <Reorder.Item key={sectionId} value={sectionId} className="group relative">
               <div className={cn(
-                "border flex flex-col transition-all duration-200 overflow-hidden",
+                "rounded-xl border flex flex-col transition-all duration-200 overflow-hidden",
                 isVisible ? "border-border bg-background" : "border-border/50 bg-muted/30 opacity-60",
                 isExpanded ? "ring-1 ring-foreground" : ""
               )}>
@@ -161,7 +161,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-none"
+                      className="h-7 w-7 rounded-lg"
                       onClick={() => setExpandedSection(isExpanded ? null : sectionId)}
                     >
                       <ChevronDown size={14} className={cn("transition-transform", isExpanded ? "rotate-180" : "")} />
@@ -174,7 +174,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 rounded-none"
+                          className="h-7 w-7 rounded-lg"
                           onClick={() => field.onChange(!field.value)}
                         >
                           {field.value ? <Eye size={12} /> : <EyeOff size={12} />}
@@ -230,7 +230,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     <Input 
                                       {...field} 
                                       placeholder="e.g. Digital Business Card" 
-                                      className="h-8 rounded-none border-border text-[10px]"
+                                      className="h-8 rounded-lg border-border text-[10px]"
                                       disabled={form.watch("config.showTopBadge") === false}
                                     />
                                   )}
@@ -258,7 +258,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     <Input 
                                       {...field} 
                                       placeholder="e.g. Identity Verified" 
-                                      className="h-8 rounded-none border-border text-[10px]"
+                                      className="h-8 rounded-lg border-border text-[10px]"
                                       disabled={form.watch("config.showVerifyBadge") === false}
                                     />
                                   )}
@@ -285,7 +285,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     key={id}
                                     type="button"
                                     onClick={() => applyCardPreset(id)}
-                                    className="h-10 rounded-none border transition-all duration-150 flex flex-col items-center justify-center gap-0.5 px-1 hover:scale-105 hover:shadow-md"
+                                    className="h-10 rounded-lg border transition-all duration-150 flex flex-col items-center justify-center gap-0.5 px-1 hover:scale-105 hover:shadow-md"
                                     style={{ backgroundColor: bg, borderColor: border, color: tc }}
                                     onMouseEnter={e => (e.currentTarget.style.borderColor = hoverBorder)}
                                     onMouseLeave={e => (e.currentTarget.style.borderColor = border)}
@@ -309,10 +309,10 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     }} 
                                     value={field.value ?? "default"}
                                   >
-                                    <SelectTrigger className="rounded-none h-9 border-border">
+                                    <SelectTrigger className="rounded-lg h-9 border-border">
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-none">
+                                    <SelectContent className="rounded-lg">
                                       <SelectItem value="default">Standard</SelectItem>
                                       <SelectItem value="modern-dark">Modern Dark</SelectItem>
                                       <SelectItem value="glass">Glass</SelectItem>
@@ -378,8 +378,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Front face color</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#ffffff"} placeholder="Default" className="flex-1 rounded-none text-[10px] h-8 border-border uppercase font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#ffffff"} placeholder="Default" className="flex-1 rounded-lg text-[10px] h-8 border-border uppercase font-mono" />
                                     </div>
                                   </Field>
                                 )}
@@ -391,8 +391,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Back face color</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#101312"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#101312"} placeholder="Default" className="flex-1 rounded-none text-[10px] h-8 border-border uppercase font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#101312"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#101312"} placeholder="Default" className="flex-1 rounded-lg text-[10px] h-8 border-border uppercase font-mono" />
                                     </div>
                                   </Field>
                                 )}
@@ -405,8 +405,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                 <Field>
                                   <FieldLabel className="text-[9px] font-black uppercase">Text Color Override</FieldLabel>
                                   <div className="flex gap-2">
-                                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                    <Input {...field} value={field.value ?? "#0f172a"} placeholder="Default" className="flex-1 rounded-none text-[10px] h-8 border-border uppercase font-mono" />
+                                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                    <Input {...field} value={field.value ?? "#0f172a"} placeholder="Default" className="flex-1 rounded-lg text-[10px] h-8 border-border uppercase font-mono" />
                                   </div>
                                 </Field>
                               )}
@@ -418,10 +418,10 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                 <Field>
                                   <FieldLabel>Background pattern</FieldLabel>
                                   <Select onValueChange={field.onChange} value={field.value ?? "none"}>
-                                    <SelectTrigger className="rounded-none h-9 border-border">
+                                    <SelectTrigger className="rounded-lg h-9 border-border">
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-none">
+                                    <SelectContent className="rounded-lg">
                                       <SelectItem value="none">None</SelectItem>
                                       <SelectItem value="dots">Dots</SelectItem>
                                       <SelectItem value="grid">Grid</SelectItem>
@@ -442,10 +442,10 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     {...field}
                                     value={field.value ?? ""}
                                     placeholder="https://example.com/image.jpg"
-                                    className="rounded-none border-border text-sm"
+                                    className="rounded-lg border-border text-sm"
                                   />
                                   {field.value && (
-                                    <div className="mt-1.5 h-12 w-full rounded-none border border-border overflow-hidden">
+                                    <div className="mt-1.5 h-12 w-full rounded-lg border border-border overflow-hidden">
                                       <img src={field.value} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                     </div>
                                   )}
@@ -466,7 +466,7 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                               render={({ field }) => (
                                 <Field>
                                   <FieldLabel>Bio text</FieldLabel>
-                                  <Textarea {...field} value={field.value ?? ""} rows={3} className="text-xs rounded-none border-border" />
+                                  <Textarea {...field} value={field.value ?? ""} rows={3} className="text-xs rounded-lg border-border" />
                                 </Field>
                               )}
                             />
@@ -480,16 +480,16 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                               render={({ field }) => (
                                 <Field>
                                   <FieldLabel>Display mode</FieldLabel>
-                                  <div className="flex gap-1 bg-muted p-1 rounded-none border border-border w-fit">
+                                  <div className="flex gap-1 bg-muted p-1 rounded-lg border border-border w-fit">
                                     <Button
                                       type="button" size="icon" variant={field.value === "grid" ? "default" : "ghost"}
-                                      className="h-7 w-7 rounded-none" onClick={() => field.onChange("grid")}
+                                      className="h-7 w-7 rounded-lg" onClick={() => field.onChange("grid")}
                                     >
                                       <LayoutGrid size={14} />
                                     </Button>
                                     <Button
                                       type="button" size="icon" variant={field.value === "list" ? "default" : "ghost"}
-                                      className="h-7 w-7 rounded-none" onClick={() => field.onChange("list")}
+                                      className="h-7 w-7 rounded-lg" onClick={() => field.onChange("list")}
                                     >
                                       <List size={14} />
                                     </Button>
@@ -510,8 +510,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     <Field>
                                       <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Button Color</FieldLabel>
                                       <div className="flex gap-2">
-                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                       </div>
                                     </Field>
                                   )}
@@ -523,8 +523,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     <Field>
                                       <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Icon Color</FieldLabel>
                                       <div className="flex gap-2">
-                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                        <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                        <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                       </div>
                                     </Field>
                                   )}
@@ -536,8 +536,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                     <Field className="col-span-2">
                                       <FieldLabel className="text-[9px] uppercase font-bold opacity-70">Background Fill</FieldLabel>
                                       <div className="flex gap-2">
-                                        <Input type="color" {...field} value={field.value ?? "transparent"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                        <Input {...field} value={field.value ?? "transparent"} placeholder="transparent or #hex" className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                        <Input type="color" {...field} value={field.value ?? "transparent"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                        <Input {...field} value={field.value ?? "transparent"} placeholder="transparent or #hex" className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                       </div>
                                     </Field>
                                   )}
@@ -570,8 +570,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Primary button</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                     </div>
                                   </Field>
                                 )}
@@ -583,8 +583,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Primary text</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                     </div>
                                   </Field>
                                 )}
@@ -598,8 +598,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Secondary button</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                     </div>
                                   </Field>
                                 )}
@@ -611,8 +611,8 @@ export function LayersTab({ form, expandedSection, setExpandedSection }: LayersT
                                   <Field>
                                     <FieldLabel>Secondary text</FieldLabel>
                                     <div className="flex gap-2">
-                                      <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
-                                      <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none text-[10px] h-8 border-border font-mono" />
+                                      <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                                      <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-lg text-[10px] h-8 border-border font-mono" />
                                     </div>
                                   </Field>
                                 )}

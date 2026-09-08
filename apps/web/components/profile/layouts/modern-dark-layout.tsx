@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 export function ModernDarkLayout({ profile, config, isFlipped }: CardProps) {
   const qrCells = new Set([0, 1, 2, 4, 5, 7, 9, 10, 12, 13, 15, 17, 19, 20, 21, 23, 24]);
 
-  const primaryColor = config?.cardPrimaryColor || config?.primaryColor || "#09090b";
-  const secondaryColor = config?.cardSecondaryColor || "#18181b";
-  const textColor = config?.cardTextColor || "#ffffff";
+  const primaryColor = config?.cardPrimaryColor || config?.primaryColor || "var(--forest-ink)";
+  const secondaryColor = config?.cardSecondaryColor || "var(--forest)";
+  const textColor = config?.cardTextColor || "var(--cream)";
   const pattern = getCardPattern(config?.cardPattern);
   const bgImage = config?.cardBackgroundImage;
 
@@ -56,7 +56,7 @@ export function ModernDarkLayout({ profile, config, isFlipped }: CardProps) {
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full opacity-80" />
             </span>
           )}
-          <span className="truncate max-w-[180px] opacity-60 font-bold tracking-tight uppercase text-[9px]">{profile.organization?.name || "Identitree"}</span>
+          <span className="truncate max-w-[180px] opacity-60 font-bold tracking-tight uppercase text-[9px]">{profile.organization?.name || "Handshakes"}</span>
           {logoAlign !== "left" && profile.organization?.logo && (
             <span className="flex size-7 shrink-0 items-center justify-center">
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full opacity-80" />
@@ -104,12 +104,12 @@ export function ModernDarkLayout({ profile, config, isFlipped }: CardProps) {
         <div className="flex h-full items-center justify-between gap-5 relative z-10">
           <div className="min-w-0">
             <div className="mb-5 flex size-10 items-center justify-center rounded-md border border-white/10 bg-white/5">
-              <Building2 className="size-5 text-blue-400" aria-hidden="true" />
+              <Building2 className="size-5 text-brass" aria-hidden="true" />
             </div>
             <p className="text-xl font-semibold leading-tight">
               Modern ID.
             </p>
-            <p className="mt-3 max-w-[14rem] text-xs leading-5 text-zinc-500">
+            <p className="mt-3 max-w-[14rem] text-xs leading-5 text-cream/50">
               Tap to connect instantly with my digital profile.
             </p>
           </div>

@@ -21,7 +21,7 @@ export default async function OrganizationSetupPage() {
           Let&apos;s create your organization.
         </h1>
         <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
-          One last step — set up your workspace before heading to the dashboard.
+          One last step. Set up your workspace before heading to the dashboard.
         </p>
       </header>
 

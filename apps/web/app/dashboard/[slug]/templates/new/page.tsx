@@ -10,7 +10,7 @@ export default async function NewTemplatePage({ params }: { params: Promise<{ sl
   return (
     <div className="space-y-8 pb-10">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild className="rounded-none">
+        <Button variant="ghost" size="icon" asChild className="rounded-lg">
           <Link href={`/dashboard/${slug}/templates`}>
             <ArrowLeft size={20} />
           </Link>

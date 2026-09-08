@@ -79,7 +79,7 @@ export function NfcProfileView({
               variant="outline"
               size="sm"
               onClick={onEdit}
-              className="rounded-xl text-xs font-semibold"
+              className="text-xs font-semibold"
             >
               Edit
             </Button>

@@ -12,7 +12,7 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
   const logoAlign = config?.cardLogoAlignment || "right";
   const nameAlign = config?.cardNameAlignment || "left";
   const showPattern = config?.cardShowPattern !== false;
-  const textColor = config?.cardTextColor || "#f1f5f9";
+  const textColor = config?.cardTextColor || "var(--cream)";
   const pattern = getCardPattern(config?.cardPattern);
   const bgImage = config?.cardBackgroundImage;
 
@@ -24,9 +24,11 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
 
   const ts = { color: textColor };
 
-  // Default frosted look: rich slate gradient
-  const frontBg = config?.cardPrimaryColor || "rgba(255, 255, 255, 0.08)";
-  const backBg = config?.cardSecondaryColor || "rgba(255, 255, 255, 0.05)";
+  // Faked frosted glass: real backdrop-filter can't sample the page from inside
+  // the 3D-transformed (preserve-3d + rotateY) flip card, so layer translucent
+  // gradients instead. These read as frosted glass over any dark background.
+  const frontBg = config?.cardPrimaryColor || "linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.06) 55%, rgba(255,255,255,0.12))";
+  const backBg = config?.cardSecondaryColor || "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.09))";
 
   return (
     <motion.div
@@ -46,8 +48,8 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
       >
         {bgImage && <div className="absolute inset-0 bg-black/40" />}
         {/* Frosted shimmer overlays */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-white/5 to-white/10 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
         {pattern && (
           <div className="absolute inset-0 pointer-events-none" style={pattern} />
         )}
@@ -68,7 +70,7 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full" />
             </span>
           )}
-          <span style={{ ...ts, opacity: 0.75 }}>{profile.organization?.name || "Identitree"}</span>
+          <span style={{ ...ts, opacity: 0.75 }}>{profile.organization?.name || "Handshakes"}</span>
           {logoAlign !== "left" && profile.organization?.logo && (
             <span className="flex size-6 items-center justify-center">
               <img src={profile.organization.logo} alt="" className="max-h-full max-w-full" />
@@ -112,8 +114,8 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
           background: backBg,
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-white/10 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
 
         <div className="flex h-full items-center justify-between gap-5 relative">
           <div className="min-w-0">
@@ -135,7 +137,7 @@ export function GlassLayout({ profile, config, isFlipped }: CardProps) {
                   key={index}
                   className={
                     qrCells.has(index)
-                      ? "rounded-[1px] bg-slate-900"
+                      ? "rounded-[1px] bg-forest-ink"
                       : "rounded-[1px] bg-transparent"
                   }
                 />

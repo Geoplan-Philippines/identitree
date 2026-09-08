@@ -289,7 +289,7 @@ export default function NfcCardPage({ params }: NfcCardPageProps) {
             <Button
               asChild
               size="lg"
-              className="h-12 w-full rounded-md shadow-[0_16px_35px_rgba(15,23,42,0.14)]"
+              className="w-full rounded-md shadow-[0_16px_35px_rgba(15,23,42,0.14)]"
             >
               <a href={vCardHref} download="elena-morgan.vcf">
                 <Download className="size-4" aria-hidden="true" />
@@ -310,7 +310,7 @@ export default function NfcCardPage({ params }: NfcCardPageProps) {
         </div>
 
         <footer className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span>Powered by Identitree</span>
+          <span>Powered by Handshakes</span>
         </footer>
       </motion.section>
     </main>

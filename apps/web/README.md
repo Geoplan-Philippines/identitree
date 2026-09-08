@@ -1,6 +1,6 @@
-# Identitree Web
+# Handshakes Web
 
-Next.js frontend for Identitree. This app provides:
+Next.js frontend for Handshakes. This app provides:
 
 - Better Auth client-side sign-in and sign-up flows
 - cookie-backed session hydration

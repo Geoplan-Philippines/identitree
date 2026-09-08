@@ -123,8 +123,8 @@ export function NfcCardDialog({ initialData, trigger, onSuccess, open, onOpenCha
             />
             <div className="bg-muted/50 p-2 rounded border border-dashed border-muted-foreground/20">
               <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-wider">Public URL Preview</p>
-              <p className="text-xs font-mono break-all text-blue-600 dark:text-blue-400">
-                identitree.geoplanph.com/{slug}/{name ? name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") : "..."}
+              <p className="text-xs font-mono break-all text-foreground">
+                handshakes.cards/{slug}/{name ? name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") : "..."}
               </p>
             </div>
             {errors.name && <p className="text-xs text-red-500 mt-0.5">{errors.name.message}</p>}

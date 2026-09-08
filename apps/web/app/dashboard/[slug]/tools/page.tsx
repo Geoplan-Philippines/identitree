@@ -21,10 +21,10 @@ export default async function ToolsPage({ params }: ToolsPageProps) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/activate"
-          className="group flex flex-col gap-4 border border-border bg-background p-6 hover:bg-muted/40 transition-colors"
+          className="group flex flex-col gap-4 rounded-2xl border border-border bg-background p-6 hover:bg-muted/40 transition-colors"
         >
           <div className="flex items-center justify-between">
-            <div className="bg-foreground text-background p-2">
+            <div className="bg-foreground text-background p-2 rounded-xl">
               <Nfc className="size-5" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">

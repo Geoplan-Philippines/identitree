@@ -130,33 +130,9 @@ export function SignupForm() {
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="space-y-5"
+      className="flex flex-col gap-6"
       noValidate
     >
-      <Button
-        type="button"
-        variant="outline"
-        className="h-11 w-full text-[13.5px] font-medium"
-        onClick={() => void handleGoogleSignIn()}
-        disabled={isGoogleLoading}
-      >
-        {isGoogleLoading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Redirecting…
-          </>
-        ) : (
-          <>
-            <GoogleIcon />
-            Sign up with Google
-          </>
-        )}
-      </Button>
-
-      <FieldSeparator className="text-[11px] uppercase tracking-[0.16em]">
-        or with email
-      </FieldSeparator>
-
       <FieldGroup className="gap-4">
         <Controller
           name="fullName"
@@ -269,7 +245,7 @@ export function SignupForm() {
 
         <Button
           type="submit"
-          className="mt-1 h-11 w-full text-[13.5px] font-medium shadow-sm"
+          className="w-full text-[13.5px] font-medium shadow-sm"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? (
@@ -282,6 +258,30 @@ export function SignupForm() {
           )}
         </Button>
       </FieldGroup>
+
+      <FieldSeparator className="text-[11px] uppercase tracking-[0.16em]">
+        or
+      </FieldSeparator>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full text-[13.5px] font-medium"
+        onClick={() => void handleGoogleSignIn()}
+        disabled={isGoogleLoading}
+      >
+        {isGoogleLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Redirecting…
+          </>
+        ) : (
+          <>
+            <GoogleIcon />
+            Sign up with Google
+          </>
+        )}
+      </Button>
     </form>
   );
 }

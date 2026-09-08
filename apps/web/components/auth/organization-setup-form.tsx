@@ -141,7 +141,7 @@ export function OrganizationSetupForm({
       if (finalSlug !== data.slug) {
         form.setValue("slug", finalSlug);
         toast.success("Organization created", {
-          description: `Your workspace URL is "${finalSlug}" — the one you chose was already taken.`,
+          description: `Your workspace URL is "${finalSlug}". The one you chose was already taken.`,
         });
       } else {
         toast.success("Organization created");
@@ -210,7 +210,7 @@ export function OrganizationSetupForm({
                   aria-hidden
                   className="flex select-none items-center border-r border-input bg-muted/40 px-2.5 text-[13px] text-muted-foreground"
                 >
-                  identitree.com/
+                  handshakes.cards/
                 </span>
                 <input
                   {...field}
@@ -288,7 +288,7 @@ export function OrganizationSetupForm({
 
         <Button
           type="submit"
-          className="mt-1 h-11 w-full text-[13.5px] font-medium shadow-sm"
+          className="mt-1 w-full text-[13.5px] font-medium shadow-sm"
           disabled={isBusy}
         >
           {isBusy ? (

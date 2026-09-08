@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
   try {
     const profile = await getPublicProfile(slug, profileSlug);
     const fullName = `${profile.firstName} ${profile.lastName}`;
-    const title = `${fullName} | Identitree`;
+    const title = `${fullName} | Handshakes`;
     const description = `${profile.positionTitle}${profile.organization?.name ? ` at ${profile.organization.name}` : ""}. Connect with ${profile.firstName} via NFC digital business card.`;
 
     return {
@@ -27,9 +27,9 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
         profile.lastName,
         profile.organization?.name || "",
         "NFC Digital Business Card",
-        "Identitree",
-        "Identitree Profile",
-        `${profile.firstName} Identitree`,
+        "Handshakes",
+        "Handshakes Profile",
+        `${profile.firstName} Handshakes`,
         `${profile.firstName} NFC`,
       ].filter(Boolean),
 
@@ -43,25 +43,25 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
         type: "profile",
         firstName: profile.firstName,
         lastName: profile.lastName,
-        images: profile.avatarUrl 
-          ? [{ url: profile.avatarUrl }] 
-          : [{ url: "https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png" }],
+        images: profile.avatarUrl
+          ? [{ url: profile.avatarUrl }]
+          : [{ url: "/icon.png" }],
       },
 
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: profile.avatarUrl 
-          ? [profile.avatarUrl] 
-          : ["https://res.cloudinary.com/djfuei11u/image/upload/v1778116399/icon_tnotpl.png"],
+        images: profile.avatarUrl
+          ? [profile.avatarUrl]
+          : ["/icon.png"],
         creator: "@geoplanph",
       }
 
     };
   } catch (error) {
     return {
-      title: "Profile Not Found | Identitree",
+      title: "Profile Not Found | Handshakes",
     };
   }
 }
@@ -101,7 +101,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           </div>
 
           <div className="text-center">
-            <Button asChild className="font-bold px-8 h-11">
+            <Button asChild className="font-bold px-8">
               <Link href="/">Go Home</Link>
             </Button>
           </div>

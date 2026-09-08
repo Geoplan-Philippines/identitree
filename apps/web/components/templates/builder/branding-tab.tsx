@@ -118,10 +118,10 @@ function GradientBuilder({ value, onChange }: { value?: string; onChange: (val: 
       <Field>
         <FieldLabel>Direction</FieldLabel>
         <Select value={direction} onValueChange={updateDirection}>
-          <SelectTrigger className="rounded-none h-9 border-border text-sm">
+          <SelectTrigger className="rounded-lg h-9 border-border text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-none">
+          <SelectContent className="rounded-lg">
             {GRADIENT_DIRECTIONS.map((d) => (
               <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
             ))}
@@ -138,12 +138,12 @@ function GradientBuilder({ value, onChange }: { value?: string; onChange: (val: 
               type="color"
               value={color}
               onChange={(e) => updateStop(i, e.target.value)}
-              className="w-8 h-8 p-1 rounded-none border-border shrink-0"
+              className="w-8 h-8 p-1 rounded-lg border-border shrink-0"
             />
             <Input
               value={color}
               onChange={(e) => updateStop(i, e.target.value)}
-              className="flex-1 rounded-none font-mono text-[10px] h-8 border-border"
+              className="flex-1 rounded-lg font-mono text-[10px] h-8 border-border"
             />
             {stops.length > 2 && (
               <button
@@ -197,10 +197,10 @@ export function BrandingTab({ form }: BrandingTabProps) {
                     }} 
                     value={field.value ?? "solid"}
                   >
-                    <SelectTrigger className="rounded-none h-10 border-border">
+                    <SelectTrigger className="rounded-lg h-10 border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none">
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="solid">Solid color</SelectItem>
                       <SelectItem value="gradient">Gradient</SelectItem>
                       <SelectItem value="image">Image</SelectItem>
@@ -217,10 +217,10 @@ export function BrandingTab({ form }: BrandingTabProps) {
                   <Field>
                     <FieldLabel>Pattern overlay</FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value ?? "none"}>
-                      <SelectTrigger className="rounded-none h-10 border-border">
+                      <SelectTrigger className="rounded-lg h-10 border-border">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-none">
+                      <SelectContent className="rounded-lg">
                         <SelectItem value="none">None</SelectItem>
                         <SelectItem value="dots">Dots</SelectItem>
                         <SelectItem value="grid">Grid</SelectItem>
@@ -242,8 +242,8 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Background color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#ffffff"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                    <Input {...field} value={field.value ?? "#ffffff"} className="flex-1 rounded-lg font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
@@ -268,9 +268,9 @@ export function BrandingTab({ form }: BrandingTabProps) {
               render={({ field }) => (
                 <Field>
                   <FieldLabel>Image URL</FieldLabel>
-                  <Input {...field} value={field.value ?? ""} placeholder="https://example.com/bg.jpg" className="rounded-none border-border text-sm" />
+                  <Input {...field} value={field.value ?? ""} placeholder="https://example.com/bg.jpg" className="rounded-lg border-border text-sm" />
                   {field.value && (
-                    <div className="mt-1.5 h-16 w-full rounded-none border border-border overflow-hidden">
+                    <div className="mt-1.5 h-16 w-full rounded-lg border border-border overflow-hidden">
                       <img src={field.value} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
                     </div>
                   )}
@@ -293,8 +293,8 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Accent color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#000000"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                    <Input {...field} value={field.value ?? "#000000"} className="flex-1 rounded-lg font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
@@ -306,8 +306,8 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Text color</FieldLabel>
                   <div className="flex gap-2">
-                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-none border-border" />
-                    <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-none font-mono text-[10px] h-8 border-border" />
+                    <Input type="color" {...field} value={field.value ?? "#0f172a"} className="w-8 h-8 p-1 rounded-lg border-border" />
+                    <Input {...field} value={field.value ?? "#0f172a"} className="flex-1 rounded-lg font-mono text-[10px] h-8 border-border" />
                   </div>
                 </Field>
               )}
@@ -321,15 +321,15 @@ export function BrandingTab({ form }: BrandingTabProps) {
                 <Field>
                   <FieldLabel>Typography</FieldLabel>
                   <Select onValueChange={field.onChange} value={field.value ?? "Inter"}>
-                    <SelectTrigger className="rounded-none h-10 border-border">
+                    <SelectTrigger className="rounded-lg h-10 border-border">
                       <div className="flex items-center gap-2">
                         <Type className="size-3.5 text-muted-foreground" />
                         <SelectValue placeholder="Select font" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="rounded-none">
+                    <SelectContent className="rounded-lg">
                       {GOOGLE_FONTS.map(font => (
-                        <SelectItem key={font.value} value={font.value} className="rounded-none">
+                        <SelectItem key={font.value} value={font.value} className="rounded-lg">
                           <span style={{ fontFamily: font.value }}>{font.label}</span>
                         </SelectItem>
                       ))}
@@ -368,7 +368,7 @@ export function BrandingTab({ form }: BrandingTabProps) {
                   <Input 
                     {...field} 
                     placeholder="e.g. Digital Business Card" 
-                    className="rounded-none border-border text-sm"
+                    className="rounded-lg border-border text-sm"
                     disabled={form.watch("config.showTopBadge") === false}
                   />
                 )}
@@ -397,7 +397,7 @@ export function BrandingTab({ form }: BrandingTabProps) {
                   <Input 
                     {...field} 
                     placeholder="e.g. Identity Verified" 
-                    className="rounded-none border-border text-sm"
+                    className="rounded-lg border-border text-sm"
                     disabled={form.watch("config.showVerifyBadge") === false}
                   />
                 )}

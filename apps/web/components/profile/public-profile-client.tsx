@@ -72,6 +72,25 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   useEffect(() => {
     const font = config?.fontFamily;
     if (!font || font === "inherit") return;
+
+    // Preconnect once so the user-selected webfont resolves without an extra
+    // round-trip. Paired with display=swap below to avoid layout shift.
+    const preconnects: [string, boolean][] = [
+      ["https://fonts.googleapis.com", false],
+      ["https://fonts.gstatic.com", true],
+    ];
+    for (const [href, crossOrigin] of preconnects) {
+      const pcId = `preconnect-${href.replace(/[^a-z]/gi, "")}`;
+      if (!document.getElementById(pcId)) {
+        const pc = document.createElement("link");
+        pc.id = pcId;
+        pc.rel = "preconnect";
+        pc.href = href;
+        if (crossOrigin) pc.crossOrigin = "anonymous";
+        document.head.appendChild(pc);
+      }
+    }
+
     const id = `font-${font.replace(/\s+/g, "-").toLowerCase()}`;
     if (document.getElementById(id)) return;
     const link = document.createElement("link");
@@ -82,10 +101,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   }, [config?.fontFamily]);
 
   const StatusDot = () => (
-    <div className="mr-1.5 flex size-1.5 items-center justify-center">
-      <div className="absolute size-1.5 animate-ping rounded-full bg-emerald-400 opacity-75" />
-      <div className="relative size-1.5 rounded-full bg-emerald-500" />
-    </div>
+    <span className="mr-1.5 inline-block size-1.5 rounded-full bg-brass" aria-hidden="true" />
   );
 
   // ─── Contact actions (shared) ───
@@ -126,7 +142,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
     "BEGIN:VCARD", "VERSION:3.0",
     `N:${profile.lastName};${profile.firstName};;;`,
     `FN:${profile.firstName} ${profile.lastName}`,
-    `ORG:${profile.organization?.name || "Identitree"}`,
+    `ORG:${profile.organization?.name || "Handshakes"}`,
     `TITLE:${profile.positionTitle}`,
     `TEL;TYPE=CELL:${profile.contactNumber}`,
     `TEL;TYPE=Viber:${profile.viberNumber || profile.contactNumber}`,
@@ -143,12 +159,12 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   }
 
   // ─── Config-derived values (only used when hasConfig) ───
-  const primaryColor = config?.primaryColor || (layoutKey === "default" ? "#0f172a" : "#ffffff");
-  const accentColor = config?.accentColor || primaryColor;
-  const textColor = config?.textColor || (layoutKey === "default" ? "#0f172a" : "#ffffff");
+  const primaryColor = config?.primaryColor || (layoutKey === "default" ? "var(--forest-ink)" : "var(--forest)");
+  const accentColor = config?.accentColor || (layoutKey === "default" ? primaryColor : "var(--brass)");
+  const textColor = config?.textColor || (layoutKey === "default" ? "var(--forest-ink)" : "var(--cream)");
 
-  const buttonRadius = { sharp: "rounded-none", rounded: "rounded-2xl", pill: "rounded-full" }[config?.buttonStyle || "sharp"];
-  const avatarRadius = { square: "rounded-none", circle: "rounded-full", rounded: "rounded-2xl" }[config?.avatarStyle || "circle"];
+  const buttonRadius = { sharp: "rounded-lg", rounded: "rounded-2xl", pill: "rounded-full" }[config?.buttonStyle || "sharp"];
+  const avatarRadius = { square: "rounded-lg", circle: "rounded-full", rounded: "rounded-2xl" }[config?.avatarStyle || "circle"];
   const glassStyle = config?.glassmorphism || layoutKey === "glass" ? "backdrop-blur-xl bg-white/5 border-white/10 shadow-2xl" : "";
   const spacingClass = { compact: "py-4 sm:py-6 gap-4", relaxed: "py-8 sm:py-12 gap-8", loose: "py-12 sm:py-20 gap-12" }[config?.contentSpacing || "relaxed"];
 
@@ -172,9 +188,12 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
   const pagePattern = (!bgType || bgType === "solid") ? getPagePattern(config?.pagePattern) : null;
 
   const themes = {
-    default: { bg: "bg-[#f8fafc]", text: "text-foreground", subtext: "text-muted-foreground", badge: "border-foreground/10 bg-background/70 text-muted-foreground", avatar: "border-white/80 shadow-[0_18px_45px_rgba(15,23,42,0.14)] ring-foreground/10", button: "shadow-[0_16px_35px_rgba(15,23,42,0.14)]", secondaryButton: "border-foreground/80 bg-transparent text-foreground", footer: "text-muted-foreground" },
-    "modern-dark": { bg: "bg-[#0c0c0e]", text: "text-white", subtext: "text-zinc-500", badge: "border-white/10 bg-white/5 text-blue-400", avatar: "border-white/10 p-1 ring-white/5 shadow-2xl", button: "shadow-xl", secondaryButton: "border-white/10 bg-white/5 text-white", footer: "text-zinc-700" },
-    glass: { bg: "bg-[#020617] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]", text: "text-white", subtext: "text-slate-500", badge: "border-white/10 bg-white/5 text-blue-400 backdrop-blur-md", avatar: "border-white/10 ring-white/5 shadow-2xl", button: "shadow-xl", secondaryButton: "bg-white/5 border-white/10 text-white", footer: "text-slate-700" },
+    // Everyday product surface — warm paper, forest ink, brass accent.
+    default: { bg: "bg-paper", text: "text-forest-ink", subtext: "text-forest-ink/60", badge: "border-forest-ink/10 bg-cream/70 text-forest-ink/70", avatar: "border-cream shadow-[0_18px_45px_rgba(13,42,31,0.16)] ring-forest-ink/10", button: "shadow-sm", secondaryButton: "border-forest-ink/70 bg-transparent text-forest-ink", footer: "text-forest-ink/50" },
+    // Premium forest chrome — forest ink ground, cream text, brass accent.
+    "modern-dark": { bg: "bg-forest-ink", text: "text-cream", subtext: "text-cream/55", badge: "border-brass/30 bg-brass/10 text-brass", avatar: "border-cream/10 p-1 ring-cream/5 shadow-2xl", button: "shadow-xl", secondaryButton: "border-cream/15 bg-cream/5 text-cream", footer: "text-cream/40" },
+    // Frosted glass over forest — warm brass glow, no purple.
+    glass: { bg: "bg-forest-ink bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(198,160,90,0.12),rgba(255,255,255,0))]", text: "text-cream", subtext: "text-cream/55", badge: "border-cream/10 bg-cream/5 text-brass backdrop-blur-md", avatar: "border-cream/10 ring-cream/5 shadow-2xl", button: "shadow-xl", secondaryButton: "bg-cream/5 border-cream/10 text-cream", footer: "text-cream/40" },
   };
   const theme = themes[layoutKey as keyof typeof themes] || themes.default;
 
@@ -199,21 +218,21 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
           </Badge>
 
           <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08, duration: 0.48, ease: [0.22, 1, 0.36, 1] }}>
-            <Avatar className="size-24 border border-white/80 bg-background shadow-[0_18px_45px_rgba(15,23,42,0.14)] ring-1 ring-foreground/10">
+            <Avatar className="size-24 border border-cream bg-background shadow-[0_18px_45px_rgba(13,42,31,0.16)] ring-1 ring-forest-ink/10">
               <AvatarImage src={profile.avatarUrl || ""} alt={`${profile.firstName} ${profile.lastName}`} />
               <AvatarFallback className="bg-foreground text-lg font-semibold text-background">{initials}</AvatarFallback>
             </Avatar>
           </motion.div>
 
           <div className="mt-6 text-center">
-            <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{profile.firstName} {profile.lastName}</h1>
+            <h1 className="font-display text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{profile.firstName} {profile.lastName}</h1>
             <p className="mt-3 text-sm font-medium text-muted-foreground sm:text-base">{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
                 <span className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
                   "border-border/70 bg-background/70 text-muted-foreground"
                 )}>
-                  <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" />
+                  <ShieldCheck className="size-3.5 text-brass" aria-hidden="true" />
                   Verified Identity
                 </span>
             </div>
@@ -241,7 +260,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
           </motion.nav>
 
           <div className="mt-7 w-full max-w-[430px] space-y-3">
-            <Button asChild size="lg" className="h-12 w-full rounded-md shadow-[0_16px_35px_rgba(15,23,42,0.14)]">
+            <Button asChild size="lg" className="h-11 w-full rounded-md shadow-sm">
               <a 
                 href={vCardHref} 
                 download={`${profile.firstName}-${profile.lastName}.vcf`} 
@@ -265,7 +284,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
         </div>
 
         <footer className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span>Powered by Identitree</span>
+          <span>Powered by Handshakes</span>
         </footer>
       </motion.section>
     );
@@ -291,17 +310,17 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
               </Avatar>
             </motion.div>
             <div className={cn("mt-6 w-full flex flex-col", getAlignmentClass(config?.infoAlignment))}>
-              <h1 className={cn("text-3xl font-black uppercase tracking-tight leading-tight sm:text-4xl transition-colors duration-500", theme.text)} style={{ color: textColor }}>{profile.firstName} {profile.lastName}</h1>
-              <p className={cn("mt-2 text-xs font-bold uppercase tracking-widest transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.6 }}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
+              <h1 className={cn("font-display text-3xl font-semibold tracking-tight leading-tight sm:text-4xl transition-colors duration-500", theme.text)} style={{ color: textColor }}>{profile.firstName} {profile.lastName}</h1>
+              <p className={cn("mt-2 text-sm font-medium tracking-tight transition-colors duration-500", theme.subtext)} style={{ color: textColor, opacity: 0.6 }}>{profile.positionTitle} {profile.organization?.name && `at ${profile.organization.name}`}</p>
               {config?.showVerifyBadge !== false && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all duration-500",
                     buttonRadius, glassStyle,
                     theme.badge,
-                    "text-emerald-500 dark:text-emerald-400 border-emerald-500/20"
+                    "text-brass border-brass/25"
                   )}>
-                    <ShieldCheck className="size-3.5 text-emerald-500" aria-hidden="true" />
+                    <ShieldCheck className="size-3.5 text-brass" aria-hidden="true" />
                     {config?.verifyBadgeText || "Verified Identity"}
                   </span>
                 </div>
@@ -365,8 +384,8 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
                   <>
                     <span
                       className={cn(
-                        "flex size-10 items-center justify-center rounded-none border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md",
-                        !config?.socialsButtonColor && !config?.secondaryButtonColor && (layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-white/5 border-white/20" : theme.secondaryButton),
+                        "flex size-10 items-center justify-center rounded-lg border shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md",
+                        !config?.socialsButtonColor && !config?.secondaryButtonColor && (layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-cream/5 border-cream/20" : theme.secondaryButton),
                         buttonRadius,
                         glassStyle
                       )}
@@ -395,7 +414,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
         return (
           <div key="actions" className={cn("w-full max-w-[430px] space-y-3 flex flex-col", getAlignmentClass(config?.actionsAlignment))}>
             {config?.showVCard !== false && (
-              <Button asChild size="lg" className={cn("h-12 w-full transition-all duration-500", buttonRadius, layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-white text-slate-950 hover:bg-white/90" : theme.button)} style={layoutKey === "glass" || layoutKey === "modern-dark" ? {} : { backgroundColor: primaryBtnBg, color: primaryBtnText }}>
+              <Button asChild size="lg" className={cn("h-11 w-full transition-all duration-500", buttonRadius, layoutKey === "glass" || layoutKey === "modern-dark" ? "bg-brass text-brass-foreground hover:bg-brass/90" : theme.button)} style={layoutKey === "glass" || layoutKey === "modern-dark" ? {} : { backgroundColor: primaryBtnBg, color: primaryBtnText }}>
                 <a 
                   href={vCardHref} 
                   download={`${profile.firstName}-${profile.lastName}.vcf`} 
@@ -412,7 +431,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
                 </a>
               </Button>
             )}
-            <a href={profile.organization?.website || "#"} target="_blank" rel="noreferrer" className={cn("flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium shadow-sm transition-all duration-500 bg-transparent", buttonRadius, layoutKey === "glass" ? "bg-white/5 border-white/10 text-white backdrop-blur-md hover:bg-white/10" : "")} style={layoutKey === "glass" ? {} : { borderColor: secondaryBtnColor, color: secondaryBtnText }}>
+            <a href={profile.organization?.website || "#"} target="_blank" rel="noreferrer" className={cn("flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium shadow-sm transition-all duration-500 bg-transparent", buttonRadius, (layoutKey === "glass" || layoutKey === "modern-dark") ? "bg-cream/5 border-cream/15 text-cream backdrop-blur-md hover:bg-cream/10" : "")} style={(layoutKey === "glass" || layoutKey === "modern-dark") ? {} : { borderColor: secondaryBtnColor, color: secondaryBtnText }}>
               {secondaryBtnLabel}
               <ArrowUpRight className="size-4" aria-hidden="true" />
             </a>
@@ -422,7 +441,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
       case "footer":
         return (
           <footer key="footer" className={cn("flex items-center justify-center gap-2 text-xs transition-colors duration-500", theme.footer)}>
-            <span>Powered by Identitree</span>
+            <span>Powered by Handshakes</span>
           </footer>
         );
 
@@ -435,7 +454,7 @@ export function PublicProfileClient({ profile }: PublicProfileClientProps) {
       {pagePattern && <div className="absolute inset-0 pointer-events-none z-0" style={pagePattern} />}
       <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className={cn("relative z-10 mx-auto flex w-full max-w-[560px] flex-col items-center px-5 sm:px-6", spacingClass)}>
         {config?.showTopBadge !== false && (
-          <Badge variant="outline" className={cn("h-6 px-2 text-[9px] uppercase font-black transition-all duration-500 mb-2 rounded-full", theme.badge, glassStyle)}>
+          <Badge variant="outline" className={cn("h-6 px-2 text-[9px] uppercase font-semibold tracking-wide transition-all duration-500 mb-2 rounded-full", theme.badge, glassStyle)}>
             <StatusDot />
             {config?.topBadgeText || "Digital Business Card"}
           </Badge>

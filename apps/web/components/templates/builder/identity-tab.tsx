@@ -31,7 +31,7 @@ export function IdentityTab({ form }: IdentityTabProps) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Template Name</FieldLabel>
-              <Input {...field} value={field.value ?? ""} placeholder="Executive Card" className="rounded-none border-border" />
+              <Input {...field} value={field.value ?? ""} placeholder="Executive Card" className="rounded-lg border-border" />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -44,7 +44,7 @@ export function IdentityTab({ form }: IdentityTabProps) {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Category</FieldLabel>
-                <Input {...field} value={field.value ?? ""} placeholder="Executive" className="rounded-none border-border" />
+                <Input {...field} value={field.value ?? ""} placeholder="Executive" className="rounded-lg border-border" />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
@@ -62,10 +62,10 @@ export function IdentityTab({ form }: IdentityTabProps) {
                   }} 
                   value={field.value ?? "default"}
                 >
-                  <SelectTrigger className="rounded-none h-10 border-border">
+                  <SelectTrigger className="rounded-lg h-10 border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-none">
+                  <SelectContent className="rounded-lg">
                     <SelectItem value="default">Standard Light</SelectItem>
                     <SelectItem value="modern-dark">Deep Onyx</SelectItem>
                     <SelectItem value="glass">Frosted Glass</SelectItem>

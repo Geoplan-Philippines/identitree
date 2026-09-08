@@ -11,7 +11,7 @@ export default async function LoginPage() {
       title="Welcome back."
       description="Sign in to manage your NFC credentials, digital profiles, and team workspace."
       secondaryAction={{
-        label: "New to Identitree?",
+        label: "New to Handshakes?",
         href: "/signup",
         actionText: "Create account",
       }}

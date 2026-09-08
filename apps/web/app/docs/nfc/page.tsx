@@ -3,7 +3,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "NFC Technology Guide",
-  description: "Comprehensive guide to Identitree's NFC digital business card technology, compatibility, and best practices.",
+  description: "Comprehensive guide to Handshakes's NFC digital business card technology, compatibility, and best practices.",
   alternates: {
     canonical: "https://identitree.geoplanph.com/docs/nfc",
   },
@@ -22,29 +22,29 @@ export default function NfcDocsPage() {
           NFC Technology
         </h1>
         <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-          Understanding how Near Field Communication works within the Identitree ecosystem to bridge physical cards and digital identities.
+          Understanding how Near Field Communication works within the Handshakes ecosystem to bridge physical cards and digital identities.
         </p>
       </section>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="space-y-4 border border-border bg-muted/20 p-8">
-          <div className="bg-foreground text-background size-10 flex items-center justify-center">
+        <div className="space-y-4 rounded-2xl border border-border bg-muted/20 p-8">
+          <div className="bg-foreground text-background size-10 flex items-center justify-center rounded-xl">
             <Layers className="size-5" />
           </div>
           <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">NDEF Records</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Identitree uses the NFC Data Exchange Format (NDEF) to store URL records. These records are 
+            Handshakes uses the NFC Data Exchange Format (NDEF) to store URL records. These records are 
             dynamically updated during the claim process to point to the user's digital profile.
           </p>
         </div>
 
-        <div className="space-y-4 border border-border bg-muted/20 p-8">
-          <div className="bg-foreground text-background size-10 flex items-center justify-center">
+        <div className="space-y-4 rounded-2xl border border-border bg-muted/20 p-8">
+          <div className="bg-foreground text-background size-10 flex items-center justify-center rounded-xl">
             <RefreshCw className="size-5" />
           </div>
           <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Dynamic Redirection</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Unlike static business cards, Identitree cards use server-side logic to redirect taps. This 
+            Unlike static business cards, Handshakes cards use server-side logic to redirect taps. This 
             allows you to update your profile link without needing to re-issue the physical card.
           </p>
         </div>
@@ -86,26 +86,26 @@ export default function NfcDocsPage() {
         </div>
       </section>
 
-      <section className="space-y-6 pt-8 bg-foreground text-background p-10">
+      <section className="space-y-6 pt-8 bg-foreground text-background p-10 rounded-2xl">
         <div className="flex items-center gap-3">
           <Zap className="size-6 fill-current" />
           <h2 className="text-2xl font-black uppercase tracking-tight">Best Practices</h2>
         </div>
         <ul className="grid gap-4 sm:grid-cols-2">
           <li className="flex gap-3 items-start">
-            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center text-[10px] font-bold">1</div>
+            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold">1</div>
             <p className="text-xs font-medium leading-relaxed opacity-90">Always test the card tap with both iOS and Android before mass distribution.</p>
           </li>
           <li className="flex gap-3 items-start">
-            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center text-[10px] font-bold">2</div>
+            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold">2</div>
             <p className="text-xs font-medium leading-relaxed opacity-90">Avoid placing NFC tags on metal surfaces which can interfere with the radio signal.</p>
           </li>
           <li className="flex gap-3 items-start">
-            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center text-[10px] font-bold">3</div>
-            <p className="text-xs font-medium leading-relaxed opacity-90">Use the Identitree Claim portal to securely link hardware IDs to digital profiles.</p>
+            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold">3</div>
+            <p className="text-xs font-medium leading-relaxed opacity-90">Use the Handshakes Claim portal to securely link hardware IDs to digital profiles.</p>
           </li>
           <li className="flex gap-3 items-start">
-            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center text-[10px] font-bold">4</div>
+            <div className="bg-background text-foreground size-5 shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold">4</div>
             <p className="text-xs font-medium leading-relaxed opacity-90">Monitor tap analytics in real-time through your personal dashboard.</p>
           </li>
         </ul>
